@@ -36,8 +36,8 @@ onMounted(() => {
         },
         // 设置边界线高亮样式
         highlightBorderStyle: {
-          color: "#ff0000", // 高亮时的颜色（改为红色以便更明显）
-          linewidth: 3,     // 高亮时的线宽
+          color: "#ff6b6b", // 高亮时的颜色（改为更明显的红色）
+          linewidth: 4,     // 高亮时的线宽
           show: true        // 启用高亮功能
         },
         // 设置区域高亮样式

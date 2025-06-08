@@ -162,10 +162,21 @@ export default class MapShape {
     const lineGeometry = new LineGeometry();
     lineGeometry.setPositions(points);
     
+    // 从配置中获取正确的默认颜色
+    const normalColorHex = this._config.mapStyle.lineColor;
+    let normalColorValue: number;
+    if (typeof normalColorHex === 'string') {
+      normalColorValue = parseInt(normalColorHex.replace('#', ''), 16);
+    } else {
+      normalColorValue = normalColorHex;
+    }
+    
     const line2Material = new LineMaterial({
-      color: 0x797eff, // 使用十六进制数值而不是字符串
+      color: normalColorValue,
       linewidth: 1, // 默认线宽（以像素为单位）
       resolution: new Vector2(window.innerWidth, window.innerHeight), // 需要设置分辨率
+      transparent: true,
+      opacity: 1.0
     });
     
     const line2Mesh = new Line2(lineGeometry, line2Material);
@@ -186,6 +197,7 @@ export default class MapShape {
       type: "countryBorderHighlight",
       countryName: countryName,
       parentLine: lineMesh,
+      normalColor: this._config.mapStyle.lineColor,
     };
     
     // 存储边界线引用
@@ -197,7 +209,7 @@ export default class MapShape {
     borderGroup.add(line2Mesh);
     borderGroup.name = `border-${countryName}`;
     
-    console.log(`Created border for ${countryName}`);
+    console.log(`Created border for ${countryName} with normal color:`, normalColorHex);
     
     return borderGroup;
   }

@@ -68,10 +68,13 @@ class EventStore {
     }) as EventListener);
   }
   registerBuildInEventMap(eventName: string, cb: () => void) {
+    let lastEventMesh: Mesh | null = null; // 跟踪上一次处理的网格对象
+
     this._chartScene.options.dom.addEventListener(eventName, ((
       event: MouseEvent
     ) => {
       const eventMesh = this.handleRaycaster(event);
+      
       //说明hover的是地球
       if (eventMesh && eventMesh.type !== "TransformControlsPlane") {
         this._chartScene.earthHovered = true;
@@ -86,8 +89,15 @@ class EventStore {
         eventMesh.userData.type === "country" &&
         this.areaColorNeedChange
       ) {
-        this.buildInEventMap[eventName] = cb;
+        // 检查是否与上一次是同一个网格对象
+        if (lastEventMesh !== eventMesh) {
+          console.log("Mouse moved to a different country or object");
+          // 重置之前的高亮
+          this.resetBorderHighlight();
+          lastEventMesh = eventMesh;
+        }
 
+        this.buildInEventMap[eventName] = cb;
         this.currentMesh = eventMesh;
         (this.currentMesh.material as MeshBasicMaterial).color.set(
           this._chartScene.options.config!.hoverRegionStyle!.areaColor!
@@ -98,12 +108,17 @@ class EventStore {
           
         // 处理边界线高亮
         if (this.borderHighlightEnabled && eventMesh.name) {
+          console.log("Hovering over country:", eventMesh.name);
           this.highlightCountryBorder(eventMesh.name);
         }
       } else {
-        this.currentMesh = null;
-        // 如果鼠标移出国家区域，重置边界线高亮
-        if (this.borderHighlightEnabled && this.currentBorderLine) {
+        // 鼠标移出国家区域或没有检测到国家
+        if (lastEventMesh) {
+          console.log("Mouse left country area completely");
+          lastEventMesh = null;
+          this.currentMesh = null;
+          
+          // 确保重置所有边界线高亮
           this.resetBorderHighlight();
         }
       }
@@ -112,6 +127,11 @@ class EventStore {
 
   // 高亮指定国家的边界线
   highlightCountryBorder(countryName: string) {
+    // 如果当前已经有高亮的边界线，先重置它
+    if (this.currentBorderLine) {
+      this.resetBorderHighlight();
+    }
+    
     let found = false;
     console.log("Looking for border of:", countryName);
     
@@ -136,7 +156,15 @@ class EventStore {
               const highlightColor = normalLine.userData.highlightColor;
               const highlightWidth = normalLine.userData.highlightWidth;
               
-              line2Material.color.set(highlightColor);
+              // 转换颜色格式
+              let highlightColorValue: number;
+              if (typeof highlightColor === 'string') {
+                highlightColorValue = parseInt(highlightColor.replace('#', ''), 16);
+              } else {
+                highlightColorValue = highlightColor;
+              }
+              
+              line2Material.color.set(highlightColorValue);
               line2Material.linewidth = highlightWidth;
               line2Material.needsUpdate = true;
               
@@ -144,7 +172,7 @@ class EventStore {
               line2Mesh.visible = true;
               normalLine.visible = false;
               
-              console.log(`Highlighted border for ${countryName} with width ${highlightWidth}`);
+              console.log(`Highlighted border for ${countryName} with color ${highlightColor} and width ${highlightWidth}`);
             }
           }
         });
@@ -175,11 +203,28 @@ class EventStore {
 
   // 重置边界线高亮
   resetBorderHighlight() {
+    console.log("Attempting to reset all border highlights");
+    
+    // 如果有当前高亮的边界线，直接处理它
     if (this.currentBorderLine) {
+      console.log("Resetting current border highlight for:", this.currentBorderLine.userData?.countryName);
+      
       if (this.currentBorderLine instanceof Line2) {
         // 处理 Line2 高亮重置
         const line2Mesh = this.currentBorderLine;
         const line2Material = line2Mesh.material as LineMaterial;
+        
+        // 重置到原始颜色
+        const normalColor = line2Mesh.userData.normalColor || this._chartScene.options.config?.mapStyle?.lineColor || "#797eff";
+        let normalColorValue: number;
+        if (typeof normalColor === 'string') {
+          normalColorValue = parseInt(normalColor.replace('#', ''), 16);
+        } else {
+          normalColorValue = normalColor;
+        }
+        line2Material.color.set(normalColorValue);
+        line2Material.linewidth = 1; // 重置线宽
+        line2Material.needsUpdate = true;
         
         // 隐藏高亮线
         line2Mesh.visible = false;
@@ -191,18 +236,61 @@ class EventStore {
             if (child.userData && child.userData.type === "countryBorder") {
               const normalLine = child as LineLoop;
               normalLine.visible = true;
+              console.log("Restored normal border line for:", child.userData.countryName);
             }
           });
         }
-      } else {
+      } else if (this.currentBorderLine instanceof LineLoop) {
         // 处理普通 LineLoop 高亮重置
         const material = this.currentBorderLine.material as LineBasicMaterial;
-        material.color.set(this.currentBorderLine.userData.normalColor);
+        const normalColor = this.currentBorderLine.userData.normalColor || this._chartScene.options.config?.mapStyle?.lineColor || "#797eff";
+        material.color.set(normalColor);
         material.needsUpdate = true;
+        console.log("Reset LineLoop border to normal color:", normalColor);
       }
       
       this.currentBorderLine = null;
+    } else {
+      // 如果没有当前高亮的边界线，尝试找出所有可能的高亮边界并重置它们
+      console.log("No current border line to reset, checking all borders");
+      
+      // 遍历场景中的所有对象
+      this._chartScene.mainContainer.traverse((object) => {
+        // 检查并重置 Line2 类型的高亮边界
+        if (object instanceof Line2 && object.userData && 
+            (object.userData.type === "countryBorderHighlight" || object.userData.countryName)) {
+          if (object.visible) {
+            console.log("Found visible Line2 border to reset:", object.userData.countryName);
+            object.visible = false;
+            
+            // 尝试找到对应的普通线并显示
+            const parentGroup = object.parent;
+            if (parentGroup) {
+              parentGroup.traverse((child) => {
+                if (child.userData && child.userData.type === "countryBorder") {
+                  child.visible = true;
+                }
+              });
+            }
+          }
+        }
+        
+        // 检查并重置 LineLoop 类型的边界
+        if (object instanceof LineLoop && object.userData && object.userData.type === "countryBorder") {
+          const material = object.material as LineBasicMaterial;
+          // 只重置那些颜色被修改过的边界线
+          if (material.color.getHex() !== 0x797eff) {
+            const normalColor = object.userData.normalColor || "#797eff";
+            console.log("Resetting LineLoop border color to:", normalColor);
+            material.color.set(normalColor);
+            material.needsUpdate = true;
+            object.visible = true;
+          }
+        }
+      });
     }
+    
+    console.log("Border highlight reset completed");
   }
   notification(event: MouseEvent) {
     const eventMesh = this.handleRaycaster(event);
