@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>国家边界线高亮功能演示</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      #container {
+        width: 100vw;
+        height: 100vh;
+        background-color: #040D21;
+      }
+      .info-box {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: Arial, sans-serif;
+        max-width: 300px;
+      }
+      h2 {
+        margin-top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <div class="info-box">
+      <h2>边界线高亮功能演示</h2>
+      <p>将鼠标移动到不同国家区域上，观察边界线的高亮效果。</p>
+      <p>当鼠标悬停在国家上时，边界线会变为红色。</p>
+    </div>
+    <script type="module">
+      import { createApp } from 'vue';
+      import BorderHighlight from '/src/examples/BorderHighlight.vue';
+      
+      createApp(BorderHighlight).mount('#container');
+    </script>
+  </body>
+</html>

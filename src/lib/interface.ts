@@ -1,0 +1,312 @@
+import { Group } from "three";
+import { Position } from "geojson";
+
+type RGB = `rgb(${number}, ${number}, ${number})`;
+type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`;
+type HEX = `#${string}`;
+type Color = RGB | RGBA | HEX | string;
+export const InitConfig = {
+  R: 160,
+  enableZoom: true,
+  earth: {
+    color: "#13162c",
+    material: "MeshPhongMaterial",
+    dragConfig: {
+      rotationSpeed: 1,
+      inertiaFactor: 0.95,
+      disableX: false,
+      disableY: false,
+    },
+  },
+  map: "world",
+  stopRotateByHover: true,
+  texture: {
+    path: "",
+    mixed: false,
+  },
+  bgStyle: {
+    color: "#040D21",
+    opacity: 1,
+  },
+  mapStyle: {
+    areaColor: "#2e3564",
+    lineColor: "#797eff",
+    opacity: 1.0,
+  },
+  // 高亮边界线样式
+  highlightBorderStyle: {
+    color: "#ffffff",
+    linewidth: 2,
+    show: true,
+  },
+  spriteStyle: {
+    color: "#797eff",
+    show: true,
+  }, //光圈
+  pathStyle: {
+    color: "#cd79ff", //飞线路径配置
+    show: true,
+  },
+  flyLineStyle: {
+    //飞线样式配置
+    color: "#cd79ff",
+  },
+  roadStyle: {
+    //道路样式配置
+    flyLineStyle: {
+      color: "#cd79ff",
+    },
+    pathStyle: {
+      color: "#cd79ff",
+    },
+  },
+  barStyle: {
+    //柱状图样式配置
+    color: "#cd79ff",
+    width: 0.5,
+    height: 0.5,
+  },
+  hoverRegionStyle: {
+    areaColor: "#cd79ff",
+    opacity: 1,
+    show: true,
+  },
+  scatterStyle: {
+    //涟漪
+    color: "#cd79ff",
+  },
+  wallStyle: {
+    color: "#cd79ff",
+    opacity: 0.5,
+    height: 2,
+    width: 2,
+  },
+  mapStreamStyle: {
+    color: "#f0f0f0",
+    opacity: 0.5,
+    speed: 1,
+    splitLine: 3,
+  },
+  textMark: {
+    style: {
+      fontSize: 20,
+      color: "#fff",
+    },
+    data: [],
+  },
+};
+export interface Options {
+  dom: HTMLElement;
+  map: string;
+  cameraType?: string;
+  mode?: "2d" | "3d";
+  helper?: boolean;
+  limitFps?: boolean;
+  autoRotate?: boolean;
+  rotateSpeed?: number;
+  light?: "AmbientLight" | "PointLight" | "DirectionalLight" | "RectAreaLight";
+  config: Partial<configType>;
+}
+export type StoreConfig = typeof InitConfig & configType;
+export interface TweenParams {
+  from: {
+    size?: number;
+    color?: Color;
+    opacity?: number;
+  };
+  to: {
+    size?: number | number[];
+    color?: Color | Color[];
+    opacity?: number | number[];
+  };
+}
+export interface TweenConfig {
+  duration?: number;
+  delay?: number;
+  repeat?: number;
+  onComplete?: (data: any) => void;
+  customFigure?: {
+    texture: string;
+    animate?: false | TweenParams;
+    rotate?: false | number;
+  };
+}
+export interface PathStyle {
+  color: Color;
+  size: number;
+  show: boolean;
+}
+export interface FlyLineStyle extends TweenConfig {
+  color: Color;
+  size: number;
+  img?: string;
+}
+export interface ScatterStyle extends TweenConfig {
+  color: Color;
+  size?: number;
+}
+
+export interface LessCoordinate {
+  lon: number;
+  lat: number;
+}
+export interface Coordinates extends LessCoordinate {
+  id?: string | number;
+  style?: ScatterStyle;
+  [key: string]: any;
+}
+export interface LineStyle {
+  flyLineStyle: Partial<FlyLineStyle>;
+  pathStyle: Partial<PathStyle>;
+}
+export interface RoadStyle {
+  flyLineStyle: Partial<FlyLineStyle>;
+  pathStyle: Partial<PathStyle>;
+}
+export interface SpriteStyle {
+  color: Color;
+  show?: boolean;
+  size?: number;
+}
+export interface BarStyle {
+  color: Color;
+  width?: number;
+  height?: number;
+}
+
+export interface DragConfig {
+  rotationSpeed: number;
+  inertiaFactor: number;
+  disableX: boolean;
+  disableY: boolean;
+}
+export interface Earth {
+  color: Color;
+  material?:
+    | "MeshPhongMaterial"
+    | "MeshBasicMaterial"
+    | "MeshLambertMaterial"
+    | "MeshMatcapMaterial"
+    | "MeshNormalMaterial";
+  dragConfig?: Partial<DragConfig>;
+}
+
+interface MapStyle {
+  areaColor?: Color;
+  lineColor?: Color;
+  opacity?: number | undefined;
+}
+export interface RegionBaseStyle {
+  areaColor?: Color;
+  opacity?: number;
+  show?: boolean;
+  borderColor?: Color; // 添加边框颜色
+  borderWidth?: number; // 添加边框宽度
+  borderHighlight?: boolean; // 是否启用边框高亮
+}
+
+export interface HighlightBorderStyle {
+  color?: Color;
+  linewidth?: number;
+  show?: boolean;
+}
+export interface TextStyle {
+  fontSize: number;
+  color: Color;
+}
+export type TextMark = {
+  style?: TextStyle;
+  data: {
+    text: string;
+    position: LessCoordinate;
+    style?: Partial<TextStyle>;
+  }[];
+};
+type RegionsStyle = Record<string, RegionBaseStyle>;
+export interface configType {
+  R: number;
+  map: string;
+  texture?: {
+    path: string;
+    mixed: boolean;
+  };
+  enableZoom?: boolean;
+  stopRotateByHover: boolean;
+  bgStyle: {
+    color: Color;
+    opacity?: number;
+  };
+  earth: Earth;
+  mapStyle: MapStyle;
+  spriteStyle: SpriteStyle;
+  pathStyle: Partial<PathStyle>;
+  flyLineStyle: Partial<FlyLineStyle>;
+  scatterStyle: Partial<ScatterStyle>;
+  roadStyle: Partial<RoadStyle>;
+  barStyle: Partial<BarStyle>;
+  regions?: RegionsStyle;
+  hoverRegionStyle?: RegionBaseStyle;
+  highlightBorderStyle?: {
+    color?: Color;
+    linewidth?: number;
+    show?: boolean;
+  };
+  wallStyle: Partial<WallStyle>;
+  mapStreamStyle: Partial<MapStreamStyle>;
+  textMark?: Partial<TextMark>;
+}
+export interface Coordinates3D {
+  x: number;
+  y: number;
+  z: number;
+}
+export interface FlyLineData {
+  from: Coordinates;
+  to: Coordinates;
+  style?: Partial<LineStyle>;
+  [key: string]: any;
+}
+
+export interface RoadData {
+  path: LessCoordinate[];
+  style?: Partial<RoadStyle>;
+  id: string | number;
+}
+
+export interface BarData {
+  position: LessCoordinate;
+  value: number;
+  style?: Partial<BarStyle>;
+  id?: string | number;
+}
+export interface WallStyle {
+  color: Color;
+  opacity: number;
+  height: number;
+  width: number;
+}
+export interface MapStreamStyle {
+  color: Color;
+  opacity: number;
+  speed: number;
+  splitLine: number;
+}
+export interface SetData {
+  flyLine: FlyLineData[];
+  point: Coordinates[];
+  road: RoadData[];
+  wall: {
+    data: Position[][];
+    style?: Partial<WallStyle>;
+  };
+  mapStreamLine: {
+    data: Position[][];
+    style?: Partial<MapStreamStyle>;
+  };
+  bar: BarData[];
+}
+export type OptDataFunc = (
+  type: keyof SetData,
+  data: any,
+  mainContainer?: Group
+) => Promise<Group[]>;
