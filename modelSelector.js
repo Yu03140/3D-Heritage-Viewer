@@ -67,12 +67,37 @@ export class ModelSelector {
         // 设置新模型
         this.game.pandaModel = gltf.scene;
         
-        // 调整模型比例和位置
-        const scale = 80;
+        // 按模型文件名自定义缩放比例和最大缩放、初始位置
+        let scale = 80;
+        let maxScale = 300;
+        let posY = this.game.renderDiv.clientHeight * -0.45;
+        let posZ = -1000;
+        const fileName = modelPath.split('/').pop();
+
+
+
+        if (fileName === 'modelNew.gltf') {
+            scale = 20;
+        }
+         if (fileName === 'copper-chew.gltf') {
+            scale = 5000;
+            maxScale = 9000;
+        }
+        if (fileName === 'teacup.gltf') {
+            scale = 2000;
+            maxScale = 5000;
+        }
+        if (fileName === 'egypt_djembe_drum.glb') {
+            // 让鼓初始位置在屏幕中心
+            posY = 450;
+            posZ = -500;
+            scale = 2000;
+            maxScale = 5000;
+        }
         this.game.pandaModel.scale.set(scale, scale, scale);
-        
-        const sceneHeight = this.game.renderDiv.clientHeight;
-        this.game.pandaModel.position.set(0, sceneHeight * -0.45, -1000);
+        this.game.pandaModel.userData.maxScale = maxScale;
+        this.game.pandaModel.userData.minScale = 10;
+        this.game.pandaModel.position.set(0, posY, posZ);
         
         // 将新模型添加到场景
         this.game.scene.add(this.game.pandaModel);

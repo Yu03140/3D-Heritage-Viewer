@@ -260,7 +260,7 @@ export var Game = /*#__PURE__*/ function() {
         this.rotateSensitivity = 0.02; // Adjust for faster/slower rotation
         this.scaleInitialPinchDistance = null; // Stores the initial distance between two pinching hands
         this.scaleInitialModelScale = null; // Stores the model's scale when scaling starts
-        this.scaleSensitivity = 0.05; // Adjust for faster/slower scaling - Increased from 0.02 to 0.05
+        this.scaleSensitivity = 0.2; // 调大缩放灵敏度，原来是0.05
         this.grabbingPulseSpeed = 8; // Speed of the grab pulse animation
         this.grabbingPulseAmplitude = 0.5; // How much the scale increases (e.g., 0.5 means 50% bigger at peak)
         this.pulseBaseScale = 1.0; // Base scale for non-pulsing and start of pulse
@@ -1097,10 +1097,10 @@ export var Game = /*#__PURE__*/ function() {
                                             var scaleFactorChange = deltaDistance * _this1.scaleSensitivity;
                                             var newScaleValue = _this1.scaleInitialModelScale.x + scaleFactorChange;
                                             // Clamp scale to prevent extreme sizes or inversion
-                                            var minScale = 10; // Example min scale (adjust based on model's base size)
-                                            var maxScale = 300; // Example max scale
-                                            newScaleValue = Math.max(minScale, Math.min(maxScale, newScaleValue));
-                                            _this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
+                                            var minScale = (_this1.pandaModel.userData && _this1.pandaModel.userData.minScale) ? _this1.pandaModel.userData.minScale : 10;
+var maxScale = (_this1.pandaModel.userData && _this1.pandaModel.userData.maxScale) ? _this1.pandaModel.userData.maxScale : 300;
+newScaleValue = Math.max(minScale, Math.min(maxScale, newScaleValue));
+_this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
                                         // console.log(`Scaling: Current pinch dist: ${dist.toFixed(2)}, Scale change: ${scaleFactorChange.toFixed(3)}, New scale value: ${newScaleValue.toFixed(2)}`);
                                         }
                                     } else {
@@ -1492,6 +1492,7 @@ export var Game = /*#__PURE__*/ function() {
         {
             key: "_animate",
             value: function _animate() {
+
                 requestAnimationFrame(this._animate.bind(this));
                 var deltaTime = this.clock.getDelta();
                 // Update hands if tracking
