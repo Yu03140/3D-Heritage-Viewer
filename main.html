@@ -41,7 +41,74 @@
             <div id="back-link" class="text-box">
                 <a href="index.html">返回首页</a>
             </div>
+            <div id="model-select-button" class="text-box">
+                <button id="selectModelBtn">选择文物</button>
+            </div>
+            <div id="model-selection-card" class="model-selection-card">
+                <h3>选择文物模型</h3>
+                <div class="model-list">
+                    <div class="model-item selected" data-model="Stan.gltf">恐龙化石 (Stan.gltf)</div>
+                    <div class="model-item" data-model="AnimationLibrary_Godot_Standard.glb">标准动画库 (AnimationLibrary_Godot_Standard.glb)</div>
+                </div>
+                <button id="closeModelCard">关闭</button>
+            </div>
         </div>
         <script type="module" src="main.js"></script>
+        <script type="module">
+            // 模型选择功能
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log("DOM内容已加载，设置模型选择功能...");
+                
+                const selectModelBtn = document.getElementById('selectModelBtn');
+                const modelSelectionCard = document.getElementById('model-selection-card');
+                const closeModelCard = document.getElementById('closeModelCard');
+                const modelItems = document.querySelectorAll('.model-item');
+                
+                if (!selectModelBtn || !modelSelectionCard || !closeModelCard) {
+                    console.error("未找到模型选择相关元素!");
+                    return;
+                }
+                
+                console.log("找到所有模型选择元素，设置事件处理...");
+                
+                // 初始状态隐藏模型选择卡片
+                modelSelectionCard.style.display = 'none';
+                
+                // 点击"选择文物"按钮显示卡片
+                selectModelBtn.addEventListener('click', function() {
+                    console.log("点击了选择文物按钮");
+                    modelSelectionCard.style.display = 'block';
+                });
+                
+                // 点击"关闭"按钮隐藏卡片
+                closeModelCard.addEventListener('click', function() {
+                    console.log("点击了关闭按钮");
+                    modelSelectionCard.style.display = 'none';
+                });
+                
+                // 点击模型项选择模型
+                modelItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        const modelPath = this.getAttribute('data-model');
+                        console.log("选择了模型:", modelPath);
+                        
+                        // 使用自定义事件通知game.js加载新模型
+                        const event = new CustomEvent('loadNewModel', { 
+                            detail: { modelPath: 'assets/' + modelPath }
+                        });
+                        window.dispatchEvent(event);
+                        
+                        // 高亮选中的模型
+                        modelItems.forEach(m => m.classList.remove('selected'));
+                        this.classList.add('selected');
+                        
+                        // 关闭模型选择卡片
+                        modelSelectionCard.style.display = 'none';
+                    });
+                });
+                
+                console.log("模型选择功能设置完成");
+            });
+        </script>
     </body>
 </html>

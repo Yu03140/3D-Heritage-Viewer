@@ -174,6 +174,7 @@ import { GLTFLoader } from 'three/loaders/GLTFLoader.js';
 import { HandLandmarker, FilesetResolver } from 'https://esm.sh/@mediapipe/tasks-vision@0.10.14';
 import { AudioManager } from './audioManager.js'; // Import the AudioManager
 import { SpeechManager } from './SpeechManager.js'; // Import SpeechManager
+import { ModelSelector } from './modelSelector.js'; // Import ModelSelector
 export var Game = /*#__PURE__*/ function() {
     "use strict";
     function Game(renderDiv) {
@@ -282,6 +283,10 @@ export var Game = /*#__PURE__*/ function() {
             "animation 4": "动画 4",
             "animation 5": "动画 5"
         };
+        
+        // 模型选择器
+        this.modelSelector = null;
+        
         // Initialize asynchronously
         this._init().catch(function(error) {
             console.error("Initialization failed:", error);
@@ -325,6 +330,11 @@ export var Game = /*#__PURE__*/ function() {
                                 window.addEventListener('resize', _this._onResize.bind(_this));
                                 _this.gameState = 'tracking'; // Change state to tracking to start immediately
                                 _this._animate(); // Start the animation loop (it will check state)
+                                
+                                // 初始化模型选择器
+                                _this.modelSelector = new ModelSelector(_this);
+                                console.log("模型选择器已初始化");
+                                
                                 return [
                                     2
                                 ];

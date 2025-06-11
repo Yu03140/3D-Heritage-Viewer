@@ -132,3 +132,118 @@
     padding: 15px 40px;
     margin-bottom: 30px;
 }
+
+/* 模型选择样式 */
+#model-select-button {
+    position: absolute;
+    bottom: 60px;
+    left: 10px;
+}
+
+#model-select-button button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #4CAF50;
+    color: white;
+    border: 2px solid black;
+    border-radius: 4px;
+    box-shadow: 3px 3px 0px black;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#model-select-button button:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0px black;
+}
+
+#model-select-button button:active {
+    transform: translateY(1px);
+    box-shadow: 2px 2px 0px black;
+}
+
+#closeModelCard {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    background-color: #f0f0f0;
+    color: #333;
+    border: 2px solid black;
+    border-radius: 4px;
+    box-shadow: 2px 2px 0px black;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: block;
+    margin: 0 auto;
+}
+
+#closeModelCard:hover {
+    background-color: #e0e0e0;
+}
+
+.model-selection-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    border: 2px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    width: 80%;
+    max-width: 400px;
+    z-index: 300;
+}
+
+.model-selection-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.4rem;
+    color: #333;
+}
+
+.model-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.model-item {
+    padding: 10px;
+    cursor: pointer;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+}
+
+.model-item:hover {
+    border-color: #4CAF50;
+    background-color: #f5f5f5;
+}
+
+.model-item.selected {
+    border-color: #4CAF50;
+    background-color: rgba(76, 175, 80, 0.1);
+    font-weight: bold;
+}
+
+#closeModelCard {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    background-color: #f0f0f0;
+    color: #333;
+    border: 2px solid black;
+    border-radius: 4px;
+    box-shadow: 2px 2px 0px black;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: block;
+    margin: 0 auto;
+}
+
+#closeModelCard:hover {
+    background-color: #e0e0e0;
+}
