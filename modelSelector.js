@@ -84,6 +84,12 @@ export class ModelSelector {
         // 重置交互状态
         this.resetInteractionStates();
         
+        // 触发模型变更事件，以便更新描述
+        const modelChangedEvent = new CustomEvent('modelChanged', { 
+            detail: { modelPath }
+        });
+        window.dispatchEvent(modelChangedEvent);
+        
         // 显示成功反馈
         this.showFeedback(`模型 "${modelPath.split('/').pop()}" 已加载`);
     }

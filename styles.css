@@ -47,6 +47,12 @@
     left: 10px;
 }
 
+#description-button {
+    position: absolute;
+    top: 10px;
+    left: 120px; /* 位于返回首页按钮右侧 */
+}
+
 /* 欢迎界面样式 */
 .welcome-screen {
     width: 100%;
@@ -245,5 +251,57 @@
 }
 
 #closeModelCard:hover {
+    background-color: #e0e0e0;
+}
+
+.description-card {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    border: 2px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    width: 300px;
+    max-height: 60%;
+    z-index: 200;
+    display: none; /* 初始隐藏 */
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.description-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.description-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.description-content {
+    overflow-y: auto;
+    padding-right: 5px;
+    line-height: 1.5;
+    max-height: calc(100% - 40px);
+}
+
+#closeDescriptionCard {
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    background-color: #f0f0f0;
+    color: #333;
+    border: 2px solid black;
+    border-radius: 4px;
+    box-shadow: 2px 2px 0px black;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#closeDescriptionCard:hover {
     background-color: #e0e0e0;
 }

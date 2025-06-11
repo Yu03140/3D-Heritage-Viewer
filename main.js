@@ -16,6 +16,14 @@ if (!renderDiv) {
     // Start the game
     game.start(); // The actual setup happens async within the Game class constructor
     
+    // 在初始化后触发默认模型加载完成事件
+    setTimeout(() => {
+        const initialModelChangedEvent = new CustomEvent('modelChanged', { 
+            detail: { modelPath: 'Stan.gltf' }
+        });
+        window.dispatchEvent(initialModelChangedEvent);
+    }, 2000); // 等待2秒，确保其他组件已初始化
+    
     // 导出game实例以便在控制台中调试
     window.gameInstance = game;
 }

@@ -176,6 +176,7 @@ import { AudioManager } from './audioManager.js'; // Import the AudioManager
 import { SpeechManager } from './SpeechManager.js'; // Import SpeechManager
 import { ModelSelector } from './modelSelector.js'; // Import ModelSelector
 import { ModelLoadingBubble } from './modelLoadingBubble.js'; // Import ModelLoadingBubble
+import { DescriptionManager } from './descriptionManager.js'; // Import DescriptionManager
 export var Game = /*#__PURE__*/ function() {
     "use strict";
     function Game(renderDiv) {
@@ -344,6 +345,10 @@ export var Game = /*#__PURE__*/ function() {
                                 // 初始化模型选择器
                                 _this.modelSelector = new ModelSelector(_this);
                                 console.log("模型选择器已初始化");
+                                
+                                // 初始化模型描述管理器
+                                _this.descriptionManager = new DescriptionManager(_this);
+                                console.log("模型描述管理器已初始化");
                                 
                                 return [
                                     2

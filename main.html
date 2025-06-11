@@ -15,14 +15,7 @@
         <meta property="og:url" content="https://collidingscopes.github.io/3d-model-playground/">
         <meta property="og:title" content="3D文物展示系统">
         <meta property="og:description" content="使用手势和语音命令实时控制3D文物模型">
-        <meta property="og:image" content="https://raw.githubusercontent.com/collidingScopes/3d-model-playground/main/assets/siteOGImage.jpg">
-
-        <!-- Twitter -->
-        <meta property="twitter:card" content="summary_large_image">
-        <meta property="twitter:url" content="https://collidingscopes.github.io/3d-model-playground/">
-        <meta property="twitter:title" content="3D文物展示系统">
-        <meta property="twitter:description" content="使用手势和语音命令实时控制3D文物模型">
-        <meta property="twitter:image" content="https://raw.githubusercontent.com/collidingScopes/3d-model-playground/main/assets/siteOGImage.jpg">
+        <meta property="og:image" content="assets/siteOGImage.jpg">
 
         <script defer src="https://cloud.umami.is/script.js" data-website-id="eb59c81c-27cb-4e1d-9e8c-bfbe70c48cd9"></script>
         <script type="importmap">
@@ -40,6 +33,18 @@
             <div id="instruction-text" class="text-box"></div>
             <div id="back-link" class="text-box">
                 <a href="index.html">返回首页</a>
+            </div>
+            <div id="description-button" class="text-box">
+                <button id="showDescriptionBtn">文本介绍</button>
+            </div>
+            <div id="description-card" class="description-card">
+                <div class="description-header">
+                    <h3 id="description-title">文物介绍</h3>
+                    <button id="closeDescriptionCard">关闭</button>
+                </div>
+                <div id="description-content" class="description-content">
+                    加载中...
+                </div>
             </div>
             <div id="model-select-button" class="text-box">
                 <button id="selectModelBtn">选择文物</button>
