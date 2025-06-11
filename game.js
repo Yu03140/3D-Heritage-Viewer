@@ -174,6 +174,9 @@ import { GLTFLoader } from 'three/loaders/GLTFLoader.js';
 import { HandLandmarker, FilesetResolver } from 'https://esm.sh/@mediapipe/tasks-vision@0.10.14';
 import { AudioManager } from './audioManager.js'; // Import the AudioManager
 import { SpeechManager } from './SpeechManager.js'; // Import SpeechManager
+import { ModelSelector } from './modelSelector.js'; // Import ModelSelector
+import { ModelLoadingBubble } from './modelLoadingBubble.js'; // Import ModelLoadingBubble
+import { DescriptionManager } from './descriptionManager.js'; // Import DescriptionManager
 export var Game = /*#__PURE__*/ function() {
     "use strict";
     function Game(renderDiv) {
@@ -219,6 +222,11 @@ export var Game = /*#__PURE__*/ function() {
         this.speechBubble = null;
         this.speechBubbleTimeout = null;
         this.isSpeechActive = false; // Track if speech recognition is active for styling
+        
+        // 模型加载提示框
+        this.modelLoadingBubble = null;
+        this.modelLoadingBubbleTimeout = null;
+        
         this.grabbingHandIndex = -1; // -1: no hand, 0: first hand, 1: second hand grabbing
         this.pickedUpModel = null; // Reference to the model being dragged
         this.modelDragOffset = new THREE.Vector3(); // Offset between model and pinch point in 3D
@@ -282,6 +290,10 @@ export var Game = /*#__PURE__*/ function() {
             "animation 4": "动画 4",
             "animation 5": "动画 5"
         };
+        
+        // 模型选择器
+        this.modelSelector = null;
+        
         // Initialize asynchronously
         this._init().catch(function(error) {
             console.error("Initialization failed:", error);
@@ -325,6 +337,19 @@ export var Game = /*#__PURE__*/ function() {
                                 window.addEventListener('resize', _this._onResize.bind(_this));
                                 _this.gameState = 'tracking'; // Change state to tracking to start immediately
                                 _this._animate(); // Start the animation loop (it will check state)
+                                
+                                // 初始化模型加载提示框
+                                _this.modelLoadingBubble = new ModelLoadingBubble(_this.renderDiv);
+                                console.log("模型加载提示框已初始化");
+                                
+                                // 初始化模型选择器
+                                _this.modelSelector = new ModelSelector(_this);
+                                console.log("模型选择器已初始化");
+                                
+                                // 初始化模型描述管理器
+                                _this.descriptionManager = new DescriptionManager(_this);
+                                console.log("模型描述管理器已初始化");
+                                
                                 return [
                                     2
                                 ];
@@ -1627,6 +1652,19 @@ export var Game = /*#__PURE__*/ function() {
                 if (this.interactionMode === mode) return; // No change
                 console.log("Setting interaction mode to: ".concat(mode));
                 this.interactionMode = mode;
+                
+                // 显示模式切换提示
+                var modeNames = {
+                    'drag': '拖拽',
+                    'rotate': '旋转',
+                    'scale': '缩放',
+                    'animate': '动画'
+                };
+                var modeName = modeNames[mode] || mode;
+                if (this.modelLoadingBubble) {
+                    this.modelLoadingBubble.showMessage("已切换至" + modeName + "操作", 3000);
+                }
+                
                 // If currently grabbing, release the model
                 if (this.grabbingHandIndex !== -1 && this.pickedUpModel) {
                     console.log("Interaction mode changed while grabbing. Releasing model from hand ".concat(this.grabbingHandIndex, "."));

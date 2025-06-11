@@ -37,6 +37,271 @@
 
 #video-link {
     position: absolute;
+    bottom: 10px;
+    left: 10px;
+}
+
+#back-link {
+    position: absolute;
     top: 10px;
     left: 10px;
+}
+
+#description-button {
+    position: absolute;
+    top: 10px;
+    left: 120px; /* 位于返回首页按钮右侧 */
+}
+
+/* 欢迎界面样式 */
+.welcome-screen {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 50px 20px;
+    box-sizing: border-box;
+    background-color: #f8f8f8;
+    font-family: "Arial", "Helvetica Neue", Helvetica, sans-serif;
+}
+
+.welcome-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-content {
+    max-width: 600px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.welcome-content p {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+.feature-list {
+    text-align: left;
+    display: inline-block;
+    margin: 0 auto;
+    padding-left: 20px;
+}
+
+.feature-list li {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    color: #444;
+}
+
+.welcome-buttons-top {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.welcome-button {
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-family: "Arial", "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid black;
+    box-shadow: 3px 3px 0px black;
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.welcome-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0px black;
+}
+
+.welcome-button:active {
+    transform: translateY(1px);
+    box-shadow: 2px 2px 0px black;
+}
+
+.start-button {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 1.3rem;
+    padding: 15px 40px;
+    margin-bottom: 30px;
+}
+
+/* 模型选择样式 */
+#model-select-button {
+    position: absolute;
+    bottom: 60px;
+    left: 10px;
+}
+
+#model-select-button button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #4CAF50;
+    color: white;
+    border: 2px solid black;
+    border-radius: 4px;
+    box-shadow: 3px 3px 0px black;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#model-select-button button:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 0px black;
+}
+
+#model-select-button button:active {
+    transform: translateY(1px);
+    box-shadow: 2px 2px 0px black;
+}
+
+#closeModelCard {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    background-color: #f0f0f0;
+    color: #333;
+    border: 2px solid black;
+    border-radius: 4px;
+    box-shadow: 2px 2px 0px black;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: block;
+    margin: 0 auto;
+}
+
+#closeModelCard:hover {
+    background-color: #e0e0e0;
+}
+
+.model-selection-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    border: 2px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    width: 80%;
+    max-width: 400px;
+    z-index: 300;
+}
+
+.model-selection-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.4rem;
+    color: #333;
+}
+
+.model-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.model-item {
+    padding: 10px;
+    cursor: pointer;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+}
+
+.model-item:hover {
+    border-color: #4CAF50;
+    background-color: #f5f5f5;
+}
+
+.model-item.selected {
+    border-color: #4CAF50;
+    background-color: rgba(76, 175, 80, 0.1);
+    font-weight: bold;
+}
+
+#closeModelCard {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    background-color: #f0f0f0;
+    color: #333;
+    border: 2px solid black;
+    border-radius: 4px;
+    box-shadow: 2px 2px 0px black;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: block;
+    margin: 0 auto;
+}
+
+#closeModelCard:hover {
+    background-color: #e0e0e0;
+}
+
+.description-card {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    border: 2px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    width: 300px;
+    max-height: 60%;
+    z-index: 200;
+    display: none; /* 初始隐藏 */
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.description-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.description-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.description-content {
+    overflow-y: auto;
+    padding-right: 5px;
+    line-height: 1.5;
+    max-height: calc(100% - 40px);
+}
+
+#closeDescriptionCard {
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    background-color: #f0f0f0;
+    color: #333;
+    border: 2px solid black;
+    border-radius: 4px;
+    box-shadow: 2px 2px 0px black;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#closeDescriptionCard:hover {
+    background-color: #e0e0e0;
 }
