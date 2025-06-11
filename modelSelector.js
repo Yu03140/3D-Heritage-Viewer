@@ -158,21 +158,9 @@ export class ModelSelector {
     }
 
     showFeedback(message) {
-        // 使用游戏中的语音反馈系统显示消息
-        if (this.game.speechBubble) {
-            this.game.speechBubble.innerText = message;
-            this.game.speechBubble.style.opacity = '1';
-            this.game.speechBubble.style.display = 'block';
-            
-            // 清除先前的超时
-            if (this.game.speechBubbleTimeout) {
-                clearTimeout(this.game.speechBubbleTimeout);
-            }
-            
-            // 3秒后隐藏反馈
-            this.game.speechBubbleTimeout = setTimeout(() => {
-                this.game.speechBubble.style.opacity = '0.7';
-            }, 3000);
+        // 使用模型加载提示框显示消息，而不是语音反馈系统
+        if (this.game.modelLoadingBubble) {
+            this.game.modelLoadingBubble.showMessage(message, 3000);
         }
     }
 }

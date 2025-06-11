@@ -175,6 +175,7 @@ import { HandLandmarker, FilesetResolver } from 'https://esm.sh/@mediapipe/tasks
 import { AudioManager } from './audioManager.js'; // Import the AudioManager
 import { SpeechManager } from './SpeechManager.js'; // Import SpeechManager
 import { ModelSelector } from './modelSelector.js'; // Import ModelSelector
+import { ModelLoadingBubble } from './modelLoadingBubble.js'; // Import ModelLoadingBubble
 export var Game = /*#__PURE__*/ function() {
     "use strict";
     function Game(renderDiv) {
@@ -220,6 +221,11 @@ export var Game = /*#__PURE__*/ function() {
         this.speechBubble = null;
         this.speechBubbleTimeout = null;
         this.isSpeechActive = false; // Track if speech recognition is active for styling
+        
+        // 模型加载提示框
+        this.modelLoadingBubble = null;
+        this.modelLoadingBubbleTimeout = null;
+        
         this.grabbingHandIndex = -1; // -1: no hand, 0: first hand, 1: second hand grabbing
         this.pickedUpModel = null; // Reference to the model being dragged
         this.modelDragOffset = new THREE.Vector3(); // Offset between model and pinch point in 3D
@@ -330,6 +336,10 @@ export var Game = /*#__PURE__*/ function() {
                                 window.addEventListener('resize', _this._onResize.bind(_this));
                                 _this.gameState = 'tracking'; // Change state to tracking to start immediately
                                 _this._animate(); // Start the animation loop (it will check state)
+                                
+                                // 初始化模型加载提示框
+                                _this.modelLoadingBubble = new ModelLoadingBubble(_this.renderDiv);
+                                console.log("模型加载提示框已初始化");
                                 
                                 // 初始化模型选择器
                                 _this.modelSelector = new ModelSelector(_this);
