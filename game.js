@@ -1647,6 +1647,19 @@ export var Game = /*#__PURE__*/ function() {
                 if (this.interactionMode === mode) return; // No change
                 console.log("Setting interaction mode to: ".concat(mode));
                 this.interactionMode = mode;
+                
+                // 显示模式切换提示
+                var modeNames = {
+                    'drag': '拖拽',
+                    'rotate': '旋转',
+                    'scale': '缩放',
+                    'animate': '动画'
+                };
+                var modeName = modeNames[mode] || mode;
+                if (this.modelLoadingBubble) {
+                    this.modelLoadingBubble.showMessage("已切换至" + modeName + "操作", 3000);
+                }
+                
                 // If currently grabbing, release the model
                 if (this.grabbingHandIndex !== -1 && this.pickedUpModel) {
                     console.log("Interaction mode changed while grabbing. Releasing model from hand ".concat(this.grabbingHandIndex, "."));
