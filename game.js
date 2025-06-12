@@ -232,8 +232,7 @@ export var Game = /*#__PURE__*/ function() {
         this.modelDragOffset = new THREE.Vector3(); // Offset between model and pinch point in 3D
         this.modelGrabStartDepth = 0; // To store the model's Z depth when grabbed
         this.interactionMode = 'drag'; // 'drag', 'rotate', 'scale', 'animate' - Default to drag
-        this.interactionModeButtons = {}; // To store references to mode buttons
-        this.loadedDroppedModelData = null; // To temporarily store parsed GLTF data
+        this.interactionModeButtons = {}; // To store references to mode buttons        this.loadedDroppedModelData = null; // To temporarily store parsed GLTF data
         this.interactionModeColors = {
             drag: {
                 base: '#00FFFF',
@@ -250,11 +249,11 @@ export var Game = /*#__PURE__*/ function() {
                 text: '#000000',
                 hand: new THREE.Color('#FFFF00')
             },
-            animate: {
-                base: '#FFA500',
-                text: '#000000',
-                hand: new THREE.Color('#FFA500')
-            } // Orange
+            fixed: {
+                base: '#808080',
+                text: '#FFFFFF',
+                hand: new THREE.Color('#808080')
+            } // 灰色表示固定模式
         };
         this.rotateLastHandX = null; // Stores the last hand X position for rotation calculation
         this.rotateSensitivity = 0.02; // Adjust for faster/slower rotation
@@ -265,13 +264,12 @@ export var Game = /*#__PURE__*/ function() {
         this.grabbingPulseAmplitude = 0.5; // How much the scale increases (e.g., 0.5 means 50% bigger at peak)
         this.pulseBaseScale = 1.0; // Base scale for non-pulsing and start of pulse
         this.fingertipDefaultOpacity = 0.3; // Default opacity for hand landmarks (Reduced from 0.6)
-        this.fingertipGrabOpacity = 1.0; // Opacity when hand is actively grabbing/interacting
-        this.instructionTextElement = document.querySelector("#instruction-text"); // DOM element for instruction text
+        this.fingertipGrabOpacity = 1.0; // Opacity when hand is actively grabbing/interacting        this.instructionTextElement = document.querySelector("#instruction-text"); // DOM element for instruction text
         this.interactionModeInstructions = {
             drag: "捏合手指来抓取并移动模型",
             rotate: "捏合手指并左右移动手来旋转",
             scale: "使用双手，两手捏合并调整手之间的距离来缩放",
-            animate: "捏合手指并上下移动手来切换动画" // 更新为中文指令
+            fixed: "固定模式：手势识别已禁用" // 新增固定模式指令
         };
         this.animationControlHandIndex = -1; // Index of the hand controlling animation scrolling
         this.animationControlInitialPinchY = null; // Initial Y position of the pinch for animation scrolling
@@ -460,13 +458,12 @@ export var Game = /*#__PURE__*/ function() {
                 this.interactionModeContainer.style.display = 'flex';
                 this.interactionModeContainer.style.flexDirection = 'column';
                 this.interactionModeContainer.style.gap = '4px';
-                this.renderDiv.appendChild(this.interactionModeContainer);
-                // Create interaction mode buttons
+                this.renderDiv.appendChild(this.interactionModeContainer);                // Create interaction mode buttons
                 [
                     '拖拽',
                     '旋转',
                     '缩放',
-                    '动画'
+                    '固定'
                 ].forEach(function(mode) {
                     var button = document.createElement('button');
                     button.innerText = mode;
@@ -475,7 +472,7 @@ export var Game = /*#__PURE__*/ function() {
                         '拖拽': 'drag',
                         '旋转': 'rotate',
                         '缩放': 'scale',
-                        '动画': 'animate'
+                        '固定': 'fixed'
                     };
                     var modeId = modeMap[mode];
                     button.id = "interaction-mode-".concat(modeId);
@@ -851,11 +848,20 @@ export var Game = /*#__PURE__*/ function() {
                 })();
             }
         },
-        {
-            key: "_updateHands",
+        {            key: "_updateHands",
             value: function _updateHands() {
                 var _this = this;
                 if (!this.handLandmarker || !this.videoElement.srcObject || this.videoElement.readyState < 2 || this.videoElement.videoWidth === 0) return;
+                
+                // 如果是固定模式，完全禁用手势识别
+                if (this.interactionMode === 'fixed') {
+                    // 隐藏所有手部可视化
+                    this.hands.forEach(function(hand) {
+                        if (hand.lineGroup) hand.lineGroup.visible = false;
+                    });
+                    return;
+                }
+                
                 // this.isAnyHandHovering = false; // Reset hover state each frame - REMOVED
                 var videoTime = this.videoElement.currentTime;
                 if (videoTime > this.lastVideoTime) {
@@ -951,64 +957,19 @@ export var Game = /*#__PURE__*/ function() {
                                 if (isTipNearMCP(ringFingerTip, ringFingerMcp, 0.08)) curledFingers++;
                                 if (isTipNearMCP(pinkyTip, pinkyMcp, 0.08)) curledFingers++;
                                 var prevIsFist = hand.isFist;
-                                hand.isFist = curledFingers >= 3; // Requires at least 3 fingers to be curled
-                                // Interaction Logic
-                                if (_this1.interactionMode === 'animate') {
+                                hand.isFist = curledFingers >= 3; // Requires at least 3 fingers to be curled                                // Interaction Logic
+                                if (_this1.interactionMode === 'fixed') {
+                                    // 固定模式：不进行任何手势识别和交互
                                     // Release any model grab from other modes
                                     if (_this1.grabbingHandIndex !== -1 && _this1.pickedUpModel) {
-                                        // console.log(`Switched to Animate mode or model grab was active. Releasing.`);
                                         _this1.grabbingHandIndex = -1;
                                         _this1.pickedUpModel = null;
-                                        // if (this.grabMarker && this.pandaModel) this.grabMarker.visible = true; // Grab marker removed
                                         // Reset other mode-specific states
                                         _this1.rotateLastHandX = null;
                                         _this1.scaleInitialPinchDistance = null;
                                         _this1.scaleInitialModelScale = null;
                                     }
-                                    if (hand.isPinching) {
-                                        if (!prevIsPinching && _this1.animationControlHandIndex === -1) {
-                                            _this1.animationControlHandIndex = i;
-                                            _this1.animationControlInitialPinchY = hand.pinchPointScreen.y;
-                                            console.log("Hand ".concat(i, " started pinch for animation control at Y: ").concat(_this1.animationControlInitialPinchY));
-                                        } else if (_this1.animationControlHandIndex === i && _this1.animationControlInitialPinchY !== null) {
-                                            // Pinch continues with the controlling hand
-                                            var deltaY = hand.pinchPointScreen.y - _this1.animationControlInitialPinchY;
-                                            if (Math.abs(deltaY) > _this1.animationScrollThreshold) {
-                                                var animationNames = Object.keys(_this1.animationActions);
-                                                if (animationNames.length > 0) {
-                                                    var currentIndex = -1;
-                                                    // Find the index of the currently playing animation action
-                                                    if (_this1.currentAction) {
-                                                        for(var j = 0; j < animationNames.length; j++){
-                                                            if (_this1.animationActions[animationNames[j]] === _this1.currentAction) {
-                                                                currentIndex = j;
-                                                                break;
-                                                            }
-                                                        }
-                                                    }
-                                                    var nextIndex = currentIndex;
-                                                    if (deltaY < 0) {
-                                                        nextIndex = (currentIndex + 1) % animationNames.length; // Now scrolls to next
-                                                        console.log("Scrolling animation UP (to next)");
-                                                    } else {
-                                                        nextIndex = (currentIndex - 1 + animationNames.length) % animationNames.length; // Now scrolls to previous
-                                                        console.log("Scrolling animation DOWN (to previous)");
-                                                    }
-                                                    if (nextIndex !== currentIndex) {
-                                                        _this1._playAnimation(animationNames[nextIndex]);
-                                                    }
-                                                }
-                                                // Reset initial Y to require another full threshold movement
-                                                _this1.animationControlInitialPinchY = hand.pinchPointScreen.y;
-                                            }
-                                        }
-                                    } else {
-                                        if (prevIsPinching && _this1.animationControlHandIndex === i) {
-                                            console.log("Hand ".concat(i, " ended pinch for animation control."));
-                                            _this1.animationControlHandIndex = -1;
-                                            _this1.animationControlInitialPinchY = null;
-                                        }
-                                    }
+                                    // 在固定模式下不处理任何手势交互
                                 } else if (_this1.interactionMode === 'drag') {
                                     if (hand.isPinching) {
                                         if (!prevIsPinching && _this1.grabbingHandIndex === -1 && _this1.pandaModel) {
@@ -1145,13 +1106,13 @@ _this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
                                 hand.isPinching = false;
                                 hand.isFist = false;
                                 if (hand.lineGroup) hand.lineGroup.visible = false;
-                            }
-                            // Play interaction click sound for this hand if applicable (not for scale, handled after loop)
+                            }                            // Play interaction click sound for this hand if applicable (not for scale, handled after loop)
                             var isThisHandActivelyInteractingForSound = false;
                             if (_this1.interactionMode === 'drag' || _this1.interactionMode === 'rotate') {
                                 isThisHandActivelyInteractingForSound = _this1.grabbingHandIndex === i && _this1.pickedUpModel === _this1.pandaModel;
-                            } else if (_this1.interactionMode === 'animate') {
-                                isThisHandActivelyInteractingForSound = _this1.animationControlHandIndex === i;
+                            } else if (_this1.interactionMode === 'fixed') {
+                                // 固定模式下不播放交互声音
+                                isThisHandActivelyInteractingForSound = false;
                             }
                             if (hand.isPinching && isThisHandActivelyInteractingForSound && _this1.interactionMode !== 'scale') {
                                 _this1.audioManager.playInteractionClickSound();
@@ -1372,17 +1333,16 @@ _this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
             value: function _updateHandLines(handIndex, landmarks, videoParams, canvasWidth, canvasHeight) {
                 var _this = this;
                 var hand = this.hands[handIndex];
-                var lineGroup = hand.lineGroup;
-                // Determine if this specific hand is currently involved in a grab/scale interaction
+                var lineGroup = hand.lineGroup;                // Determine if this specific hand is currently involved in a grab/scale interaction
                 var isThisHandActivelyInteracting = false;
                 if (this.interactionMode === 'drag' || this.interactionMode === 'rotate') {
                     isThisHandActivelyInteracting = this.grabbingHandIndex === handIndex && this.pickedUpModel === this.pandaModel;
                 } else if (this.interactionMode === 'scale') {
                     // For scale, both hands involved show the effect if scaling is active
                     isThisHandActivelyInteracting = this.scaleInitialPinchDistance !== null && (handIndex === 0 || handIndex === 1);
-                } else if (this.interactionMode === 'animate') {
-                    // For animate, the hand controlling animation scrolling (via pinch) shows the effect
-                    isThisHandActivelyInteracting = this.animationControlHandIndex === handIndex;
+                } else if (this.interactionMode === 'fixed') {
+                    // 固定模式下不显示任何手势交互效果
+                    isThisHandActivelyInteracting = false;
                 }
                 var currentHandMaterial = handIndex === 0 ? this.fingertipMaterialHand1 : this.fingertipMaterialHand2;
                 if (currentHandMaterial) {
@@ -1587,13 +1547,12 @@ _this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
                 }, function(isActive) {
                     _this.isSpeechActive = isActive;
                     _this._updateSpeechBubbleAppearance();
-                }, function(command) {
-                    console.log("Game received command: ".concat(command));
+                }, function(command) {                    console.log("Game received command: ".concat(command));
                     var validCommands = [
                         'drag',
                         'rotate',
                         'scale',
-                        'animate'
+                        'fixed'
                     ];
                     if (validCommands.includes(command.toLowerCase())) {
                         _this._setInteractionMode(command.toLowerCase());
@@ -1653,13 +1612,12 @@ _this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
                 if (this.interactionMode === mode) return; // No change
                 console.log("Setting interaction mode to: ".concat(mode));
                 this.interactionMode = mode;
-                
-                // 显示模式切换提示
+                  // 显示模式切换提示
                 var modeNames = {
                     'drag': '拖拽',
                     'rotate': '旋转',
                     'scale': '缩放',
-                    'animate': '动画'
+                    'fixed': '固定'
                 };
                 var modeName = modeNames[mode] || mode;
                 if (this.modelLoadingBubble) {
@@ -1676,23 +1634,11 @@ _this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
                     this.scaleInitialModelScale = null;
                 }
                 this._updateHandMaterialsForMode(mode); // Update hand colors for new mode
-                this._updateInteractionModeButtonStyles();
-                // Show/hide animation buttons container based on mode
+                this._updateInteractionModeButtonStyles();                // Show/hide animation buttons container based on mode
                 if (this.animationButtonsContainer) {
-                    if (mode === 'animate') {
-                        this.animationButtonsContainer.style.display = 'flex';
-                        requestAnimationFrame(function() {
-                            _this.animationButtonsContainer.style.opacity = '1';
-                        });
-                    } else {
-                        this.animationButtonsContainer.style.opacity = '0';
-                        // Wait for transition to complete before setting display to none
-                        setTimeout(function() {
-                            if (_this.interactionMode !== 'animate') {
-                                _this.animationButtonsContainer.style.display = 'none';
-                            }
-                        }, 300); // Corresponds to transition duration
-                    }
+                    // 由于移除了动画功能，动画按钮容器始终隐藏
+                    this.animationButtonsContainer.style.opacity = '0';
+                    this.animationButtonsContainer.style.display = 'none';
                 }
                 this._updateInstructionText(); // Update instruction text when mode changes
             }
@@ -1753,19 +1699,11 @@ _this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
                         button.style.fontWeight = 'bold'; // Always bold
                         button.style.boxShadow = '2px 2px 0px black'; // Default shadow for inactive
                     }
-                }
-                // Explicitly set display for animationButtonsContainer based on current mode
-                // This ensures it's correct even on initial load if default mode isn't 'animate'
+                }                // Explicitly set display for animationButtonsContainer based on current mode
+                // 由于移除了动画功能，动画按钮容器始终隐藏
                 if (this.animationButtonsContainer) {
-                    if (this.interactionMode === 'animate') {
-                        this.animationButtonsContainer.style.display = 'flex';
-                        requestAnimationFrame(function() {
-                            _this.animationButtonsContainer.style.opacity = '1';
-                        });
-                    } else {
-                        this.animationButtonsContainer.style.opacity = '0';
-                        this.animationButtonsContainer.style.display = 'none'; // Set display none immediately if not animate
-                    }
+                    this.animationButtonsContainer.style.opacity = '0';
+                    this.animationButtonsContainer.style.display = 'none';
                 }
                 this._updateInstructionText(); // Also call here to adjust position if animation buttons are shown/hidden
             }

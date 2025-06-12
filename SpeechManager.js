@@ -175,8 +175,7 @@ export var SpeechManager = /*#__PURE__*/ function() {
                         if (_this.onTranscript) {
                             // Display the raw transcript before processing as command
                             _this.onTranscript(event.results[i][0].transcript, ''); // Send final, clear interim
-                        }
-                        // Check for commands
+                        }                        // Check for commands
                         var commandMap = {
                             // 英文命令
                             'drag': 'drag',
@@ -185,9 +184,8 @@ export var SpeechManager = /*#__PURE__*/ function() {
                             'scale': 'scale',
                             'size': 'scale',
                             'zoom': 'scale',
-                            'animate': 'animate',
-                            'anime': 'animate',
-                            'animation': 'animate', // Alias for animate
+                            'fixed': 'fixed',
+                            'lock': 'fixed',
                             
                             // 中文命令
                             '拖拽': 'drag',
@@ -198,7 +196,8 @@ export var SpeechManager = /*#__PURE__*/ function() {
                             '大小': 'scale',
                             '放大': 'scale',
                             '缩小': 'scale',
-                            '动画': 'animate'
+                            '固定': 'fixed',
+                            '锁定': 'fixed'
                         };
                         var spokenCommands = Object.keys(commandMap);
                         var _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
