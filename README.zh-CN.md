@@ -26,12 +26,6 @@
 ## 开发环境设置
 
 ```bash
-# 克隆此仓库
-git clone https://github.com/collidingScopes/3d-model-playground
-
-# 导航到项目目录
-cd 3d-model-playground
-
 # 使用您喜欢的方法提供服务（示例使用Python）
 python -m http.server
 ```

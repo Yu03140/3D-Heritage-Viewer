@@ -327,10 +327,35 @@ export var Game = /*#__PURE__*/ function() {
                                     4,
                                     _this.videoElement.play()
                                 ];
-                            case 3:
-                                _state.sent();
+                            case 3:                                _state.sent();
                                 _this.audioManager.resumeContext(); // Resume audio context as game starts automatically
-                                _this.speechManager.requestPermissionAndStart(); // Start speech recognition
+                                
+                                // 检查语音识别设置是否启用（默认启用）
+                                const speechEnabled = localStorage.getItem('speechRecognitionEnabled') !== 'false';
+                                if (speechEnabled) {
+                                    _this.speechManager.requestPermissionAndStart(); // 启动语音识别
+                                    if (_this.speechBubble) {
+                                        _this.speechBubble.innerHTML = "语音识别已启用";
+                                        _this.speechBubble.style.opacity = '1';
+                                        setTimeout(() => {
+                                            _this.speechBubble.innerHTML = "...";
+                                            _this.speechBubble.style.opacity = '0.7';
+                                            _this._updateSpeechBubbleAppearance();
+                                        }, 2000);
+                                    }
+                                } else {
+                                    // 显示语音识别已禁用的消息
+                                    if (_this.speechBubble) {
+                                        _this.speechBubble.innerHTML = "语音识别已禁用";
+                                        _this.speechBubble.style.opacity = '1';
+                                        setTimeout(() => {
+                                            _this.speechBubble.innerHTML = "语音识别已关闭";
+                                            _this.speechBubble.style.opacity = '0.7';
+                                            _this._updateSpeechBubbleAppearance();
+                                        }, 2000);
+                                    }
+                                }
+                                
                                 _this.clock.start(); // Start the main clock as game starts automatically
                                 window.addEventListener('resize', _this._onResize.bind(_this));
                                 _this.gameState = 'tracking'; // Change state to tracking to start immediately
@@ -454,11 +479,12 @@ export var Game = /*#__PURE__*/ function() {
                 this.interactionModeContainer.style.position = 'absolute';
                 this.interactionModeContainer.style.top = '10px'; // Changed from 20px
                 this.interactionModeContainer.style.right = '10px'; // Changed from 20px
-                this.interactionModeContainer.style.zIndex = '30';
-                this.interactionModeContainer.style.display = 'flex';
+                this.interactionModeContainer.style.zIndex = '30';                this.interactionModeContainer.style.display = 'flex';
                 this.interactionModeContainer.style.flexDirection = 'column';
                 this.interactionModeContainer.style.gap = '4px';
-                this.renderDiv.appendChild(this.interactionModeContainer);                // Create interaction mode buttons
+                this.renderDiv.appendChild(this.interactionModeContainer);
+                
+                // Create interaction mode buttons
                 [
                     '拖拽',
                     '旋转',
@@ -1514,11 +1540,83 @@ _this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
                     this.speechBubble.style.top = '10px'; // Original top margin, changed from 20px
                 }
             }
-        },
-        {
+        },        {
             key: "_setupSpeechRecognition",
             value: function _setupSpeechRecognition() {
                 var _this = this;
+                
+                // 创建语音识别状态显示元素和切换按钮
+                // 1. 创建语音识别状态显示元素
+                this.speechStatusElement = document.createElement('div');
+                this.speechStatusElement.id = 'speech-status';
+                this.speechStatusElement.className = 'text-box';
+                this.speechStatusElement.style.backgroundColor = 'rgba(0,0,0,0.6)';
+                this.speechStatusElement.style.color = 'white';
+                this.speechStatusElement.style.padding = '5px 10px';
+                this.speechStatusElement.style.borderRadius = '4px';
+                this.speechStatusElement.style.fontSize = '14px';
+                this.speechStatusElement.style.marginTop = '4px';
+                this.speechStatusElement.innerHTML = '语音识别状态：<span id="speech-status-text">已启用</span>';
+                this.speechStatusTextElement = this.speechStatusElement.querySelector('#speech-status-text');
+                this.interactionModeContainer.appendChild(this.speechStatusElement);
+                
+                // 2. 创建语音识别切换按钮
+                const speechSettingBtn = document.createElement('button');
+                speechSettingBtn.textContent = '切换语音识别';
+                speechSettingBtn.style.padding = '5px 10px';
+                speechSettingBtn.style.fontSize = '14px';
+                speechSettingBtn.style.backgroundColor = '#f0f0f0';
+                speechSettingBtn.style.color = 'black';
+                speechSettingBtn.style.border = '2px solid black';
+                speechSettingBtn.style.borderRadius = '4px';
+                speechSettingBtn.style.cursor = 'pointer';
+                speechSettingBtn.style.marginTop = '4px';
+                speechSettingBtn.style.boxShadow = '2px 2px 0px black';
+                
+                speechSettingBtn.addEventListener('click', function() {
+                    const currentSetting = localStorage.getItem('speechRecognitionEnabled') !== 'false';
+                    localStorage.setItem('speechRecognitionEnabled', !currentSetting);
+                    
+                    // 通知游戏实例更新语音识别状态
+                    if (_this.speechManager) {
+                        const isEnabled = _this.speechManager.updateSpeechRecognitionState();
+                        
+                        // 更新状态显示
+                        _this.updateSpeechStatusDisplay();
+                        
+                        // 显示临时通知
+                        if (_this.speechStatusElement) {
+                            const originalBg = _this.speechStatusElement.style.backgroundColor;
+                            _this.speechStatusElement.style.backgroundColor = isEnabled ? 'rgba(40,167,69,0.8)' : 'rgba(220,53,69,0.8)';
+                            setTimeout(() => {
+                                _this.speechStatusElement.style.backgroundColor = originalBg;
+                            }, 1000);
+                        }
+                    }
+                });
+                
+                this.interactionModeContainer.appendChild(speechSettingBtn);
+                
+                // 根据设置更新语音状态显示
+                this.updateSpeechStatusDisplay = function() {
+                    const speechEnabled = localStorage.getItem('speechRecognitionEnabled') !== 'false';
+                    if (_this.speechStatusElement && _this.speechStatusTextElement) {
+                        _this.speechStatusTextElement.textContent = speechEnabled ? '已启用' : '已禁用';
+                        _this.speechStatusElement.style.backgroundColor = speechEnabled ? 'rgba(0,123,255,0.6)' : 'rgba(108,117,125,0.6)';
+                    }
+                };
+                
+                // 初始化时显示语音状态
+                this.updateSpeechStatusDisplay();
+                
+                // 监听localStorage变化（其他标签页设置可能改变）
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'speechRecognitionEnabled') {
+                        _this.speechManager.updateSpeechRecognitionState();
+                        _this.updateSpeechStatusDisplay();
+                    }
+                });
+                
                 this.speechManager = new SpeechManager(function(finalTranscript, interimTranscript) {
                     if (_this.speechBubble) {
                         clearTimeout(_this.speechBubbleTimeout);

@@ -5,6 +5,68 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>设置 - 3D文物展示系统</title>
         <link rel="stylesheet" href="styles.css">
+        <style>
+            .setting-item {
+                margin: 20px 0;
+                padding: 15px;
+                background: #fff;
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            }
+            .setting-title {
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+            .setting-description {
+                color: #666;
+                margin-bottom: 15px;
+            }
+            .toggle-switch {
+                position: relative;
+                display: inline-block;
+                width: 60px;
+                height: 34px;
+            }
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+            .toggle-slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #ccc;
+                transition: .4s;
+                border-radius: 34px;
+            }
+            .toggle-slider:before {
+                position: absolute;
+                content: "";
+                height: 26px;
+                width: 26px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                transition: .4s;
+                border-radius: 50%;
+            }
+            input:checked + .toggle-slider {
+                background-color: #2196F3;
+            }
+            input:checked + .toggle-slider:before {
+                transform: translateX(26px);
+            }
+            .save-message {
+                color: #4CAF50;
+                margin-top: 10px;
+                display: none;
+            }
+        </style>
     </head>
     <body style="width: 100%; height: 100%; overflow: hidden; margin: 0; background-color: #f0f0f0;">
         <div style="position: absolute; top: 20px; left: 20px; z-index: 100;">
@@ -15,9 +77,55 @@
             <div class="welcome-title">设置</div>
             
             <div class="welcome-content">
-                <p>此页面将用于设置系统参数。</p>
-                <p>功能正在开发中，敬请期待...</p>
+                <div class="setting-item">
+                    <div class="setting-title">语音识别功能</div>
+                    <div class="setting-description">控制是否启用语音命令识别功能。关闭后将不再响应语音命令。</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="speechRecognitionToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span id="toggleStatus">已启用</span>
+                    <div id="saveMessage" class="save-message">设置已保存！</div>
+                </div>
             </div>
         </div>
+
+        <script>
+            // 加载已保存的设置
+            document.addEventListener('DOMContentLoaded', function() {
+                const speechEnabled = localStorage.getItem('speechRecognitionEnabled');
+                const toggle = document.getElementById('speechRecognitionToggle');
+                const statusText = document.getElementById('toggleStatus');
+                
+                // 默认启用语音识别，除非明确设置为 "false"
+                if (speechEnabled === 'false') {
+                    toggle.checked = false;
+                    statusText.textContent = '已禁用';
+                } else {
+                    toggle.checked = true;
+                    statusText.textContent = '已启用';
+                }
+                
+                // 添加开关切换事件
+                toggle.addEventListener('change', function() {
+                    if (this.checked) {
+                        localStorage.setItem('speechRecognitionEnabled', 'true');
+                        statusText.textContent = '已启用';
+                    } else {
+                        localStorage.setItem('speechRecognitionEnabled', 'false');
+                        statusText.textContent = '已禁用';
+                    }
+                    
+                    // 显示保存消息
+                    const saveMessage = document.getElementById('saveMessage');
+                    saveMessage.style.display = 'block';
+                    
+                    // 2秒后隐藏保存消息
+                    setTimeout(function() {
+                        saveMessage.style.display = 'none';
+                    }, 2000);
+                });
+            });
+        </script>
     </body>
 </html>

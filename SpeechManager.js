@@ -301,13 +301,29 @@ export var SpeechManager = /*#__PURE__*/ function() {
                     }
                 }
             }
-        },
-        {
+        },        {
             key: "stopRecognition",
             value: function stopRecognition() {
                 if (this.recognition && this.isRecognizing) {
                     this.recognition.stop();
                 }
+            }
+        },
+        {
+            key: "updateSpeechRecognitionState",
+            value: function updateSpeechRecognitionState() {
+                // 检查语音识别设置
+                const speechEnabled = localStorage.getItem('speechRecognitionEnabled') !== 'false';
+                
+                if (speechEnabled && !this.isRecognizing) {
+                    // 如果设置为启用且当前未运行，则启动语音识别
+                    this.requestPermissionAndStart();
+                } else if (!speechEnabled && this.isRecognizing) {
+                    // 如果设置为禁用且当前正在运行，则停止语音识别
+                    this.stopRecognition();
+                }
+                
+                return speechEnabled;
             }
         },
         {

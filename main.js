@@ -15,6 +15,10 @@ if (!renderDiv) {
     var game = new Game(renderDiv);
     // Start the game
     game.start(); // The actual setup happens async within the Game class constructor
+      // 添加语音识别设置变更的监听
+    document.addEventListener('DOMContentLoaded', function() {
+        // 不再在这里创建切换按钮，将在game.js的UI初始化中添加
+    });
     
     // 在初始化后触发默认模型加载完成事件
     setTimeout(() => {
