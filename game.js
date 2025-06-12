@@ -248,18 +248,25 @@ export var Game = /*#__PURE__*/ function() {
                 base: '#FFFF00',
                 text: '#000000',
                 hand: new THREE.Color('#FFFF00')
-            },
-            fixed: {
+            },            fixed: {
                 base: '#808080',
                 text: '#FFFFFF',
                 hand: new THREE.Color('#808080')
             } // 灰色表示固定模式
         };
         this.rotateLastHandX = null; // Stores the last hand X position for rotation calculation
-        this.rotateSensitivity = 0.02; // Adjust for faster/slower rotation
+        
+        // 从localStorage读取旋转灵敏度设置，如果没有则使用默认值
+        const savedRotateSensitivity = localStorage.getItem('rotateSensitivity');
+        this.rotateSensitivity = savedRotateSensitivity ? parseFloat(savedRotateSensitivity) : 0.02;
+        
         this.scaleInitialPinchDistance = null; // Stores the initial distance between two pinching hands
         this.scaleInitialModelScale = null; // Stores the model's scale when scaling starts
-        this.scaleSensitivity = 0.2; // 调大缩放灵敏度，原来是0.05
+        
+        // 从localStorage读取缩放灵敏度设置，如果没有则使用默认值
+        const savedScaleSensitivity = localStorage.getItem('scaleSensitivity');
+        this.scaleSensitivity = savedScaleSensitivity ? parseFloat(savedScaleSensitivity) : 0.2;
+        
         this.grabbingPulseSpeed = 8; // Speed of the grab pulse animation
         this.grabbingPulseAmplitude = 0.5; // How much the scale increases (e.g., 0.5 means 50% bigger at peak)
         this.pulseBaseScale = 1.0; // Base scale for non-pulsing and start of pulse
@@ -360,8 +367,7 @@ export var Game = /*#__PURE__*/ function() {
                                 window.addEventListener('resize', _this._onResize.bind(_this));
                                 _this.gameState = 'tracking'; // Change state to tracking to start immediately
                                 _this._animate(); // Start the animation loop (it will check state)
-                                
-                                // 初始化模型加载提示框
+                                  // 初始化模型加载提示框
                                 _this.modelLoadingBubble = new ModelLoadingBubble(_this.renderDiv);
                                 console.log("模型加载提示框已初始化");
                                 
@@ -372,6 +378,28 @@ export var Game = /*#__PURE__*/ function() {
                                 // 初始化模型描述管理器
                                 _this.descriptionManager = new DescriptionManager(_this);
                                 console.log("模型描述管理器已初始化");
+                                
+                                // 监听localStorage变化，以便实时更新灵敏度设置
+                                window.addEventListener('storage', function(e) {
+                                    // 检查是否为灵敏度设置
+                                    if (e.key === 'scaleSensitivity') {
+                                        _this.scaleSensitivity = parseFloat(e.newValue);
+                                        console.log("缩放灵敏度已更新为:", _this.scaleSensitivity);
+                                        
+                                        // 显示设置已更新的提示
+                                        if (_this.modelLoadingBubble) {
+                                            _this.modelLoadingBubble.showMessage("缩放灵敏度已更新", 2000);
+                                        }
+                                    } else if (e.key === 'rotateSensitivity') {
+                                        _this.rotateSensitivity = parseFloat(e.newValue);
+                                        console.log("旋转灵敏度已更新为:", _this.rotateSensitivity);
+                                        
+                                        // 显示设置已更新的提示
+                                        if (_this.modelLoadingBubble) {
+                                            _this.modelLoadingBubble.showMessage("旋转灵敏度已更新", 2000);
+                                        }
+                                    }
+                                });
                                 
                                 return [
                                     2
@@ -1544,9 +1572,7 @@ _this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
             key: "_setupSpeechRecognition",
             value: function _setupSpeechRecognition() {
                 var _this = this;
-                
-                // 创建语音识别状态显示元素和切换按钮
-                // 1. 创建语音识别状态显示元素
+                  // 创建语音识别状态显示元素
                 this.speechStatusElement = document.createElement('div');
                 this.speechStatusElement.id = 'speech-status';
                 this.speechStatusElement.className = 'text-box';
@@ -1559,43 +1585,6 @@ _this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
                 this.speechStatusElement.innerHTML = '语音识别状态：<span id="speech-status-text">已启用</span>';
                 this.speechStatusTextElement = this.speechStatusElement.querySelector('#speech-status-text');
                 this.interactionModeContainer.appendChild(this.speechStatusElement);
-                
-                // 2. 创建语音识别切换按钮
-                const speechSettingBtn = document.createElement('button');
-                speechSettingBtn.textContent = '切换语音识别';
-                speechSettingBtn.style.padding = '5px 10px';
-                speechSettingBtn.style.fontSize = '14px';
-                speechSettingBtn.style.backgroundColor = '#f0f0f0';
-                speechSettingBtn.style.color = 'black';
-                speechSettingBtn.style.border = '2px solid black';
-                speechSettingBtn.style.borderRadius = '4px';
-                speechSettingBtn.style.cursor = 'pointer';
-                speechSettingBtn.style.marginTop = '4px';
-                speechSettingBtn.style.boxShadow = '2px 2px 0px black';
-                
-                speechSettingBtn.addEventListener('click', function() {
-                    const currentSetting = localStorage.getItem('speechRecognitionEnabled') !== 'false';
-                    localStorage.setItem('speechRecognitionEnabled', !currentSetting);
-                    
-                    // 通知游戏实例更新语音识别状态
-                    if (_this.speechManager) {
-                        const isEnabled = _this.speechManager.updateSpeechRecognitionState();
-                        
-                        // 更新状态显示
-                        _this.updateSpeechStatusDisplay();
-                        
-                        // 显示临时通知
-                        if (_this.speechStatusElement) {
-                            const originalBg = _this.speechStatusElement.style.backgroundColor;
-                            _this.speechStatusElement.style.backgroundColor = isEnabled ? 'rgba(40,167,69,0.8)' : 'rgba(220,53,69,0.8)';
-                            setTimeout(() => {
-                                _this.speechStatusElement.style.backgroundColor = originalBg;
-                            }, 1000);
-                        }
-                    }
-                });
-                
-                this.interactionModeContainer.appendChild(speechSettingBtn);
                 
                 // 根据设置更新语音状态显示
                 this.updateSpeechStatusDisplay = function() {

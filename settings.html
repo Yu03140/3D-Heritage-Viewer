@@ -66,6 +66,75 @@
                 margin-top: 10px;
                 display: none;
             }
+            
+            /* 滑块样式 */
+            .slider-container {
+                margin: 15px 0;
+            }
+            .slider-container label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+            .slider-row {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+            .slider {
+                flex-grow: 1;
+                height: 5px;
+                border-radius: 5px;
+                background: #d3d3d3;
+                outline: none;
+                -webkit-appearance: none;
+                appearance: none;
+                margin-right: 15px;
+            }
+            .slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #2196F3;
+                cursor: pointer;
+                border: 2px solid white;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            }
+            .slider::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: #2196F3;
+                cursor: pointer;
+                border: 2px solid white;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            }
+            .slider-value {
+                width: 50px;
+                text-align: center;
+                font-weight: bold;
+            }
+            .save-btn {
+                padding: 8px 15px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: bold;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                transition: all 0.2s;
+            }
+            .save-btn:hover {
+                background-color: #45a049;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+            .save-btn:active {
+                transform: translateY(2px);
+                box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            }
         </style>
     </head>
     <body style="width: 100%; height: 100%; overflow: hidden; margin: 0; background-color: #f0f0f0;">
@@ -75,8 +144,7 @@
         
         <div class="welcome-screen">
             <div class="welcome-title">设置</div>
-            
-            <div class="welcome-content">
+              <div class="welcome-content">
                 <div class="setting-item">
                     <div class="setting-title">语音识别功能</div>
                     <div class="setting-description">控制是否启用语音命令识别功能。关闭后将不再响应语音命令。</div>
@@ -87,12 +155,43 @@
                     <span id="toggleStatus">已启用</span>
                     <div id="saveMessage" class="save-message">设置已保存！</div>
                 </div>
+                
+                <!-- 缩放灵敏度设置 -->
+                <div class="setting-item">
+                    <div class="setting-title">手势灵敏度设置</div>
+                    <div class="setting-description">调整手势操作的灵敏度参数，以适应您的操作习惯。</div>
+                    
+                    <div class="slider-container">
+                        <label for="scaleSlider">缩放灵敏度</label>
+                        <div class="slider-row">
+                            <input type="range" min="0.05" max="0.5" step="0.01" class="slider" id="scaleSlider">
+                            <span class="slider-value" id="scaleValue">0.2</span>
+                            <button class="save-btn" id="saveScaleBtn">保存</button>
+                        </div>
+                        <div class="setting-description">
+                            调整捏合手势的缩放响应程度（较高值使小幅度捏合产生更大缩放效果）
+                        </div>
+                        <div id="scaleMessage" class="save-message">缩放灵敏度设置已保存！</div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label for="rotateSlider">旋转灵敏度</label>
+                        <div class="slider-row">
+                            <input type="range" min="0.005" max="0.05" step="0.001" class="slider" id="rotateSlider">
+                            <span class="slider-value" id="rotateValue">0.02</span>
+                            <button class="save-btn" id="saveRotateBtn">保存</button>
+                        </div>
+                        <div class="setting-description">
+                            控制旋转手势的响应灵敏度（较高值使手腕小角度旋转产生更大旋转效果）
+                        </div>
+                        <div id="rotateMessage" class="save-message">旋转灵敏度设置已保存！</div>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <script>
+        </div>        <script>
             // 加载已保存的设置
             document.addEventListener('DOMContentLoaded', function() {
+                // 语音识别设置
                 const speechEnabled = localStorage.getItem('speechRecognitionEnabled');
                 const toggle = document.getElementById('speechRecognitionToggle');
                 const statusText = document.getElementById('toggleStatus');
@@ -123,6 +222,70 @@
                     // 2秒后隐藏保存消息
                     setTimeout(function() {
                         saveMessage.style.display = 'none';
+                    }, 2000);
+                });
+                
+                // 加载缩放灵敏度设置
+                const scaleSlider = document.getElementById('scaleSlider');
+                const scaleValue = document.getElementById('scaleValue');
+                const saveScaleBtn = document.getElementById('saveScaleBtn');
+                const scaleMessage = document.getElementById('scaleMessage');
+                
+                // 默认缩放灵敏度为0.2，除非有保存的设置
+                const savedScaleSensitivity = localStorage.getItem('scaleSensitivity');
+                if (savedScaleSensitivity) {
+                    scaleSlider.value = savedScaleSensitivity;
+                    scaleValue.textContent = savedScaleSensitivity;
+                } else {
+                    scaleSlider.value = 0.2; // 默认值
+                    scaleValue.textContent = '0.2';
+                }
+                
+                // 滑块值变化时更新显示
+                scaleSlider.addEventListener('input', function() {
+                    scaleValue.textContent = this.value;
+                });
+                
+                // 保存缩放灵敏度设置
+                saveScaleBtn.addEventListener('click', function() {
+                    localStorage.setItem('scaleSensitivity', scaleSlider.value);
+                    
+                    // 显示保存成功消息
+                    scaleMessage.style.display = 'block';
+                    setTimeout(function() {
+                        scaleMessage.style.display = 'none';
+                    }, 2000);
+                });
+                
+                // 加载旋转灵敏度设置
+                const rotateSlider = document.getElementById('rotateSlider');
+                const rotateValue = document.getElementById('rotateValue');
+                const saveRotateBtn = document.getElementById('saveRotateBtn');
+                const rotateMessage = document.getElementById('rotateMessage');
+                
+                // 默认旋转灵敏度为0.02，除非有保存的设置
+                const savedRotateSensitivity = localStorage.getItem('rotateSensitivity');
+                if (savedRotateSensitivity) {
+                    rotateSlider.value = savedRotateSensitivity;
+                    rotateValue.textContent = savedRotateSensitivity;
+                } else {
+                    rotateSlider.value = 0.02; // 默认值
+                    rotateValue.textContent = '0.02';
+                }
+                
+                // 滑块值变化时更新显示
+                rotateSlider.addEventListener('input', function() {
+                    rotateValue.textContent = this.value;
+                });
+                
+                // 保存旋转灵敏度设置
+                saveRotateBtn.addEventListener('click', function() {
+                    localStorage.setItem('rotateSensitivity', rotateSlider.value);
+                    
+                    // 显示保存成功消息
+                    rotateMessage.style.display = 'block';
+                    setTimeout(function() {
+                        rotateMessage.style.display = 'none';
                     }, 2000);
                 });
             });

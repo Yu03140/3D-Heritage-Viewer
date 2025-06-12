@@ -186,12 +186,13 @@ export class ModelSelector {
         
         // 更新交互模式按钮样式
         this.game._updateInteractionModeButtonStyles();
-    }
-
-    showFeedback(message) {
+    }    showFeedback(message) {
         // 使用模型加载提示框显示消息，而不是语音反馈系统
+        console.log("显示反馈信息:", message);
         if (this.game.modelLoadingBubble) {
             this.game.modelLoadingBubble.showMessage(message, 3000);
+        } else {
+            console.error("模型加载提示框未初始化，无法显示:", message);
         }
     }
 }
