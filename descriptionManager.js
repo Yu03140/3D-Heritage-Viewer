@@ -24,8 +24,8 @@ export class DescriptionManager {
             this.descriptions = await response.json();
             console.log("模型描述数据加载成功");
             
-            // 设置初始模型的描述（默认是Stan）
-            this.setModelDescription("Stan");
+            // 移除这里的初始描述设置，完全依赖modelChanged事件
+            // this.setModelDescription("teacup");
             
             // 设置事件监听器
             this.setupEventListeners();

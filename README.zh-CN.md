@@ -79,4 +79,3 @@ SpeechManager.js      // 语音管理模块
 styles.css            // 样式文件
 assets/               // 静态资源文件夹
     siteOGImage.jpg   // 网站分享图片
-    Stan.gltf         // 示例 3D 模型

@@ -732,7 +732,7 @@ export var Game = /*#__PURE__*/ function() {
                                 return [
                                     4,
                                     new Promise(function(resolve, reject) {
-                                        gltfLoader.load('assets/Stan.gltf', function(gltf) {
+                                        gltfLoader.load('assets/teacup.gltf', function(gltf) {
                                             _this.pandaModel = gltf.scene; // GLTFLoader returns an object with a 'scene' property
                                             _this.animationMixer = new THREE.AnimationMixer(_this.pandaModel);
                                             _this.animationClips = gltf.animations;
@@ -780,20 +780,21 @@ export var Game = /*#__PURE__*/ function() {
                                                     console.log("No animations found or default animation could not be played.");
                                                 }
                                             } else {
-                                                console.log("Stan model has no embedded animations.");
+                                                console.log("teacup模型没有嵌入动画。");
                                             }
                                             // Scale and position the model
-                                            // These values might need adjustment based on the model's original size and pivot
-                                            var scale = 80; // This scale might need adjustment for Stan model
+                                            var scale = 2000; // 茶壶初始scale
+                                            var maxScale = 5000;
                                             _this.pandaModel.scale.set(scale, scale, scale);
-                                            // Position the model: X=center, Y=roughly bottom, Z=in front of hands
+                                            _this.pandaModel.userData.maxScale = maxScale;
+                                            _this.pandaModel.userData.minScale = 10;
                                             var sceneHeight = _this.renderDiv.clientHeight;
                                             _this.pandaModel.position.set(0, sceneHeight * -0.45, -1000); // Updated Z to -1000
                                             _this.scene.add(_this.pandaModel);
-                                            console.log("Stan GLTF model loaded and added to scene.");
+                                            console.log("teacup GLTF模型已加载并添加到场景。");
                                             resolve();
                                         }, undefined, function(error) {
-                                            console.error('An error occurred while loading the Stan GLTF model:', error); // Updated log
+                                            console.error('An error occurred while loading the teacup GLTF model:', error); // Updated log
                                             reject(error);
                                         });
                                     })

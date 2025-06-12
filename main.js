@@ -23,7 +23,7 @@ if (!renderDiv) {
     // 在初始化后触发默认模型加载完成事件
     setTimeout(() => {
         const initialModelChangedEvent = new CustomEvent('modelChanged', { 
-            detail: { modelPath: 'Stan.gltf' }
+            detail: { modelPath: 'teacup.gltf' } // 默认加载teacup.gltf
         });
         window.dispatchEvent(initialModelChangedEvent);
     }, 2000); // 等待2秒，确保其他组件已初始化
