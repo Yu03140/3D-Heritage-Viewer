@@ -3,19 +3,19 @@ import { Game } from './game.js';
 // 显示调试信息，方便排查模型加载问题
 console.log("main.js loaded");
 
-// Get the render target div
+// 获取渲染目标div元素
 var renderDiv = document.getElementById('renderDiv');
 
-// Check if renderDiv exists
+// 检查renderDiv是否存在
 if (!renderDiv) {
-    console.error('Fatal Error: renderDiv element not found.');
+    console.error('致命错误: 未找到renderDiv元素。');
 } else {
-    console.log("renderDiv found, initializing game...");
-    // Initialize the game with the render target
+    console.log("已找到renderDiv，正在初始化游戏...");
+    // 使用渲染目标初始化游戏
     var game = new Game(renderDiv);
-    // Start the game
-    game.start(); // The actual setup happens async within the Game class constructor
-      // 添加语音识别设置变更的监听
+    // 启动游戏
+    game.start(); // 实际设置在Game类构造函数中异步进行
+    // 添加语音识别设置变更的监听
     document.addEventListener('DOMContentLoaded', function() {
         // 不再在这里创建切换按钮，将在game.js的UI初始化中添加
     });

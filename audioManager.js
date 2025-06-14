@@ -1,4 +1,4 @@
-// Basic Web Audio API Sound Manager
+// 基础Web音频API声音管理器
 function _class_call_check(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
         throw new TypeError("Cannot call a class as a function");
@@ -22,34 +22,34 @@ export var AudioManager = /*#__PURE__*/ function() {
     "use strict";
     function AudioManager() {
         _class_call_check(this, AudioManager);
-        // Use '||' for broader browser compatibility, though 'webkit' is largely legacy
+        // 使用 '||' 增强浏览器兼容性，虽然 'webkit' 前缀在很大程度上已过时
         var AudioContext = window.AudioContext || window.webkitAudioContext;
         this.audioCtx = null;
         this.isInitialized = false;
         this.lastClickTime = 0;
-        this.clickInterval = 200; // Milliseconds between clicks for rhythm
+        this.clickInterval = 200; // 点击之间的毫秒间隔，用于节奏控制
         if (AudioContext) {
             try {
                 this.audioCtx = new AudioContext();
                 this.isInitialized = true;
-                console.log("AudioContext created successfully.");
+                console.log("音频上下文创建成功。");
             } catch (e) {
-                console.error("Error creating AudioContext:", e);
+                console.error("创建音频上下文时出错:", e);
             }
         } else {
-            console.warn("Web Audio API is not supported in this browser.");
+            console.warn("此浏览器不支持Web音频API。");
         }
     }
     _create_class(AudioManager, [
         {
-            // Resume audio context after user interaction (required by many browsers)
+            // 用户交互后恢复音频上下文（许多浏览器需要）
             key: "resumeContext",
             value: function resumeContext() {
                 if (this.audioCtx && this.audioCtx.state === 'suspended') {
                     this.audioCtx.resume().then(function() {
-                        console.log("AudioContext resumed successfully.");
+                        console.log("音频上下文恢复成功。");
                     }).catch(function(e) {
-                        return console.error("Error resuming AudioContext:", e);
+                        return console.error("恢复音频上下文时出错:", e);
                     });
                 }
             }
@@ -59,25 +59,25 @@ export var AudioManager = /*#__PURE__*/ function() {
             value: function playInteractionClickSound() {
                 if (!this.isInitialized || !this.audioCtx || this.audioCtx.state !== 'running') return;
                 var internalCurrentTime = this.audioCtx.currentTime;
-                // Check if enough time has passed since the last click
+                // 检查自上次点击以来是否已经过了足够的时间
                 if (internalCurrentTime - this.lastClickTime < this.clickInterval / 1000) {
-                    return; // Too soon for the next click
+                    return; // 距离下一次点击太快
                 }
                 this.lastClickTime = internalCurrentTime;
                 var oscillator = this.audioCtx.createOscillator();
                 var gainNode = this.audioCtx.createGain();
                 oscillator.connect(gainNode);
                 gainNode.connect(this.audioCtx.destination);
-                oscillator.type = 'sine'; // Softer waveform for a 'tic'
-                oscillator.frequency.setValueAtTime(1200, this.audioCtx.currentTime); // Lowered base pitch
-                // A very quick pitch drop can make it sound more 'clicky'
-                oscillator.frequency.exponentialRampToValueAtTime(600, this.audioCtx.currentTime + 0.01); // Lowered pitch drop target
-                var clickVolume = 0.08; // Increased volume slightly
-                gainNode.gain.setValueAtTime(0, this.audioCtx.currentTime); // Start silent for a clean attack
-                gainNode.gain.linearRampToValueAtTime(clickVolume, this.audioCtx.currentTime + 0.003); // Very fast attack
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, this.audioCtx.currentTime + 0.005); // Keep decay short for 'tic'
+                oscillator.type = 'sine'; // 更柔和的波形，产生'滴答'声
+                oscillator.frequency.setValueAtTime(1200, this.audioCtx.currentTime); // 降低基础音高
+                // 非常快速的音高下降可以使声音更像'点击'
+                oscillator.frequency.exponentialRampToValueAtTime(600, this.audioCtx.currentTime + 0.01); // 降低音高下降目标
+                var clickVolume = 0.08; // 略微增加音量
+                gainNode.gain.setValueAtTime(0, this.audioCtx.currentTime); // 从静音开始，实现干净的起音
+                gainNode.gain.linearRampToValueAtTime(clickVolume, this.audioCtx.currentTime + 0.003); // 非常快速的起音
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, this.audioCtx.currentTime + 0.005); // 保持短促的衰减，形成'滴答'声
                 oscillator.start(this.audioCtx.currentTime);
-                oscillator.stop(this.audioCtx.currentTime + 0.005); // Match decay duration
+                oscillator.stop(this.audioCtx.currentTime + 0.005); // 匹配衰减持续时间
             }
         }
     ]);

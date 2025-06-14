@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>视频演示 - 3D文物展示系统</title>
+        <link rel="stylesheet" href="styles.css">
+        <script src="videoHelper.js"></script>
+        <style>
+            .video-container {
+                background-color: white;
+                border-radius: 8px;
+                border: 2px solid black;
+                box-shadow: 4px 4px 0px rgba(0,0,0,1);
+                padding: 20px;
+                margin: 20px auto;
+                max-width: 800px;
+                width: 90%;
+            }
+            
+            .video-title {
+                color: #333;
+                margin-top: 0;
+                border-bottom: 2px solid #eee;
+                padding-bottom: 10px;
+                text-align: center;
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+            
+            video {
+                width: 100%;
+                max-height: 70vh;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+            
+            .video-controls {
+                display: flex;
+                justify-content: center;
+                margin-top: 15px;
+            }
+            
+            .video-button {
+                padding: 8px 15px;
+                font-size: 1rem;
+                background-color: #4CAF50;
+                color: white;
+                border: 2px solid black;
+                border-radius: 4px;
+                box-shadow: 3px 3px 0px black;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin: 0 10px;
+            }
+            
+            .video-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 4px 4px 0px black;
+            }
+            
+            .video-button:active {
+                transform: translateY(1px);
+                box-shadow: 2px 2px 0px black;
+            }
+        </style>
+    </head>
+    <body style="width: 100%; height: 100%; overflow: auto; margin: 0; background-color: #f0f0f0;">
+        <div style="position: absolute; top: 20px; left: 20px; z-index: 100;">
+            <button onclick="window.location.href='tutorial.html'" class="welcome-button">返回教程</button>
+        </div>
+        
+        <div class="welcome-screen" style="justify-content: flex-start; overflow-y: auto; height: auto; min-height: 100vh; padding-top: 80px;">
+            <div class="welcome-title">视频演示</div>
+            
+            <div class="video-container">
+                <h2 class="video-title">3D文物展示系统使用演示</h2>
+                <video id="demo-video" controls preload="metadata">
+                    <source src="data/视频演示.mov" type="video/mp4">
+                    <source src="data/视频演示.mov" type="video/quicktime">
+                    <source src="data/视频演示.mov" type="video/mov">
+                    您的浏览器不支持视频标签。
+                </video>
+                <div id="error-message" style="color: red; text-align: center; margin-top: 10px; display: none;">
+                    视频加载失败，请检查文件路径或格式是否正确。
+                </div>
+                <div class="video-controls">
+                    <button id="play-button" class="video-button">播放</button>
+                    <button id="pause-button" class="video-button">暂停</button>
+                    <button id="reload-button" class="video-button" style="background-color: #f39c12;">重新加载</button>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const video = document.getElementById('demo-video');
+                const playButton = document.getElementById('play-button');
+                const pauseButton = document.getElementById('pause-button');
+                const reloadButton = document.getElementById('reload-button');
+                const errorMessage = document.getElementById('error-message');
+                
+                // 检查视频加载状态
+                video.addEventListener('error', function(e) {
+                    console.error('视频加载错误:', e);
+                    errorMessage.style.display = 'block';
+                });
+                
+                // 检查视频是否能播放
+                video.addEventListener('canplay', function() {
+                    console.log('视频已加载，可以播放');
+                    errorMessage.style.display = 'none';
+                });
+                
+                // 尝试多种方式加载视频
+                function tryLoadVideo() {
+                    // 尝试标准方式
+                    video.addEventListener('error', function onFirstError() {
+                        video.removeEventListener('error', onFirstError);
+                        console.log('标准方式加载失败，尝试编码URL');
+                        
+                        // 尝试编码路径
+                        const encodedSrc = encodeURI('data/视频演示.mov');
+                        video.src = encodedSrc;
+                        
+                        video.addEventListener('error', function onSecondError() {
+                            video.removeEventListener('error', onSecondError);
+                            console.log('编码URL方式失败，尝试Fetch加载');
+                            
+                            // 尝试Fetch方式加载
+                            loadVideoWithFetch(video, 'data/视频演示.mov');
+                        });
+                    });
+                }
+                
+                // 如果视频已经有错误，重置并重新尝试
+                if (video.error) {
+                    video.src = '';
+                }
+                
+                tryLoadVideo();
+                
+                playButton.addEventListener('click', function() {
+                    try {
+                        const playPromise = video.play();
+                        
+                        if (playPromise !== undefined) {
+                            playPromise.then(_ => {
+                                // 播放成功
+                            }).catch(error => {
+                                console.error('播放失败:', error);
+                                errorMessage.style.display = 'block';
+                                errorMessage.textContent = '播放失败，可能是浏览器阻止了自动播放';
+                            });
+                        }
+                    } catch (e) {
+                        console.error('播放异常:', e);
+                    }
+                });
+                
+                pauseButton.addEventListener('click', function() {
+                    video.pause();
+                });
+                
+                reloadButton.addEventListener('click', function() {
+                    errorMessage.style.display = 'none';
+                    video.src = '';
+                    setTimeout(() => {
+                        // 尝试直接使用Fetch方法
+                        loadVideoWithFetch(video, 'data/视频演示.mov');
+                    }, 100);
+                });
+            });
+        </script>
+    </body>
+</html>

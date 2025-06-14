@@ -147,8 +147,8 @@ export var SpeechManager = /*#__PURE__*/ function() {
         var _this = this;
         _class_call_check(this, SpeechManager);
         this.onTranscript = onTranscript;
-        this.onRecognitionActive = onRecognitionActive; // Callback for recognition state
-        this.onCommandRecognized = onCommandRecognized; // Callback for recognized commands
+        this.onRecognitionActive = onRecognitionActive; // 识别状态的回调函数
+        this.onCommandRecognized = onCommandRecognized; // 命令识别的回调函数
         this.recognition = null;
         this.isRecognizing = false;
         this.finalTranscript = '';
@@ -156,26 +156,27 @@ export var SpeechManager = /*#__PURE__*/ function() {
         var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             this.recognition = new SpeechRecognition();
-            this.recognition.continuous = true; // Keep listening even after a pause
-            this.recognition.interimResults = true; // Get results while speaking
+            this.recognition.continuous = true; // 即使在暂停后也继续监听
+            this.recognition.interimResults = true; // 在说话过程中获取结果
             this.recognition.lang = 'zh-CN'; // 设置语言为中文（普通话，中国大陆）
             this.recognition.onstart = function() {
                 _this.isRecognizing = true;
-                console.log('Speech recognition started.');
+                console.log('语音识别已启动。');
                 if (_this.onRecognitionActive) _this.onRecognitionActive(true);
             };
             this.recognition.onresult = function(event) {
                 _this.interimTranscript = '';
                 for(var i = event.resultIndex; i < event.results.length; ++i){
                     if (event.results[i].isFinal) {
-                        // Append to finalTranscript and then clear it for the next utterance
-                        // This way, `finalTranscript` holds the *current complete* utterance.
+                        // 附加到finalTranscript，然后为下一个话语清除它
+                        // 这样，`finalTranscript`保存*当前完整的*话语。
                         var currentFinalTranscript = event.results[i][0].transcript.trim().toLowerCase();
-                        _this.finalTranscript += currentFinalTranscript; // Append to potentially longer session transcript if needed, though we process per utterance
+                        _this.finalTranscript += currentFinalTranscript; // 如果需要，附加到可能更长的会话记录中，尽管我们按话语处理
                         if (_this.onTranscript) {
-                            // Display the raw transcript before processing as command
-                            _this.onTranscript(event.results[i][0].transcript, ''); // Send final, clear interim
-                        }                        // Check for commands
+                            // 在处理为命令之前显示原始记录
+                            _this.onTranscript(event.results[i][0].transcript, ''); // 发送最终结果，清除临时结果
+                        }
+                        // 检查命令
                         var commandMap = {
                             // 英文命令
                             'drag': 'drag',
@@ -226,9 +227,9 @@ export var SpeechManager = /*#__PURE__*/ function() {
                                 }
                             }
                         }
-                        // Reset finalTranscript for the next full utterance if you are processing utterance by utterance
-                        // If you want to accumulate, then don't reset here.
-                        // For command processing, resetting per utterance is usually best.
+                        // 如果您是按话语处理，则为下一个完整话语重置finalTranscript
+                        // 如果您想累积，那么不要在这里重置。
+                        // 对于命令处理，通常最好按话语重置。
                         _this.finalTranscript = '';
                     } else {
                         _this.interimTranscript += event.results[i][0].transcript;
@@ -237,7 +238,7 @@ export var SpeechManager = /*#__PURE__*/ function() {
                         }
                     }
                 }
-                // If only interim results were processed in this event batch, ensure onTranscript is called
+                // 如果在此事件批处理中只处理了临时结果，确保调用onTranscript
                 if (_this.interimTranscript && !event.results[event.results.length - 1].isFinal) {
                     if (_this.onTranscript) {
                         _this.onTranscript(null, _this.interimTranscript);
@@ -245,36 +246,36 @@ export var SpeechManager = /*#__PURE__*/ function() {
                 }
             };
             this.recognition.onerror = function(event) {
-                console.error('Speech recognition error:', event.error);
+                console.error('语音识别错误:', event.error);
                 var oldIsRecognizing = _this.isRecognizing;
                 _this.isRecognizing = false;
-                _this.finalTranscript = ''; // Clear transcript on error
+                _this.finalTranscript = ''; // 出错时清除记录
                 _this.interimTranscript = '';
-                if (_this.onTranscript) _this.onTranscript('', ''); // Clear display
+                if (_this.onTranscript) _this.onTranscript('', ''); // 清除显示
                 if (oldIsRecognizing && _this.onRecognitionActive) _this.onRecognitionActive(false);
-                // Automatically restart if it's an 'aborted' or 'no-speech' error
+                // 如果是"中止"或"无语音"错误，自动重启
                 if (event.error === 'aborted' || event.error === 'no-speech') {
-                    console.log('Restarting speech recognition due to inactivity or abort.');
-                // Don't call startRecognition directly, let onend handle it if continuous
+                    console.log('由于不活动或中止而重新启动语音识别。');
+                // 不直接调用startRecognition，如果是连续模式，让onend处理它
                 }
             };
             this.recognition.onend = function() {
                 var oldIsRecognizing = _this.isRecognizing;
                 _this.isRecognizing = false;
-                console.log('Speech recognition ended.');
-                _this.finalTranscript = ''; // Clear transcript on end
+                console.log('语音识别已结束。');
+                _this.finalTranscript = ''; // 结束时清除记录
                 _this.interimTranscript = '';
-                if (_this.onTranscript) _this.onTranscript('', ''); // Clear display
+                if (_this.onTranscript) _this.onTranscript('', ''); // 清除显示
                 if (oldIsRecognizing && _this.onRecognitionActive) _this.onRecognitionActive(false);
-                // If it ended and continuous is true, restart it.
-                // This handles cases where the browser might stop it.
+                // 如果它结束且continuous为true，则重新启动它。
+                // 这处理浏览器可能停止它的情况。
                 if (_this.recognition.continuous) {
-                    console.log('Continuous mode: Restarting speech recognition.');
-                    _this.startRecognition(); // startRecognition already resets transcripts
+                    console.log('连续模式：重新启动语音识别。');
+                    _this.startRecognition(); // startRecognition已经重置了记录
                 }
             };
         } else {
-            console.warn('Web Speech API is not supported in this browser.');
+            console.warn('此浏览器不支持Web语音API。');
         }
     }
     _create_class(SpeechManager, [
@@ -284,16 +285,16 @@ export var SpeechManager = /*#__PURE__*/ function() {
                 var _this = this;
                 if (this.recognition && !this.isRecognizing) {
                     try {
-                        this.finalTranscript = ''; // Reset transcript
+                        this.finalTranscript = ''; // 重置记录
                         this.interimTranscript = '';
                         this.recognition.start();
                     } catch (e) {
-                        console.error("Error starting speech recognition:", e);
-                        // This can happen if it's already started or due to permissions
+                        console.error("启动语音识别时出错:", e);
+                        // 这可能是因为它已经启动或由于权限问题
                         if (e.name === 'InvalidStateError' && this.isRecognizing) {
-                        // Already started, do nothing
+                        // 已经启动，不做任何事情
                         } else {
-                            // Attempt to restart if it fails for other reasons (e.g. after an error)
+                            // 如果由于其他原因失败，尝试重启（例如，在错误之后）
                             setTimeout(function() {
                                 return _this.startRecognition();
                             }, 500);
@@ -328,7 +329,7 @@ export var SpeechManager = /*#__PURE__*/ function() {
         },
         {
             key: "requestPermissionAndStart",
-            value: // Call this on user interaction to request microphone permission
+            value: // 在用户交互时调用此函数以请求麦克风权限
             function requestPermissionAndStart() {
                 var _this = this;
                 return _async_to_generator(function() {

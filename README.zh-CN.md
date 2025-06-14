@@ -2,13 +2,11 @@
 
 使用手势和语音命令实时控制3D模型。
 
-这是一个交互式网页应用，由 Three.js、MediaPipe 计算机视觉、Web Speech API 和 Rosebud AI 构建。
+这是一个交互式网页应用，由 Three.js、MediaPipe 计算机视觉、Web Speech API 构建。
 
 - 说出"拖拽"（drag）、"旋转"（rotate）、"缩放"（scale）或"固定"（fixed）来切换交互模式
 - 捏合手指以控制3D模型
 - 将新的3D模型拖放到页面上以导入（目前仅支持GLTF格式）
-
-[视频演示](https://x.com/measure_plan/status/1929900748235550912) | [在线演示](https://collidingscopes.github.io/3d-model-playground/)
 
 ## 系统要求
 
@@ -38,34 +36,9 @@ MIT 许可证
 
 ## 技术鸣谢
 
-- Three.js - https://threejs.org/
-- MediaPipe - https://mediapipe.dev/
-- Rosebud AI - https://rosebud.ai/
-- Quaternius 3D 模型 - https://quaternius.com/
-
-## 相关项目
-
-您可能还会喜欢我的其他一些开源项目：
-
-- [Three.js手部追踪教程](https://collidingScopes.github.io/threejs-handtracking-101) - 使用Three.js和MediaPipe计算机视觉的基础手部追踪设置
-- [Particular Drift](https://collidingScopes.github.io/particular-drift) - 将照片转化为流动的粒子动画
-- [Liquid Logo](https://collidingScopes.github.io/liquid-logo) - 将标志和图标转换为液态金属动画
-- [Video-to-ASCII](https://collidingScopes.github.io/ascii) - 将视频转换为ASCII像素艺术
-
-## 联系方式
-
-- Instagram: [@stereo.drift](https://www.instagram.com/stereo.drift/)
-- Twitter/X: [@measure_plan](https://x.com/measure_plan)
-- 电子邮件: [stereodriftvisuals@gmail.com](mailto:stereodriftvisuals@gmail.com)
-- GitHub: [collidingScopes](https://github.com/collidingScopes)
-
-## 捐赠
-
-如果您觉得这个工具有用，欢迎给我买杯咖啡。
-
-我叫Alan，我喜欢为计算机视觉、游戏等创建开源软件。在深夜编程时，您的支持将非常受欢迎！
-
-[![给我买杯咖啡](https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png)](https://www.buymeacoffee.com/stereoDrift)
+- Three.js
+- MediaPipe
+- Web Speech API
 
 ---
 # 架构分析
@@ -78,4 +51,3 @@ README.zh-CN.md       // 中文文档
 SpeechManager.js      // 语音管理模块
 styles.css            // 样式文件
 assets/               // 静态资源文件夹
-    siteOGImage.jpg   // 网站分享图片
