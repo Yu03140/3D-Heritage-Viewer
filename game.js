@@ -1,2013 +1,1542 @@
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-    try {
-        var info = gen[key](arg);
-        var value = info.value;
-    } catch (error) {
-        reject(error);
-        return;
-    }
-    if (info.done) {
-        resolve(value);
-    } else {
-        Promise.resolve(value).then(_next, _throw);
-    }
-}
-function _async_to_generator(fn) {
-    return function() {
-        var self = this, args = arguments;
-        return new Promise(function(resolve, reject) {
-            var gen = fn.apply(self, args);
-            function _next(value) {
-                asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-            }
-            function _throw(err) {
-                asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-            }
-            _next(undefined);
-        });
-    };
-}
-function _class_call_check(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-        throw new TypeError("Cannot call a class as a function");
-    }
-}
-function _defineProperties(target, props) {
-    for(var i = 0; i < props.length; i++){
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ("value" in descriptor) descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-    }
-}
-function _create_class(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties(Constructor, staticProps);
-    return Constructor;
-}
-function _define_property(obj, key, value) {
-    if (key in obj) {
-        Object.defineProperty(obj, key, {
-            value: value,
-            enumerable: true,
-            configurable: true,
-            writable: true
-        });
-    } else {
-        obj[key] = value;
-    }
-    return obj;
-}
-function _object_spread(target) {
-    for(var i = 1; i < arguments.length; i++){
-        var source = arguments[i] != null ? arguments[i] : {};
-        var ownKeys = Object.keys(source);
-        if (typeof Object.getOwnPropertySymbols === "function") {
-            ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function(sym) {
-                return Object.getOwnPropertyDescriptor(source, sym).enumerable;
-            }));
-        }
-        ownKeys.forEach(function(key) {
-            _define_property(target, key, source[key]);
-        });
-    }
-    return target;
-}
-function _ts_generator(thisArg, body) {
-    var f, y, t, g, _ = {
-        label: 0,
-        sent: function() {
-            if (t[0] & 1) throw t[1];
-            return t[1];
-        },
-        trys: [],
-        ops: []
-    };
-    return g = {
-        next: verb(0),
-        "throw": verb(1),
-        "return": verb(2)
-    }, typeof Symbol === "function" && (g[Symbol.iterator] = function() {
-        return this;
-    }), g;
-    function verb(n) {
-        return function(v) {
-            return step([
-                n,
-                v
-            ]);
-        };
-    }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while(_)try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [
-                op[0] & 2,
-                t.value
-            ];
-            switch(op[0]){
-                case 0:
-                case 1:
-                    t = op;
-                    break;
-                case 4:
-                    _.label++;
-                    return {
-                        value: op[1],
-                        done: false
-                    };
-                case 5:
-                    _.label++;
-                    y = op[1];
-                    op = [
-                        0
-                    ];
-                    continue;
-                case 7:
-                    op = _.ops.pop();
-                    _.trys.pop();
-                    continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
-                        _ = 0;
-                        continue;
-                    }
-                    if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
-                        _.label = op[1];
-                        break;
-                    }
-                    if (op[0] === 6 && _.label < t[1]) {
-                        _.label = t[1];
-                        t = op;
-                        break;
-                    }
-                    if (t && _.label < t[2]) {
-                        _.label = t[2];
-                        _.ops.push(op);
-                        break;
-                    }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop();
-                    continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) {
-            op = [
-                6,
-                e
-            ];
-            y = 0;
-        } finally{
-            f = t = 0;
-        }
-        if (op[0] & 5) throw op[1];
-        return {
-            value: op[0] ? op[1] : void 0,
-            done: true
-        };
-    }
-}
+// game.js - 主游戏类，负责3D场景渲染、手势追踪、模型交互等核心功能
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/loaders/GLTFLoader.js';
 import { HandLandmarker, FilesetResolver } from 'https://esm.sh/@mediapipe/tasks-vision@0.10.14';
-import { AudioManager } from './audioManager.js'; // Import the AudioManager
-import { SpeechManager } from './SpeechManager.js'; // Import SpeechManager
-import { ModelSelector } from './modelSelector.js'; // Import ModelSelector
-import { ModelLoadingBubble } from './modelLoadingBubble.js'; // Import ModelLoadingBubble
-import { DescriptionManager } from './descriptionManager.js'; // Import DescriptionManager
-export var Game = /*#__PURE__*/ function() {
-    "use strict";
-    function Game(renderDiv) {
-        var _this = this;
-        _class_call_check(this, Game);
+import { AudioManager } from './audioManager.js';
+import { SpeechManager } from './SpeechManager.js';
+import { ModelSelector } from './modelSelector.js';
+import { ModelLoadingBubble } from './modelLoadingBubble.js';
+import { DescriptionManager } from './descriptionManager.js';
+
+// ==================== 配置常量 ====================
+const CONFIG = {
+    hand: {
+        smoothingFactor: 0.4,           // 手部平滑系数
+        pinchThreshold: 45,              // 捏合判定阈值（像素）
+        fingertipRadius: 8,              // 指尖圆圈半径
+        wristRadius: 12,                 // 手腕圆圈半径
+        circleSegments: 16,              // 圆圈分段数
+        defaultOpacity: 0.3,             // 默认透明度
+        grabOpacity: 1.0,                // 抓取时透明度
+        fingertipIndices: [0, 4, 8, 12, 16, 20]  // 手腕+五指尖的索引
+    },
+    interaction: {
+        rotateSensitivityKey: 'rotateSensitivity',
+        scaleSensitivityKey: 'scaleSensitivity',
+        defaultRotateSensitivity: 0.02,
+        defaultScaleSensitivity: 0.2,
+        animationScrollThreshold: 40,    // 动画切换的垂直移动阈值
+        pulseSpeed: 8,                   // 抓取脉冲动画速度
+        pulseAmplitude: 0.5,             // 脉冲幅度
+        pulseBaseScale: 1.0              // 基础缩放
+    },
+    model: {
+        defaultScale: 2000,              // 茶壶初始缩放
+        defaultMaxScale: 5000,
+        defaultMinScale: 10,
+        positionYFactor: -0.45,          // Y轴位置因子
+        positionZ: -1000,                // Z轴位置
+        minZ: -200,
+        maxZ: 50
+    },
+    camera: {
+        nearPlane: 1,
+        farPlane: 2000
+    },
+    light: {
+        ambientIntensity: 1.5,
+        directionalIntensity: 1.8
+    }
+};
+
+// 交互模式配置
+const INTERACTION_MODES = {
+    drag: {
+        base: '#00FFFF',
+        text: '#000000',
+        hand: new THREE.Color('#00FFFF'),
+        instruction: '捏合手指来抓取并移动模型'
+    },
+    rotate: {
+        base: '#FF00FF',
+        text: '#FFFFFF',
+        hand: new THREE.Color('#FF00FF'),
+        instruction: '捏合手指并左右移动手来旋转'
+    },
+    scale: {
+        base: '#FFFF00',
+        text: '#000000',
+        hand: new THREE.Color('#FFFF00'),
+        instruction: '使用双手，两手捏合并调整手之间的距离来缩放'
+    },
+    fixed: {
+        base: '#808080',
+        text: '#FFFFFF',
+        hand: new THREE.Color('#808080'),
+        instruction: '固定模式：手势识别已禁用'
+    }
+};
+
+// 动画名称翻译映射
+const ANIMATION_TRANSLATIONS = {
+    "idle": "待机",
+    "walk": "行走",
+    "run": "跑步",
+    "jump": "跳跃",
+    "attack": "攻击",
+    "dance": "舞蹈",
+    "animation 1": "动画 1",
+    "animation 2": "动画 2",
+    "animation 3": "动画 3",
+    "animation 4": "动画 4",
+    "animation 5": "动画 5"
+};
+
+// 手部连接定义（MediaPipe Hand Landmarks）
+const HAND_CONNECTIONS = [
+    [0, 1], [1, 2], [2, 3], [3, 4],        // 拇指
+    [0, 5], [5, 6], [6, 7], [7, 8],        // 食指
+    [0, 9], [9, 10], [10, 11], [11, 12],   // 中指
+    [0, 13], [13, 14], [14, 15], [15, 16], // 无名指
+    [0, 17], [17, 18], [18, 19], [19, 20], // 小指
+    [5, 9], [9, 13], [13, 17]              // 手掌连接
+];
+
+// ==================== 工具函数 ====================
+class CoordinateTransformer {
+    /**
+     * 将MediaPipe地标坐标转换为屏幕坐标
+     */
+    static landmarkToScreen(landmark, videoParams, canvasWidth, canvasHeight) {
+        const originalX = landmark.x * videoParams.videoNaturalWidth;
+        const originalY = landmark.y * videoParams.videoNaturalHeight;
+        const normX = (originalX - videoParams.offsetX) / videoParams.visibleWidth;
+        const normY = (originalY - videoParams.offsetY) / videoParams.visibleHeight;
+        
+        return {
+            x: (1 - normX) * canvasWidth - canvasWidth / 2,
+            y: (1 - normY) * canvasHeight - canvasHeight / 2
+        };
+    }
+
+    /**
+     * 检查地标是否在屏幕内
+     */
+    static isLandmarkOnScreen(landmark, videoParams) {
+        const originalX = landmark.x * videoParams.videoNaturalWidth;
+        const originalY = landmark.y * videoParams.videoNaturalHeight;
+        const normX = (originalX - videoParams.offsetX) / videoParams.visibleWidth;
+        const normY = (originalY - videoParams.offsetY) / videoParams.visibleHeight;
+        
+        return normX >= 0 && normX <= 1 && normY >= 0 && normY <= 1;
+    }
+}
+
+class GestureDetector {
+    /**
+     * 检测捏合手势
+     */
+    static detectPinch(landmarks, videoParams, canvasWidth, canvasHeight) {
+        const thumbTip = landmarks[4];
+        const indexTip = landmarks[8];
+        
+        if (!thumbTip || !indexTip) return null;
+
+        const thumbScreen = CoordinateTransformer.landmarkToScreen(thumbTip, videoParams, canvasWidth, canvasHeight);
+        const indexScreen = CoordinateTransformer.landmarkToScreen(indexTip, videoParams, canvasWidth, canvasHeight);
+        
+        const dx = thumbScreen.x - indexScreen.x;
+        const dy = thumbScreen.y - indexScreen.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < CONFIG.hand.pinchThreshold) {
+            return {
+                isPinching: true,
+                pinchPoint: {
+                    x: (thumbScreen.x + indexScreen.x) / 2,
+                    y: (thumbScreen.y + indexScreen.y) / 2
+                }
+            };
+        }
+        
+        return { isPinching: false, pinchPoint: null };
+    }
+
+    /**
+     * 检测握拳手势
+     */
+    static detectFist(landmarks) {
+        const isTipNearMCP = (tipIdx, mcpIdx, threshold = 0.08) => {
+            const tip = landmarks[tipIdx];
+            const mcp = landmarks[mcpIdx];
+            if (!tip || !mcp) return false;
+            
+            const dx = tip.x - mcp.x;
+            const dy = tip.y - mcp.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            return distance < threshold;
+        };
+
+        let curledFingers = 0;
+        if (isTipNearMCP(8, 5)) curledFingers++;   // 食指
+        if (isTipNearMCP(12, 9)) curledFingers++;  // 中指
+        if (isTipNearMCP(16, 13)) curledFingers++; // 无名指
+        if (isTipNearMCP(20, 17)) curledFingers++; // 小指
+        
+        return curledFingers >= 3;
+    }
+}
+
+// ==================== 主Game类 ====================
+export class Game {
+    constructor(renderDiv) {
         this.renderDiv = renderDiv;
+        this._initProperties();
+        this._init().catch(error => {
+            console.error("初始化失败:", error);
+            this._showError("初始化失败，请查看控制台");
+        });
+    }
+
+    // ========== 初始化 ==========
+    _initProperties() {
+        // Three.js核心对象
         this.scene = null;
         this.camera = null;
         this.renderer = null;
+        this.clock = new THREE.Clock();
+
+        // 视频和手部追踪
         this.videoElement = null;
         this.handLandmarker = null;
         this.lastVideoTime = -1;
-        this.hands = []; // Stores data about detected hands (landmarks, anchor position, line group)
-        this.handLineMaterial = null; // Material for hand lines
-        this.fingertipMaterialHand1 = null; // Material for first hand's fingertip circles (blue)
-        this.fingertipMaterialHand2 = null; // Material for second hand's fingertip circles (green)
-        this.fingertipLandmarkIndices = [
-            0,
-            4,
-            8,
-            12,
-            16,
-            20
-        ]; // WRIST + TIP landmarks
-        this.handConnections = null; // Landmark connection definitions
-        // this.handCollisionRadius = 30; // Conceptual radius for hand collision, was 25 (sphere radius) - Not needed for template
-        this.gameState = 'loading'; // loading, ready, tracking, error
-        this.gameOverText = null; // Will be repurposed or simplified
-        this.clock = new THREE.Clock();
-        this.audioManager = new AudioManager(); // Create an instance of AudioManager
-        this.lastLandmarkPositions = [
-            [],
-            []
-        ]; // Store last known smoothed positions for each hand's landmarks
-        this.smoothingFactor = 0.4; // Alpha for exponential smoothing (0 < alpha <= 1). Smaller = more smoothing.
-        this.loadedModels = {};
-        this.pandaModel = null; // Add reference for the Panda model
-        this.animationMixer = null; // For Stan model animations
-        this.animationClips = []; // To store all animation clips from the model
-        this.animationActions = {}; // To store animation actions by name or index
-        this.currentAction = null; // To keep track of the currently playing animation action
+        this.hands = [];
+        this.lastLandmarkPositions = [[], []];
+
+        // 材质
+        this.handLineMaterial = null;
+        this.fingertipMaterialHand1 = null;
+        this.fingertipMaterialHand2 = null;
+
+        // 模型和动画
+        this.pandaModel = null;
+        this.animationMixer = null;
+        this.animationClips = [];
+        this.animationActions = {};
+        this.currentAction = null;
+
+        // 交互状态
+        this.gameState = 'loading';
+        this.interactionMode = 'drag';
+        this.grabbingHandIndex = -1;
+        this.pickedUpModel = null;
+        this.modelDragOffset = new THREE.Vector3();
+        this.modelGrabStartDepth = 0;
+
+        // 旋转模式
+        this.rotateLastHandX = null;
+        this.rotateSensitivity = this._loadSensitivity('rotateSensitivity', CONFIG.interaction.defaultRotateSensitivity);
+
+        // 缩放模式
+        this.scaleInitialPinchDistance = null;
+        this.scaleInitialModelScale = null;
+        this.scaleSensitivity = this._loadSensitivity('scaleSensitivity', CONFIG.interaction.defaultScaleSensitivity);
+
+        // 动画控制
+        this.animationControlHandIndex = -1;
+        this.animationControlInitialPinchY = null;
+
+        // 管理器
+        this.audioManager = new AudioManager();
         this.speechManager = null;
+        this.modelSelector = null;
+        this.modelLoadingBubble = null;
+        this.descriptionManager = null;
+
+        // UI元素
         this.speechBubble = null;
         this.speechBubbleTimeout = null;
-        this.isSpeechActive = false; // Track if speech recognition is active for styling
+        this.isSpeechActive = false;
+        this.gameOverContainer = null;
+        this.gameOverText = null;
+        this.restartHintText = null;
+        this.animationButtonsContainer = null;
+        this.interactionModeContainer = null;
+        this.interactionModeButtons = {};
+        this.instructionTextElement = null;
+        this.speechStatusElement = null;
+        this.speechStatusTextElement = null;
+    }
+
+    _loadSensitivity(key, defaultValue) {
+        const saved = localStorage.getItem(key);
+        return saved ? parseFloat(saved) : defaultValue;
+    }
+
+    async _init() {
+        this._setupDOM();
+        this._setupThree();
+        this._setupSpeechRecognition();
         
-        // 模型加载提示框
-        this.modelLoadingBubble = null;
-        this.modelLoadingBubbleTimeout = null;
+        await this._loadAssets();
+        await this._setupHandTracking();
+        await this.videoElement.play();
         
-        this.grabbingHandIndex = -1; // -1: no hand, 0: first hand, 1: second hand grabbing
-        this.pickedUpModel = null; // Reference to the model being dragged
-        this.modelDragOffset = new THREE.Vector3(); // Offset between model and pinch point in 3D
-        this.modelGrabStartDepth = 0; // To store the model's Z depth when grabbed
-        this.interactionMode = 'drag'; // 'drag', 'rotate', 'scale', 'animate' - Default to drag
-        this.interactionModeButtons = {}; // To store references to mode buttons        this.loadedDroppedModelData = null; // To temporarily store parsed GLTF data
-        this.interactionModeColors = {
-            drag: {
-                base: '#00FFFF',
-                text: '#000000',
-                hand: new THREE.Color('#00FFFF')
-            },
-            rotate: {
-                base: '#FF00FF',
-                text: '#FFFFFF',
-                hand: new THREE.Color('#FF00FF')
-            },
-            scale: {
-                base: '#FFFF00',
-                text: '#000000',
-                hand: new THREE.Color('#FFFF00')
-            },            fixed: {
-                base: '#808080',
-                text: '#FFFFFF',
-                hand: new THREE.Color('#808080')
-            } // 灰色表示固定模式
-        };
-        this.rotateLastHandX = null; // Stores the last hand X position for rotation calculation
+        this.audioManager.resumeContext();
         
-        // 从localStorage读取旋转灵敏度设置，如果没有则使用默认值
-        const savedRotateSensitivity = localStorage.getItem('rotateSensitivity');
-        this.rotateSensitivity = savedRotateSensitivity ? parseFloat(savedRotateSensitivity) : 0.02;
+        // 启动语音识别
+        const speechEnabled = localStorage.getItem('speechRecognitionEnabled') !== 'false';
+        if (speechEnabled) {
+            this.speechManager.requestPermissionAndStart();
+            this._showSpeechMessage("语音识别已启用", 2000);
+        } else {
+            this._showSpeechMessage("语音识别已禁用", 2000);
+        }
         
-        this.scaleInitialPinchDistance = null; // Stores the initial distance between two pinching hands
-        this.scaleInitialModelScale = null; // Stores the model's scale when scaling starts
-        
-        // 从localStorage读取缩放灵敏度设置，如果没有则使用默认值
-        const savedScaleSensitivity = localStorage.getItem('scaleSensitivity');
-        this.scaleSensitivity = savedScaleSensitivity ? parseFloat(savedScaleSensitivity) : 0.2;
-        
-        this.grabbingPulseSpeed = 8; // Speed of the grab pulse animation
-        this.grabbingPulseAmplitude = 0.5; // How much the scale increases (e.g., 0.5 means 50% bigger at peak)
-        this.pulseBaseScale = 1.0; // Base scale for non-pulsing and start of pulse
-        this.fingertipDefaultOpacity = 0.3; // Default opacity for hand landmarks (Reduced from 0.6)
-        this.fingertipGrabOpacity = 1.0; // Opacity when hand is actively grabbing/interacting        this.instructionTextElement = document.querySelector("#instruction-text"); // DOM element for instruction text
-        this.interactionModeInstructions = {
-            drag: "捏合手指来抓取并移动模型",
-            rotate: "捏合手指并左右移动手来旋转",
-            scale: "使用双手，两手捏合并调整手之间的距离来缩放",
-            fixed: "固定模式：手势识别已禁用" // 新增固定模式指令
-        };
-        this.animationControlHandIndex = -1; // Index of the hand controlling animation scrolling
-        this.animationControlInitialPinchY = null; // Initial Y position of the pinch for animation scrolling
-        this.animationScrollThreshold = 40; // Pixels of vertical movement to trigger an animation change (Reduced from 50)
-        // 翻译常见的动画名称到中文
-        this.animationNameTranslations = {
-            "idle": "待机",
-            "walk": "行走",
-            "run": "跑步",
-            "jump": "跳跃",
-            "attack": "攻击",
-            "dance": "舞蹈",
-            "animation 1": "动画 1",
-            "animation 2": "动画 2",
-            "animation 3": "动画 3",
-            "animation 4": "动画 4",
-            "animation 5": "动画 5"
-        };
-        
-        // 模型选择器
-        this.modelSelector = null;
-        
-        // Initialize asynchronously
-        this._init().catch(function(error) {
-            console.error("Initialization failed:", error);
-            _this._showError("Initialization failed. Check console.");
+        this.clock.start();
+        window.addEventListener('resize', this._onResize.bind(this));
+        this.gameState = 'tracking';
+        this._animate();
+
+        // 初始化额外组件
+        this.modelLoadingBubble = new ModelLoadingBubble(this.renderDiv);
+        this.modelSelector = new ModelSelector(this);
+        this.descriptionManager = new DescriptionManager(this);
+
+        // 监听设置变化
+        this._setupStorageListener();
+    }
+
+    _setupStorageListener() {
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'scaleSensitivity') {
+                this.scaleSensitivity = parseFloat(e.newValue);
+                this.modelLoadingBubble?.showMessage("缩放灵敏度已更新", 2000);
+            } else if (e.key === 'rotateSensitivity') {
+                this.rotateSensitivity = parseFloat(e.newValue);
+                this.modelLoadingBubble?.showMessage("旋转灵敏度已更新", 2000);
+            }
         });
     }
-    _create_class(Game, [
-        {
-            key: "_init",
-            value: function _init() {
-                var _this = this;
-                return _async_to_generator(function() {
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _this._setupDOM(); // Sets up basic DOM, including speech bubble container
-                                _this._setupThree();
-                                _this._setupSpeechRecognition(); // Initialize SpeechManager
-                                return [
-                                    4,
-                                    _this._loadAssets()
-                                ];
-                            case 1:
-                                _state.sent(); // Add asset loading step
-                                return [
-                                    4,
-                                    _this._setupHandTracking()
-                                ];
-                            case 2:
-                                _state.sent(); // This needs to complete before we can proceed
-                                // Ensure webcam is playing before starting game logic dependent on it
-                                return [
-                                    4,
-                                    _this.videoElement.play()
-                                ];
-                            case 3:                                _state.sent();
-                                _this.audioManager.resumeContext(); // Resume audio context as game starts automatically
-                                
-                                // 检查语音识别设置是否启用（默认启用）
-                                const speechEnabled = localStorage.getItem('speechRecognitionEnabled') !== 'false';
-                                if (speechEnabled) {
-                                    _this.speechManager.requestPermissionAndStart(); // 启动语音识别
-                                    if (_this.speechBubble) {
-                                        _this.speechBubble.innerHTML = "语音识别已启用";
-                                        _this.speechBubble.style.opacity = '1';
-                                        setTimeout(() => {
-                                            _this.speechBubble.innerHTML = "...";
-                                            _this.speechBubble.style.opacity = '0.7';
-                                            _this._updateSpeechBubbleAppearance();
-                                        }, 2000);
-                                    }
-                                } else {
-                                    // 显示语音识别已禁用的消息
-                                    if (_this.speechBubble) {
-                                        _this.speechBubble.innerHTML = "语音识别已禁用";
-                                        _this.speechBubble.style.opacity = '1';
-                                        setTimeout(() => {
-                                            _this.speechBubble.innerHTML = "语音识别已关闭";
-                                            _this.speechBubble.style.opacity = '0.7';
-                                            _this._updateSpeechBubbleAppearance();
-                                        }, 2000);
-                                    }
-                                }
-                                
-                                _this.clock.start(); // Start the main clock as game starts automatically
-                                window.addEventListener('resize', _this._onResize.bind(_this));
-                                _this.gameState = 'tracking'; // Change state to tracking to start immediately
-                                _this._animate(); // Start the animation loop (it will check state)
-                                  // 初始化模型加载提示框
-                                _this.modelLoadingBubble = new ModelLoadingBubble(_this.renderDiv);
-                                console.log("模型加载提示框已初始化");
-                                
-                                // 初始化模型选择器
-                                _this.modelSelector = new ModelSelector(_this);
-                                console.log("模型选择器已初始化");
-                                
-                                // 初始化模型描述管理器
-                                _this.descriptionManager = new DescriptionManager(_this);
-                                console.log("模型描述管理器已初始化");
-                                
-                                // 监听localStorage变化，以便实时更新灵敏度设置
-                                window.addEventListener('storage', function(e) {
-                                    // 检查是否为灵敏度设置
-                                    if (e.key === 'scaleSensitivity') {
-                                        _this.scaleSensitivity = parseFloat(e.newValue);
-                                        console.log("缩放灵敏度已更新为:", _this.scaleSensitivity);
-                                        
-                                        // 显示设置已更新的提示
-                                        if (_this.modelLoadingBubble) {
-                                            _this.modelLoadingBubble.showMessage("缩放灵敏度已更新", 2000);
-                                        }
-                                    } else if (e.key === 'rotateSensitivity') {
-                                        _this.rotateSensitivity = parseFloat(e.newValue);
-                                        console.log("旋转灵敏度已更新为:", _this.rotateSensitivity);
-                                        
-                                        // 显示设置已更新的提示
-                                        if (_this.modelLoadingBubble) {
-                                            _this.modelLoadingBubble.showMessage("旋转灵敏度已更新", 2000);
-                                        }
-                                    }
-                                });
-                                
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "_setupDOM",
-            value: function _setupDOM() {
-                var _this = this;
-                this.renderDiv.style.position = 'relative';
-                this.renderDiv.style.width = '100vw'; // Use viewport units for fullscreen
-                this.renderDiv.style.height = '100vh';
-                this.renderDiv.style.overflow = 'hidden';
-                this.renderDiv.style.background = '#111'; // Fallback background
-                // Start Screen Overlay and related DOM elements (title, instructions, loading text) removed.
-                // --- End Start Screen Overlay ---
-                this.videoElement = document.createElement('video');
-                this.videoElement.style.position = 'absolute';
-                this.videoElement.style.top = '0';
-                this.videoElement.style.left = '0';
-                this.videoElement.style.width = '100%';
-                this.videoElement.style.height = '100%';
-                this.videoElement.style.objectFit = 'cover';
-                this.videoElement.style.transform = 'scaleX(-1)'; // Mirror view for intuitive control
-                this.videoElement.autoplay = true;
-                this.videoElement.muted = true; // Mute video to avoid feedback loops if audio was captured
-                this.videoElement.playsInline = true;
-                this.videoElement.style.zIndex = '0'; // Ensure video is behind THREE canvas
-                this.renderDiv.appendChild(this.videoElement);
-                // Container for Status text (formerly Game Over) and restart hint
-                this.gameOverContainer = document.createElement('div');
-                this.gameOverContainer.style.position = 'absolute';
-                this.gameOverContainer.style.top = '50%';
-                this.gameOverContainer.style.left = '50%';
-                this.gameOverContainer.style.transform = 'translate(-50%, -50%)';
-                this.gameOverContainer.style.zIndex = '10';
-                this.gameOverContainer.style.display = 'none'; // Hidden initially
-                this.gameOverContainer.style.pointerEvents = 'none'; // Don't block clicks
-                this.gameOverContainer.style.textAlign = 'center'; // Center text elements within
-                this.gameOverContainer.style.color = 'white'; // Default color, can be changed by _showError
-                // this.gameOverContainer.style.textShadow = '2px 2px 4px black'; // Removed for flatter look
-                this.gameOverContainer.style.fontFamily = '"Arial", "Helvetica Neue", Helvetica, sans-serif'; // Cleaner, modern sans-serif
-                // Main Status Text (formerly Game Over Text)
-                this.gameOverText = document.createElement('div'); // Will be 'gameOverText' internally
-                this.gameOverText.innerText = 'STATUS'; // Generic placeholder
-                this.gameOverText.style.fontSize = 'clamp(36px, 10vw, 72px)'; // Responsive font size
-                this.gameOverText.style.fontWeight = 'bold';
-                this.gameOverText.style.marginBottom = '10px'; // Space below main text
-                this.gameOverContainer.appendChild(this.gameOverText);
-                // Restart Hint Text (may or may not be shown depending on context)
-                this.restartHintText = document.createElement('div');
-                this.restartHintText.innerText = '(click to restart tracking)';
-                this.restartHintText.style.fontSize = 'clamp(16px, 3vw, 24px)';
-                this.restartHintText.style.fontWeight = 'normal';
-                this.restartHintText.style.opacity = '0.8'; // Slightly faded
-                this.gameOverContainer.appendChild(this.restartHintText);
-                this.renderDiv.appendChild(this.gameOverContainer);
-                // --- Speech Bubble ---
-                this.speechBubble = document.createElement('div');
-                this.speechBubble.id = 'speech-bubble';
-                this.speechBubble.style.position = 'absolute';
-                this.speechBubble.style.top = '10px'; // Changed from 20px to 10px
-                this.speechBubble.style.left = '50%';
-                this.speechBubble.style.transform = 'translateX(-50%)';
-                this.speechBubble.style.padding = '15px 25px';
-                this.speechBubble.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-                this.speechBubble.style.border = '2px solid black'; // Solid black border
-                this.speechBubble.style.borderRadius = '4px'; // Sharper corners
-                this.speechBubble.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)'; // Hard shadow
-                this.speechBubble.style.color = '#333';
-                this.speechBubble.style.fontFamily = '"Arial", "Helvetica Neue", Helvetica, sans-serif'; // Consistent modern sans-serif
-                this.speechBubble.style.fontSize = 'clamp(16px, 3vw, 22px)';
-                this.speechBubble.style.maxWidth = '80%';
-                this.speechBubble.style.textAlign = 'center';
-                this.speechBubble.style.zIndex = '25'; // Above most things but below modal popups if any
-                this.speechBubble.style.opacity = '0'; // Hidden initially, fade in
-                // Added boxShadow, border, padding, fontSize, top to transition for smooth active state changes
-                this.speechBubble.style.transition = 'opacity 0.5s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border 0.3s ease-in-out, padding 0.3s ease-in-out, font-size 0.3s ease-in-out, top 0.3s ease-in-out';
-                this.speechBubble.style.pointerEvents = 'none'; // Not interactive
-                this.speechBubble.innerHTML = "..."; // Default text
-                this.renderDiv.appendChild(this.speechBubble);
-                // Animation buttons container
-                this.animationButtonsContainer = document.createElement('div');
-                this.animationButtonsContainer.id = 'animation-buttons-container';
-                this.animationButtonsContainer.style.position = 'absolute';
-                this.animationButtonsContainer.style.bottom = 'auto'; // Remove bottom positioning
-                this.animationButtonsContainer.style.top = '10px'; // Position from the top, changed from 20px
-                this.animationButtonsContainer.style.left = '10px'; // Position from the left, changed from 20px
-                this.animationButtonsContainer.style.transform = 'none'; // Remove centering transform
-                this.animationButtonsContainer.style.zIndex = '30'; // Above speech bubble
-                this.animationButtonsContainer.style.display = 'flex';
-                this.animationButtonsContainer.style.flexDirection = 'column'; // Arrange buttons in a column
-                this.animationButtonsContainer.style.gap = '4px'; // Reduced gap for tighter vertical layout
-                this.animationButtonsContainer.style.opacity = '0'; // Start fully transparent for fade-in
-                this.animationButtonsContainer.style.transition = 'opacity 0.3s ease-in-out'; // Smooth fade transition
-                this.animationButtonsContainer.style.display = 'none'; // Initially hidden (will be set to flex by logic)
-                this.renderDiv.appendChild(this.animationButtonsContainer);
-                // Interaction Mode UI Container
-                this.interactionModeContainer = document.createElement('div');
-                this.interactionModeContainer.id = 'interaction-mode-container';
-                this.interactionModeContainer.style.position = 'absolute';
-                this.interactionModeContainer.style.top = '10px'; // Changed from 20px
-                this.interactionModeContainer.style.right = '10px'; // Changed from 20px
-                this.interactionModeContainer.style.zIndex = '30';                this.interactionModeContainer.style.display = 'flex';
-                this.interactionModeContainer.style.flexDirection = 'column';
-                this.interactionModeContainer.style.gap = '4px';
-                this.renderDiv.appendChild(this.interactionModeContainer);
-                
-                // Create interaction mode buttons
-                [
-                    '拖拽',
-                    '旋转',
-                    '缩放',
-                    '固定'
-                ].forEach(function(mode) {
-                    var button = document.createElement('button');
-                    button.innerText = mode;
-                    // 为了保持英文的ID，我们需要一个映射
-                    var modeMap = {
-                        '拖拽': 'drag',
-                        '旋转': 'rotate',
-                        '缩放': 'scale',
-                        '固定': 'fixed'
-                    };
-                    var modeId = modeMap[mode];
-                    button.id = "interaction-mode-".concat(modeId);
-                    button.style.padding = '10px 22px'; // Increased padding
-                    button.style.fontSize = '18px'; // Increased font size further
-                    button.style.border = '2px solid black'; // Consistent black border
-                    button.style.borderRadius = '4px'; // Sharper corners
-                    button.style.cursor = 'pointer';
-                    button.style.fontWeight = 'bold'; // Always bold
-                    button.style.transition = 'background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease'; // Faster transition, added shadow
-                    button.style.boxShadow = '2px 2px 0px black'; // Default shadow for inactive
-                    button.addEventListener('click', function() {
-                        return _this._setInteractionMode(modeId);
-                    });
-                    _this.interactionModeContainer.appendChild(button);
-                    _this.interactionModeButtons[modeId] = button; // Store button reference
-                });
-                this._updateInteractionModeButtonStyles(); // Apply initial styles
-                this._updateInstructionText(); // Set initial instruction text
-                this._setupDragAndDrop(); // Add drag and drop listeners
-            }
-        },
-        {
-            key: "_setupThree",
-            value: function _setupThree() {
-                var _this_interactionModeColors_this_interactionMode;
-                var width = this.renderDiv.clientWidth;
-                var height = this.renderDiv.clientHeight;
-                this.scene = new THREE.Scene();
-                // Using OrthographicCamera for a 2D-like overlay effect
-                this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 2000); // Increased far plane
-                this.camera.position.z = 100; // Position along Z doesn't change scale in Ortho
-                this.renderer = new THREE.WebGLRenderer({
-                    alpha: true,
-                    antialias: true
-                });
-                this.renderer.setSize(width, height);
-                this.renderer.setPixelRatio(window.devicePixelRatio);
-                this.renderer.domElement.style.position = 'absolute';
-                this.renderer.domElement.style.top = '0';
-                this.renderer.domElement.style.left = '0';
-                this.renderer.domElement.style.zIndex = '1'; // Canvas on top of video
-                this.renderDiv.appendChild(this.renderer.domElement);
-                var ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // Increased intensity
-                this.scene.add(ambientLight);
-                var directionalLight = new THREE.DirectionalLight(0xffffff, 1.8); // Increased intensity
-                directionalLight.position.set(0, 0, 100); // Pointing from behind camera
-                this.scene.add(directionalLight);
-                // Setup hand visualization (palm circles removed, lines will be added later)
-                for(var i = 0; i < 2; i++){
-                    var lineGroup = new THREE.Group();
-                    lineGroup.visible = false;
-                    this.scene.add(lineGroup);
-                    this.hands.push({
-                        landmarks: null,
-                        anchorPos: new THREE.Vector3(),
-                        lineGroup: lineGroup,
-                        isPinching: false,
-                        pinchPointScreen: new THREE.Vector2(),
-                        isFist: false // True if hand is detected as a fist
-                    });
-                }
-                this.handLineMaterial = new THREE.LineBasicMaterial({
-                    color: 0x00ccff,
-                    linewidth: 8
-                }); // Kept line material default for now
-                var initialModeHandColor = ((_this_interactionModeColors_this_interactionMode = this.interactionModeColors[this.interactionMode]) === null || _this_interactionModeColors_this_interactionMode === void 0 ? void 0 : _this_interactionModeColors_this_interactionMode.hand) || new THREE.Color(0x00ccff);
-                this.fingertipMaterialHand1 = new THREE.MeshBasicMaterial({
-                    color: initialModeHandColor.clone(),
-                    side: THREE.DoubleSide,
-                    transparent: true,
-                    opacity: this.fingertipDefaultOpacity
-                });
-                this.fingertipMaterialHand2 = new THREE.MeshBasicMaterial({
-                    color: initialModeHandColor.clone(),
-                    side: THREE.DoubleSide,
-                    transparent: true,
-                    opacity: this.fingertipDefaultOpacity
-                });
-                // Define connections for MediaPipe hand landmarks
-                // See: https://developers.google.com/mediapipe/solutions/vision/hand_landmarker#hand_landmarks
-                this.handConnections = [
-                    // Thumb
-                    [
-                        0,
-                        1
-                    ],
-                    [
-                        1,
-                        2
-                    ],
-                    [
-                        2,
-                        3
-                    ],
-                    [
-                        3,
-                        4
-                    ],
-                    // Index finger
-                    [
-                        0,
-                        5
-                    ],
-                    [
-                        5,
-                        6
-                    ],
-                    [
-                        6,
-                        7
-                    ],
-                    [
-                        7,
-                        8
-                    ],
-                    // Middle finger
-                    [
-                        0,
-                        9
-                    ],
-                    [
-                        9,
-                        10
-                    ],
-                    [
-                        10,
-                        11
-                    ],
-                    [
-                        11,
-                        12
-                    ],
-                    // Ring finger
-                    [
-                        0,
-                        13
-                    ],
-                    [
-                        13,
-                        14
-                    ],
-                    [
-                        14,
-                        15
-                    ],
-                    [
-                        15,
-                        16
-                    ],
-                    // Pinky
-                    [
-                        0,
-                        17
-                    ],
-                    [
-                        17,
-                        18
-                    ],
-                    [
-                        18,
-                        19
-                    ],
-                    [
-                        19,
-                        20
-                    ],
-                    // Palm
-                    [
-                        5,
-                        9
-                    ],
-                    [
-                        9,
-                        13
-                    ],
-                    [
-                        13,
-                        17
-                    ] // Connect base of fingers
-                ];
-            }
-        },
-        {
-            key: "_loadAssets",
-            value: function _loadAssets() {
-                var _this = this;
-                return _async_to_generator(function() {
-                    var gltfLoader, error;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                console.log("Loading assets...");
-                                gltfLoader = new GLTFLoader(); // Changed from FBXLoader
-                                _state.label = 1;
-                            case 1:
-                                _state.trys.push([
-                                    1,
-                                    3,
-                                    ,
-                                    4
-                                ]);
-                                return [
-                                    4,
-                                    new Promise(function(resolve, reject) {
-                                        gltfLoader.load('assets/teacup.gltf', function(gltf) {
-                                            _this.pandaModel = gltf.scene; // GLTFLoader returns an object with a 'scene' property
-                                            _this.animationMixer = new THREE.AnimationMixer(_this.pandaModel);
-                                            _this.animationClips = gltf.animations;
-                                            if (_this.animationClips && _this.animationClips.length) {
-                                                _this.animationClips.forEach(function(clip, index) {
-                                                    var action = _this.animationMixer.clipAction(clip);
-                                                    var actionName = clip.name || "Animation ".concat(index + 1);
-                                                    _this.animationActions[actionName] = action;
-                                                    // Create a button for this animation
-                                                    var button = document.createElement('button');
-                                                    button.innerText = actionName;
-                                                    button.style.padding = '5px 10px'; // Adjusted padding
-                                                    button.style.fontSize = '13px'; // Consistent font size
-                                                    button.style.backgroundColor = '#f0f0f0'; // Light grey default
-                                                    button.style.color = 'black';
-                                                    button.style.border = '2px solid black'; // Black border
-                                                    button.style.borderRadius = '4px'; // Sharper corners
-                                                    button.style.cursor = 'pointer';
-                                                    button.style.transition = 'background-color 0.2s ease, box-shadow 0.2s ease';
-                                                    button.style.boxShadow = '2px 2px 0px black'; // Default shadow
-                                                    button.addEventListener('click', function() {
-                                                        return _this._playAnimation(actionName);
-                                                    });
-                                                    _this.animationButtonsContainer.appendChild(button);
-                                                    console.log("Loaded animation and created button for: ".concat(actionName));
-                                                });
-                                                // Play the first animation by default
-                                                // Try to find and play an "idle" animation by default
-                                                var defaultActionName = Object.keys(_this.animationActions)[0]; // Fallback to the first animation
-                                                var idleActionKey = Object.keys(_this.animationActions).find(function(name) {
-                                                    return name.toLowerCase().includes('idle');
-                                                });
-                                                if (idleActionKey) {
-                                                    defaultActionName = idleActionKey;
-                                                    console.log("Found idle animation: ".concat(defaultActionName));
-                                                } else if (defaultActionName) {
-                                                    console.log("No specific idle animation found, defaulting to first animation: ".concat(defaultActionName));
-                                                }
-                                                if (defaultActionName && _this.animationActions[defaultActionName]) {
-                                                    _this.currentAction = _this.animationActions[defaultActionName];
-                                                    _this.currentAction.play();
-                                                    console.log("Playing default animation: ".concat(defaultActionName));
-                                                    _this._updateButtonStyles(defaultActionName);
-                                                } else {
-                                                    console.log("No animations found or default animation could not be played.");
-                                                }
-                                            } else {
-                                                console.log("teacup模型没有嵌入动画。");
-                                            }
-                                            // Scale and position the model
-                                            var scale = 2000; // 茶壶初始scale
-                                            var maxScale = 5000;
-                                            _this.pandaModel.scale.set(scale, scale, scale);
-                                            _this.pandaModel.userData.maxScale = maxScale;
-                                            _this.pandaModel.userData.minScale = 10;
-                                            var sceneHeight = _this.renderDiv.clientHeight;
-                                            _this.pandaModel.position.set(0, sceneHeight * -0.45, -1000); // Updated Z to -1000
-                                            _this.scene.add(_this.pandaModel);
-                                            console.log("teacup GLTF模型已加载并添加到场景。");
-                                            resolve();
-                                        }, undefined, function(error) {
-                                            console.error('An error occurred while loading the teacup GLTF model:', error); // Updated log
-                                            reject(error);
-                                        });
-                                    })
-                                ];
-                            case 2:
-                                _state.sent();
-                                console.log("All specified assets loaded.");
-                                return [
-                                    3,
-                                    4
-                                ];
-                            case 3:
-                                error = _state.sent();
-                                console.error("Error loading assets:", error);
-                                _this._showError("Failed to load 3D model.");
-                                throw error; // Stop initialization
-                            case 4:
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {
-            key: "_setupHandTracking",
-            value: function _setupHandTracking() {
-                var _this = this;
-                return _async_to_generator(function() {
-                    var vision, stream, error;
-                    return _ts_generator(this, function(_state) {
-                        switch(_state.label){
-                            case 0:
-                                _state.trys.push([
-                                    0,
-                                    4,
-                                    ,
-                                    5
-                                ]);
-                                console.log("Setting up Hand Tracking...");
-                                return [
-                                    4,
-                                    FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm')
-                                ];
-                            case 1:
-                                vision = _state.sent();
-                                return [
-                                    4,
-                                    HandLandmarker.createFromOptions(vision, {
-                                        baseOptions: {
-                                            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-                                            delegate: 'GPU'
-                                        },
-                                        numHands: 2,
-                                        runningMode: 'VIDEO'
-                                    })
-                                ];
-                            case 2:
-                                _this.handLandmarker = _state.sent();
-                                console.log("HandLandmarker created.");
-                                console.log("Requesting webcam access...");
-                                return [
-                                    4,
-                                    navigator.mediaDevices.getUserMedia({
-                                        video: {
-                                            facingMode: 'user',
-                                            width: {
-                                                ideal: 1920
-                                            },
-                                            height: {
-                                                ideal: 1080
-                                            } // Request Full HD height
-                                        },
-                                        audio: false
-                                    })
-                                ];
-                            case 3:
-                                stream = _state.sent();
-                                _this.videoElement.srcObject = stream;
-                                console.log("Webcam stream obtained.");
-                                // Wait for video metadata to load to ensure dimensions are available
-                                return [
-                                    2,
-                                    new Promise(function(resolve) {
-                                        _this.videoElement.onloadedmetadata = function() {
-                                            console.log("Webcam metadata loaded.");
-                                            // Adjust video size slightly after metadata is loaded if needed, but CSS handles most
-                                            _this.videoElement.style.width = _this.renderDiv.clientWidth + 'px';
-                                            _this.videoElement.style.height = _this.renderDiv.clientHeight + 'px';
-                                            resolve();
-                                        };
-                                    })
-                                ];
-                            case 4:
-                                error = _state.sent();
-                                console.error('Error setting up Hand Tracking or Webcam:', error);
-                                _this._showError("Webcam/Hand Tracking Error: ".concat(error.message, ". Please allow camera access."));
-                                throw error; // Re-throw to stop initialization
-                            case 5:
-                                return [
-                                    2
-                                ];
-                        }
-                    });
-                })();
-            }
-        },
-        {            key: "_updateHands",
-            value: function _updateHands() {
-                var _this = this;
-                if (!this.handLandmarker || !this.videoElement.srcObject || this.videoElement.readyState < 2 || this.videoElement.videoWidth === 0) return;
-                
-                // 如果是固定模式，完全禁用手势识别
-                if (this.interactionMode === 'fixed') {
-                    // 隐藏所有手部可视化
-                    this.hands.forEach(function(hand) {
-                        if (hand.lineGroup) hand.lineGroup.visible = false;
-                    });
-                    return;
-                }
-                
-                // this.isAnyHandHovering = false; // Reset hover state each frame - REMOVED
-                var videoTime = this.videoElement.currentTime;
-                if (videoTime > this.lastVideoTime) {
-                    this.lastVideoTime = videoTime;
-                    try {
-                        var _this1, _loop = function(i) {
-                            var hand = _this1.hands[i];
-                            if (results.landmarks && results.landmarks[i]) {
-                                var currentRawLandmarks = results.landmarks[i];
-                                if (!_this1.lastLandmarkPositions[i] || _this1.lastLandmarkPositions[i].length !== currentRawLandmarks.length) {
-                                    _this1.lastLandmarkPositions[i] = currentRawLandmarks.map(function(lm) {
-                                        return _object_spread({}, lm);
-                                    });
-                                }
-                                var smoothedLandmarks = currentRawLandmarks.map(function(lm, lmIndex) {
-                                    var prevLm = _this.lastLandmarkPositions[i][lmIndex];
-                                    return {
-                                        x: _this.smoothingFactor * lm.x + (1 - _this.smoothingFactor) * prevLm.x,
-                                        y: _this.smoothingFactor * lm.y + (1 - _this.smoothingFactor) * prevLm.y,
-                                        z: _this.smoothingFactor * lm.z + (1 - _this.smoothingFactor) * prevLm.z
-                                    };
-                                });
-                                _this1.lastLandmarkPositions[i] = smoothedLandmarks.map(function(lm) {
-                                    return _object_spread({}, lm);
-                                }); // Update last positions with new smoothed ones
-                                hand.landmarks = smoothedLandmarks;
-                                var palm = smoothedLandmarks[9]; // MIDDLE_FINGER_MCP
-                                var lmOriginalX = palm.x * videoParams.videoNaturalWidth;
-                                var lmOriginalY = palm.y * videoParams.videoNaturalHeight;
-                                var normX_visible = (lmOriginalX - videoParams.offsetX) / videoParams.visibleWidth;
-                                var normY_visible = (lmOriginalY - videoParams.offsetY) / videoParams.visibleHeight;
-                                var handX = (1 - normX_visible) * canvasWidth - canvasWidth / 2;
-                                var handY = (1 - normY_visible) * canvasHeight - canvasHeight / 2;
-                                hand.anchorPos.set(handX, handY, 1);
-                                // Hover detection logic REMOVED
-                                var prevIsPinching = hand.isPinching; // Store previous pinch state
-                                // Pinch detection logic
-                                var thumbTipLm = smoothedLandmarks[4]; // THUMB_TIP landmark index
-                                var indexTipLm = smoothedLandmarks[8]; // INDEX_FINGER_TIP landmark index
-                                if (thumbTipLm && indexTipLm) {
-                                    // Convert landmark coordinates to screen space for pinch detection
-                                    var convertToScreenSpace = function(lm) {
-                                        var originalX = lm.x * videoParams.videoNaturalWidth;
-                                        var originalY = lm.y * videoParams.videoNaturalHeight;
-                                        var normX_visible = (originalX - videoParams.offsetX) / videoParams.visibleWidth;
-                                        var normY_visible = (originalY - videoParams.offsetY) / videoParams.visibleHeight;
-                                        return {
-                                            x: (1 - normX_visible) * canvasWidth - canvasWidth / 2,
-                                            y: (1 - normY_visible) * canvasHeight - canvasHeight / 2
-                                        };
-                                    };
-                                    var thumbTipScreen = convertToScreenSpace(thumbTipLm);
-                                    var indexTipScreen = convertToScreenSpace(indexTipLm);
-                                    var distanceX = thumbTipScreen.x - indexTipScreen.x;
-                                    var distanceY = thumbTipScreen.y - indexTipScreen.y;
-                                    var pinchDistance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-                                    var pinchThreshold = 45; // Increased from 35. Distance in screen pixels to consider a pinch.
-                                    if (pinchDistance < pinchThreshold) {
-                                        hand.isPinching = true;
-                                        hand.pinchPointScreen.set((thumbTipScreen.x + indexTipScreen.x) / 2, (thumbTipScreen.y + indexTipScreen.y) / 2);
-                                    } else {
-                                        hand.isPinching = false;
-                                    }
-                                } else {
-                                    hand.isPinching = false;
-                                }
-                                // Fist detection logic (simple version based on finger curl)
-                                // This is a basic fist detection. More robust methods might involve checking distances
-                                // of all fingertips to the palm or wrist.
-                                var isTipNearMCP = function(tipLandmark, mcpLandmark) {
-                                    var threshold = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : 0.1;
-                                    if (!tipLandmark || !mcpLandmark) return false;
-                                    // Using 3D distance, but could simplify to 2D if performance is an issue
-                                    // and Z-depth isn't significantly varying for this gesture.
-                                    var dx = tipLandmark.x - mcpLandmark.x;
-                                    var dy = tipLandmark.y - mcpLandmark.y;
-                                    // const dz = tipLandmark.z - mcpLandmark.z; // Can include Z if needed
-                                    var distance = Math.sqrt(dx * dx + dy * dy /* + dz*dz */ );
-                                    return distance < threshold;
-                                };
-                                var indexFingerTip = smoothedLandmarks[8];
-                                var indexFingerMcp = smoothedLandmarks[5];
-                                var middleFingerTip = smoothedLandmarks[12];
-                                var middleFingerMcp = smoothedLandmarks[9];
-                                var ringFingerTip = smoothedLandmarks[16];
-                                var ringFingerMcp = smoothedLandmarks[13];
-                                var pinkyTip = smoothedLandmarks[20];
-                                var pinkyMcp = smoothedLandmarks[17];
-                                // Check if at least 3 fingers are curled (tip near MCP joint)
-                                var curledFingers = 0;
-                                if (isTipNearMCP(indexFingerTip, indexFingerMcp, 0.08)) curledFingers++;
-                                if (isTipNearMCP(middleFingerTip, middleFingerMcp, 0.08)) curledFingers++;
-                                if (isTipNearMCP(ringFingerTip, ringFingerMcp, 0.08)) curledFingers++;
-                                if (isTipNearMCP(pinkyTip, pinkyMcp, 0.08)) curledFingers++;
-                                var prevIsFist = hand.isFist;
-                                hand.isFist = curledFingers >= 3; // Requires at least 3 fingers to be curled                                // Interaction Logic
-                                if (_this1.interactionMode === 'fixed') {
-                                    // 固定模式：不进行任何手势识别和交互
-                                    // Release any model grab from other modes
-                                    if (_this1.grabbingHandIndex !== -1 && _this1.pickedUpModel) {
-                                        _this1.grabbingHandIndex = -1;
-                                        _this1.pickedUpModel = null;
-                                        // Reset other mode-specific states
-                                        _this1.rotateLastHandX = null;
-                                        _this1.scaleInitialPinchDistance = null;
-                                        _this1.scaleInitialModelScale = null;
-                                    }
-                                    // 在固定模式下不处理任何手势交互
-                                } else if (_this1.interactionMode === 'drag') {
-                                    if (hand.isPinching) {
-                                        if (!prevIsPinching && _this1.grabbingHandIndex === -1 && _this1.pandaModel) {
-                                            // REMOVED: Bounding box check - drag can be initiated from anywhere if not scaling
-                                            _this1.grabbingHandIndex = i;
-                                            _this1.pickedUpModel = _this1.pandaModel;
-                                            // Convert 2D screen pinch point to 3D world point on a plane
-                                            // The plane is at the model's current Z depth
-                                            _this1.modelGrabStartDepth = _this1.pickedUpModel.position.z; // Store initial depth
-                                            var pinchX = hand.pinchPointScreen.x;
-                                            var pinchY = hand.pinchPointScreen.y;
-                                            // Convert 2D screen pinch point (origin center) to NDC (Normalized Device Coords, -1 to 1)
-                                            var ndcX = pinchX / (_this1.renderDiv.clientWidth / 2);
-                                            var ndcY = pinchY / (_this1.renderDiv.clientHeight / 2);
-                                            var pinchPoint3DWorld = new THREE.Vector3(ndcX, ndcY, 0.5); // Start with a neutral NDC Z
-                                            pinchPoint3DWorld.unproject(_this1.camera);
-                                            pinchPoint3DWorld.z = _this1.modelGrabStartDepth; // Force Z to the grab depth
-                                            console.log("Grab screen: (".concat(pinchX.toFixed(2), ", ").concat(pinchY.toFixed(2), "), NDC: (").concat(ndcX.toFixed(2), ", ").concat(ndcY.toFixed(2), ")"));
-                                            console.log("Grab 3D World (pre-offset): ".concat(pinchPoint3DWorld.x.toFixed(2), ", ").concat(pinchPoint3DWorld.y.toFixed(2), ", ").concat(pinchPoint3DWorld.z.toFixed(2)));
-                                            _this1.modelDragOffset.subVectors(_this1.pickedUpModel.position, pinchPoint3DWorld);
-                                            console.log("Hand ".concat(i, " GRABBED model for DRAG at depth ").concat(_this1.modelGrabStartDepth, ". Offset:"), _this1.modelDragOffset.x.toFixed(2), _this1.modelDragOffset.y.toFixed(2), _this1.modelDragOffset.z.toFixed(2));
-                                        } else if (_this1.grabbingHandIndex === i && _this1.pickedUpModel) {
-                                            // Update model position based on pinch
-                                            var currentPinchX = hand.pinchPointScreen.x;
-                                            var currentPinchY = hand.pinchPointScreen.y;
-                                            var currentNdcX = currentPinchX / (_this1.renderDiv.clientWidth / 2);
-                                            var currentNdcY = currentPinchY / (_this1.renderDiv.clientHeight / 2);
-                                            var newPinchPoint3DWorld = new THREE.Vector3(currentNdcX, currentNdcY, 0.5);
-                                            newPinchPoint3DWorld.unproject(_this1.camera);
-                                            newPinchPoint3DWorld.z = _this1.modelGrabStartDepth; // Force Z to the original grab depth plane
-                                            _this1.pickedUpModel.position.addVectors(newPinchPoint3DWorld, _this1.modelDragOffset);
-                                            var minZ = -200;
-                                            var maxZ = 50;
-                                            _this1.pickedUpModel.position.z = Math.max(minZ, Math.min(maxZ, _this1.pickedUpModel.position.z));
-                                        }
-                                    } else {
-                                        if (prevIsPinching && _this1.grabbingHandIndex === i) {
-                                            console.log("Hand ".concat(i, " RELEASED Stan model (Drag mode) at position:"), _this1.pickedUpModel.position);
-                                            _this1.grabbingHandIndex = -1;
-                                            _this1.pickedUpModel = null;
-                                        // if (this.grabMarker && this.pandaModel) this.grabMarker.visible = true; // Show marker when released - Grab marker removed
-                                        }
-                                    }
-                                } else if (_this1.interactionMode === 'rotate') {
-                                    if (hand.isPinching) {
-                                        if (!prevIsPinching && _this1.grabbingHandIndex === -1 && _this1.pandaModel) {
-                                            // REMOVED: Bounding box check - rotate can be initiated from anywhere if not scaling
-                                            _this1.grabbingHandIndex = i;
-                                            _this1.pickedUpModel = _this1.pandaModel;
-                                            _this1.rotateLastHandX = hand.pinchPointScreen.x; // Store initial pinch X for delta calculation
-                                            console.log("Hand ".concat(i, " INITIATED ROTATION on model via pinch from anywhere."));
-                                        } else if (_this1.grabbingHandIndex === i && _this1.pickedUpModel && _this1.rotateLastHandX !== null) {
-                                            var currentHandX = hand.pinchPointScreen.x; // Use pinch point X for delta
-                                            var deltaX = currentHandX - _this1.rotateLastHandX;
-                                            if (_this1.pickedUpModel && Math.abs(deltaX) > 0.5) {
-                                                _this1.pickedUpModel.rotation.y -= deltaX * _this1.rotateSensitivity;
-                                            }
-                                            _this1.rotateLastHandX = currentHandX;
-                                        }
-                                    } else {
-                                        if (prevIsPinching && _this1.grabbingHandIndex === i) {
-                                            console.log("Hand ".concat(i, " RELEASED ROTATION on model (pinch ended)."));
-                                            _this1.grabbingHandIndex = -1;
-                                            _this1.pickedUpModel = null;
-                                            _this1.rotateLastHandX = null;
-                                        // if (this.grabMarker && this.pandaModel) this.grabMarker.visible = true; // Grab marker removed
-                                        }
-                                    }
-                                } else if (_this1.interactionMode === 'scale') {
-                                    var hand0 = _this1.hands[0];
-                                    var hand1 = _this1.hands[1];
-                                    if (hand0 && hand1 && hand0.landmarks && hand1.landmarks && hand0.isPinching && hand1.isPinching) {
-                                        // Both hands are visible and pinching
-                                        var dist = hand0.pinchPointScreen.distanceTo(hand1.pinchPointScreen);
-                                        if (_this1.scaleInitialPinchDistance === null || _this1.scaleInitialModelScale === null) {
-                                            // Start of scaling gesture
-                                            _this1.scaleInitialPinchDistance = dist;
-                                            _this1.scaleInitialModelScale = _this1.pandaModel.scale.clone(); // Store initial scale vector
-                                            _this1.grabbingHandIndex = 0; // Mark as "grabbing" for scaling (using hand 0 as primary)
-                                            _this1.pickedUpModel = _this1.pandaModel; // Indicate model is being interacted with
-                                            // if(this.grabMarker) this.grabMarker.visible = false; // Grab marker removed
-                                            console.log("Scaling initiated. Initial pinch dist: ".concat(dist.toFixed(2), ", Initial scale: ").concat(_this1.scaleInitialModelScale.x.toFixed(2)));
-                                        } else {
-                                            // Continue scaling
-                                            var deltaDistance = dist - _this1.scaleInitialPinchDistance;
-                                            var scaleFactorChange = deltaDistance * _this1.scaleSensitivity;
-                                            var newScaleValue = _this1.scaleInitialModelScale.x + scaleFactorChange;
-                                            // Clamp scale to prevent extreme sizes or inversion
-                                            var minScale = (_this1.pandaModel.userData && _this1.pandaModel.userData.minScale) ? _this1.pandaModel.userData.minScale : 10;
-var maxScale = (_this1.pandaModel.userData && _this1.pandaModel.userData.maxScale) ? _this1.pandaModel.userData.maxScale : 300;
-newScaleValue = Math.max(minScale, Math.min(maxScale, newScaleValue));
-_this1.pandaModel.scale.set(newScaleValue, newScaleValue, newScaleValue);
-                                        // console.log(`Scaling: Current pinch dist: ${dist.toFixed(2)}, Scale change: ${scaleFactorChange.toFixed(3)}, New scale value: ${newScaleValue.toFixed(2)}`);
-                                        }
-                                    } else {
-                                        // One or both hands are not pinching or not visible, or scaling was active
-                                        if (_this1.scaleInitialPinchDistance !== null) {
-                                            console.log("Scaling gesture ended.");
-                                            _this1.scaleInitialPinchDistance = null;
-                                            _this1.scaleInitialModelScale = null;
-                                            _this1.grabbingHandIndex = -1;
-                                            _this1.pickedUpModel = null;
-                                        // if(this.grabMarker && this.pandaModel) this.grabMarker.visible = true; // Grab marker removed
-                                        }
-                                    }
-                                }
-                                _this1._updateHandLines(i, smoothedLandmarks, videoParams, canvasWidth, canvasHeight);
-                            } else {
-                                if (hand.isPinching && _this1.grabbingHandIndex === i && _this1.interactionMode === 'drag') {
-                                    console.log("Hand ".concat(i, " (which was grabbing for drag) disappeared. Releasing model."));
-                                    _this1.grabbingHandIndex = -1;
-                                    _this1.pickedUpModel = null;
-                                // if (this.grabMarker && this.pandaModel) this.grabMarker.visible = true; // Grab marker removed
-                                } else if (_this1.hands[i].isPinching && _this1.grabbingHandIndex === i && _this1.interactionMode === 'rotate') {
-                                    console.log("Hand ".concat(i, " (which was pinching for rotate) disappeared. Releasing model."));
-                                    _this1.grabbingHandIndex = -1;
-                                    _this1.pickedUpModel = null;
-                                    _this1.rotateLastHandX = null;
-                                // if (this.grabMarker && this.pandaModel) this.grabMarker.visible = true; // Grab marker removed
-                                } else if (_this1.interactionMode === 'scale' && _this1.scaleInitialPinchDistance !== null && (i === 0 || i === 1)) {
-                                    var _this_hands_, _this_hands_1;
-                                    var hand0Exists = (_this_hands_ = _this1.hands[0]) === null || _this_hands_ === void 0 ? void 0 : _this_hands_.landmarks;
-                                    var hand1Exists = (_this_hands_1 = _this1.hands[1]) === null || _this_hands_1 === void 0 ? void 0 : _this_hands_1.landmarks;
-                                    if (!hand0Exists || !hand1Exists) {
-                                        console.log("Scaling gesture ended due to hand disappearance.");
-                                        _this1.scaleInitialPinchDistance = null;
-                                        _this1.scaleInitialModelScale = null;
-                                        _this1.grabbingHandIndex = -1;
-                                        _this1.pickedUpModel = null;
-                                    // if(this.grabMarker && this.pandaModel) this.grabMarker.visible = true; // Grab marker removed
-                                    }
-                                }
-                                hand.landmarks = null;
-                                hand.isPinching = false;
-                                hand.isFist = false;
-                                if (hand.lineGroup) hand.lineGroup.visible = false;
-                            }                            // Play interaction click sound for this hand if applicable (not for scale, handled after loop)
-                            var isThisHandActivelyInteractingForSound = false;
-                            if (_this1.interactionMode === 'drag' || _this1.interactionMode === 'rotate') {
-                                isThisHandActivelyInteractingForSound = _this1.grabbingHandIndex === i && _this1.pickedUpModel === _this1.pandaModel;
-                            } else if (_this1.interactionMode === 'fixed') {
-                                // 固定模式下不播放交互声音
-                                isThisHandActivelyInteractingForSound = false;
-                            }
-                            if (hand.isPinching && isThisHandActivelyInteractingForSound && _this1.interactionMode !== 'scale') {
-                                _this1.audioManager.playInteractionClickSound();
-                            }
-                        };
-                        var results = this.handLandmarker.detectForVideo(this.videoElement, performance.now());
-                        var videoParams = this._getVisibleVideoParameters();
-                        if (!videoParams) return;
-                        var canvasWidth = this.renderDiv.clientWidth;
-                        var canvasHeight = this.renderDiv.clientHeight;
-                        for(var i = 0; i < this.hands.length; i++)_this1 = this, _loop(i);
-                         // End of hand loop
-                        // After processing both hands, if in scale mode and one hand stops pinching, explicitly stop scaling.
-                        if (this.interactionMode === 'scale' && this.scaleInitialPinchDistance !== null) {
-                            var hand0 = this.hands[0];
-                            var hand1 = this.hands[1];
-                            var hand0PinchingAndVisible = hand0 && hand0.landmarks && hand0.isPinching;
-                            var hand1PinchingAndVisible = hand1 && hand1.landmarks && hand1.isPinching;
-                            if (hand0PinchingAndVisible && hand1PinchingAndVisible) {
-                                // If scaling is active and both hands are pinching, play sound
-                                this.audioManager.playInteractionClickSound();
-                            } else {
-                                // If scaling was active but one hand stopped pinching or disappeared
-                                if (this.scaleInitialPinchDistance !== null) {
-                                    console.log("Scaling gesture ended (one hand stopped pinching/disappeared - post-loop check).");
-                                    this.scaleInitialPinchDistance = null;
-                                    this.scaleInitialModelScale = null;
-                                    this.grabbingHandIndex = -1;
-                                    this.pickedUpModel = null;
-                                // if(this.grabMarker && this.pandaModel) this.grabMarker.visible = true; // Grab marker removed
-                                }
-                            }
-                        }
-                    } catch (error) {
-                        console.error("Error during hand detection:", error);
-                    }
-                }
-            }
-        },
-        {
-            key: "_getModelScreenBoundingBox",
-            value: function _getModelScreenBoundingBox() {
-                var _this = this;
-                if (!this.pandaModel || !this.camera || !this.renderer) {
-                    return null;
-                }
-                // Ensure the model's world matrix is up to date
-                this.pandaModel.updateMatrixWorld(true);
-                var box = new THREE.Box3().setFromObject(this.pandaModel);
-                if (box.isEmpty()) {
-                    return null; // Model might not be loaded or has no geometry
-                }
-                var corners = [
-                    new THREE.Vector3(box.min.x, box.min.y, box.min.z),
-                    new THREE.Vector3(box.min.x, box.min.y, box.max.z),
-                    new THREE.Vector3(box.min.x, box.max.y, box.min.z),
-                    new THREE.Vector3(box.min.x, box.max.y, box.max.z),
-                    new THREE.Vector3(box.max.x, box.min.y, box.min.z),
-                    new THREE.Vector3(box.max.x, box.min.y, box.max.z),
-                    new THREE.Vector3(box.max.x, box.max.y, box.min.z),
-                    new THREE.Vector3(box.max.x, box.max.y, box.max.z)
-                ];
-                var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-                var canvasWidth = this.renderDiv.clientWidth;
-                var canvasHeight = this.renderDiv.clientHeight;
-                corners.forEach(function(corner) {
-                    // Apply model's world transformation to the local bounding box corners
-                    corner.applyMatrix4(_this.pandaModel.matrixWorld);
-                    // Project to Normalized Device Coordinates (NDC)
-                    corner.project(_this.camera);
-                    // Convert NDC to screen coordinates (origin at center of screen)
-                    // This matches the coordinate system of pinchPointScreen
-                    var screenX = corner.x * (canvasWidth / 2);
-                    var screenY = corner.y * (canvasHeight / 2); // In Three.js NDC, +Y is up
-                    minX = Math.min(minX, screenX);
-                    maxX = Math.max(maxX, screenX);
-                    minY = Math.min(minY, screenY);
-                    maxY = Math.max(maxY, screenY);
-                });
-                if (minX === Infinity) return null; // All points were behind camera or some other issue
-                return {
-                    minX: minX,
-                    minY: minY,
-                    maxX: maxX,
-                    maxY: maxY
-                };
-            }
-        },
-        {
-            key: "_getVisibleVideoParameters",
-            value: function _getVisibleVideoParameters() {
-                if (!this.videoElement || this.videoElement.videoWidth === 0 || this.videoElement.videoHeight === 0) {
-                    return null;
-                }
-                var vNatW = this.videoElement.videoWidth;
-                var vNatH = this.videoElement.videoHeight;
-                var rW = this.renderDiv.clientWidth;
-                var rH = this.renderDiv.clientHeight;
-                if (vNatW === 0 || vNatH === 0 || rW === 0 || rH === 0) return null;
-                var videoAR = vNatW / vNatH;
-                var renderDivAR = rW / rH;
-                var finalVideoPixelX, finalVideoPixelY;
-                var visibleVideoPixelWidth, visibleVideoPixelHeight;
-                if (videoAR > renderDivAR) {
-                    // Video is wider than renderDiv, scaled to fit renderDiv height, cropped horizontally.
-                    var scale = rH / vNatH; // Scale factor based on height.
-                    var scaledVideoWidth = vNatW * scale; // Width of video if scaled to fit renderDiv height.
-                    // Total original video pixels cropped horizontally (from both sides combined).
-                    var totalCroppedPixelsX = (scaledVideoWidth - rW) / scale;
-                    finalVideoPixelX = totalCroppedPixelsX / 2; // Pixels cropped from the left of original video.
-                    finalVideoPixelY = 0; // No vertical cropping.
-                    visibleVideoPixelWidth = vNatW - totalCroppedPixelsX; // Width of the visible part in original video pixels.
-                    visibleVideoPixelHeight = vNatH; // Full height is visible.
-                } else {
-                    // Video is taller than renderDiv (or same AR), scaled to fit renderDiv width, cropped vertically.
-                    var scale1 = rW / vNatW; // Scale factor based on width.
-                    var scaledVideoHeight = vNatH * scale1; // Height of video if scaled to fit renderDiv width.
-                    // Total original video pixels cropped vertically (from top and bottom combined).
-                    var totalCroppedPixelsY = (scaledVideoHeight - rH) / scale1;
-                    finalVideoPixelX = 0; // No horizontal cropping.
-                    finalVideoPixelY = totalCroppedPixelsY / 2; // Pixels cropped from the top of original video.
-                    visibleVideoPixelWidth = vNatW; // Full width is visible.
-                    visibleVideoPixelHeight = vNatH - totalCroppedPixelsY; // Height of the visible part in original video pixels.
-                }
-                // Safety check for degenerate cases (e.g., extreme aspect ratios leading to zero visible dimension)
-                if (visibleVideoPixelWidth <= 0 || visibleVideoPixelHeight <= 0) {
-                    // Fallback or log error, this shouldn't happen in normal scenarios
-                    console.warn("Calculated visible video dimension is zero or negative.", {
-                        visibleVideoPixelWidth: visibleVideoPixelWidth,
-                        visibleVideoPixelHeight: visibleVideoPixelHeight
-                    });
-                    return {
-                        offsetX: 0,
-                        offsetY: 0,
-                        visibleWidth: vNatW,
-                        visibleHeight: vNatH,
-                        videoNaturalWidth: vNatW,
-                        videoNaturalHeight: vNatH
-                    };
-                }
-                return {
-                    offsetX: finalVideoPixelX,
-                    offsetY: finalVideoPixelY,
-                    visibleWidth: visibleVideoPixelWidth,
-                    visibleHeight: visibleVideoPixelHeight,
-                    videoNaturalWidth: vNatW,
-                    videoNaturalHeight: vNatH
-                };
-            }
-        },
-        {
-            // _updateGhosts method removed.
-            key: "_showStatusScreen",
-            value: function _showStatusScreen(message) {
-                var color = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : 'white', showRestartHint = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : false;
-                this.gameOverContainer.style.display = 'block';
-                this.gameOverText.innerText = message;
-                this.gameOverText.style.color = color;
-                this.restartHintText.style.display = showRestartHint ? 'block' : 'none';
-            // No spawning to stop for template
-            }
-        },
-        {
-            key: "_showError",
-            value: function _showError(message) {
-                this.gameOverContainer.style.display = 'block';
-                this.gameOverText.innerText = "ERROR: ".concat(message);
-                this.gameOverText.style.color = 'orange';
-                this.restartHintText.style.display = 'true'; // Show restart hint on error
-                this.gameState = 'error';
-                // No spawning to stop
-                this.hands.forEach(function(hand) {
-                    if (hand.lineGroup) hand.lineGroup.visible = false;
-                });
-            }
-        },
-        {
-            key: "_restartGame",
-            value: function _restartGame() {
-                console.log("Restarting tracking...");
-                this.gameOverContainer.style.display = 'none';
-                this.hands.forEach(function(hand) {
-                    if (hand.lineGroup) {
-                        hand.lineGroup.visible = false;
-                    }
-                });
-                // Ghost removal removed
-                // Score reset removed
-                // Visibility of game elements removed
-                this.gameState = 'tracking'; // Changed from 'playing'
-                this.lastVideoTime = -1;
-                this.clock.start();
-            // Removed _startSpawning()
-            }
-        },
-        {
-            // _updateScoreDisplay method removed.
-            key: "_onResize",
-            value: function _onResize() {
-                var width = this.renderDiv.clientWidth;
-                var height = this.renderDiv.clientHeight;
-                // Update camera perspective
-                this.camera.left = width / -2;
-                this.camera.right = width / 2;
-                this.camera.top = height / 2;
-                this.camera.bottom = height / -2;
-                this.camera.updateProjectionMatrix();
-                // Update renderer size
-                this.renderer.setSize(width, height);
-                // Update video element size
-                this.videoElement.style.width = width + 'px';
-                this.videoElement.style.height = height + 'px';
-            // Watermelon, Chad, GroundLine updates removed.
-            }
-        },
-        {
-            key: "_updateHandLines",
-            value: function _updateHandLines(handIndex, landmarks, videoParams, canvasWidth, canvasHeight) {
-                var _this = this;
-                var hand = this.hands[handIndex];
-                var lineGroup = hand.lineGroup;                // Determine if this specific hand is currently involved in a grab/scale interaction
-                var isThisHandActivelyInteracting = false;
-                if (this.interactionMode === 'drag' || this.interactionMode === 'rotate') {
-                    isThisHandActivelyInteracting = this.grabbingHandIndex === handIndex && this.pickedUpModel === this.pandaModel;
-                } else if (this.interactionMode === 'scale') {
-                    // For scale, both hands involved show the effect if scaling is active
-                    isThisHandActivelyInteracting = this.scaleInitialPinchDistance !== null && (handIndex === 0 || handIndex === 1);
-                } else if (this.interactionMode === 'fixed') {
-                    // 固定模式下不显示任何手势交互效果
-                    isThisHandActivelyInteracting = false;
-                }
-                var currentHandMaterial = handIndex === 0 ? this.fingertipMaterialHand1 : this.fingertipMaterialHand2;
-                if (currentHandMaterial) {
-                    currentHandMaterial.opacity = isThisHandActivelyInteracting ? this.fingertipGrabOpacity : this.fingertipDefaultOpacity;
-                }
-                while(lineGroup.children.length){
-                    var child = lineGroup.children[0];
-                    lineGroup.remove(child);
-                    if (child.geometry) child.geometry.dispose();
-                // Materials are shared, no need to dispose them here unless they are unique per line/circle
-                }
-                if (!landmarks || landmarks.length === 0 || !videoParams) {
-                    lineGroup.visible = false;
-                    return;
-                }
-                var isAnyLandmarkOffScreen = false;
-                var _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
-                try {
-                    // First, check if any landmark is off-screen based on unclamped normalized coordinates
-                    for(var _iterator = landmarks[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true){
-                        var lm = _step.value;
-                        var lmOriginalX = lm.x * videoParams.videoNaturalWidth;
-                        var lmOriginalY = lm.y * videoParams.videoNaturalHeight;
-                        var normX_visible = (lmOriginalX - videoParams.offsetX) / videoParams.visibleWidth;
-                        var normY_visible = (lmOriginalY - videoParams.offsetY) / videoParams.visibleHeight;
-                        if (normX_visible < 0 || normX_visible > 1 || normY_visible < 0 || normY_visible > 1) {
-                            isAnyLandmarkOffScreen = true;
-                            break;
-                        }
-                    }
-                } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                } finally{
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator.return != null) {
-                            _iterator.return();
-                        }
-                    } finally{
-                        if (_didIteratorError) {
-                            throw _iteratorError;
-                        }
-                    }
-                }
-                if (isAnyLandmarkOffScreen) {
-                    lineGroup.visible = false;
-                    return;
-                }
-                // If all landmarks are on-screen (or would be, before clamping), proceed to calculate points3D for drawing.
-                // These points will use clamped coordinates to ensure they are drawn within canvas bounds if very close to edge.
-                var points3D = landmarks.map(function(lm) {
-                    var lmOriginalX = lm.x * videoParams.videoNaturalWidth;
-                    var lmOriginalY = lm.y * videoParams.videoNaturalHeight;
-                    var normX_visible = (lmOriginalX - videoParams.offsetX) / videoParams.visibleWidth;
-                    var normY_visible = (lmOriginalY - videoParams.offsetY) / videoParams.visibleHeight;
-                    // Clamp values FOR DRAWING purposes
-                    normX_visible = Math.max(0, Math.min(1, normX_visible));
-                    normY_visible = Math.max(0, Math.min(1, normY_visible));
-                    var x = (1 - normX_visible) * canvasWidth - canvasWidth / 2;
-                    var y = (1 - normY_visible) * canvasHeight - canvasHeight / 2;
-                    return new THREE.Vector3(x, y, 1.1); // Z for fingertip circles, slightly in front of lines
-                });
-                var lineZ = 1; // Z for connection lines
-                this.handConnections.forEach(function(conn) {
-                    var p1 = points3D[conn[0]];
-                    var p2 = points3D[conn[1]];
-                    if (p1 && p2) {
-                        // Create points for the line with the correct Z
-                        var lineP1 = p1.clone().setZ(lineZ);
-                        var lineP2 = p2.clone().setZ(lineZ);
-                        var geometry = new THREE.BufferGeometry().setFromPoints([
-                            lineP1,
-                            lineP2
-                        ]);
-                        var line = new THREE.Line(geometry, _this.handLineMaterial);
-                        lineGroup.add(line);
-                    }
-                });
-                // Draw fingertip circles
-                var fingertipRadius = 8; // Radius of the circle for fingertips
-                var wristRadius = 12; // Larger radius for the wrist
-                var circleSegments = 16; // Smoothness of the circle
-                this.fingertipLandmarkIndices.forEach(function(index) {
-                    var landmarkPosition = points3D[index];
-                    if (landmarkPosition) {
-                        var radius = index === 0 ? wristRadius : fingertipRadius; // Use wristRadius for landmark 0
-                        var circleGeometry = new THREE.CircleGeometry(radius, circleSegments);
-                        // The 'currentHandMaterial' (fetched and opacity-updated above) is used here.
-                        var landmarkCircle = new THREE.Mesh(circleGeometry, currentHandMaterial);
-                        landmarkCircle.position.copy(landmarkPosition); // Already has Z=1.1
-                        // Pulse scaling also depends on 'isThisHandActivelyInteracting'
-                        if (isThisHandActivelyInteracting) {
-                            // Apply pulsing effect to scale
-                            // (1 + sin) / 2 gives a 0-1 range, perfect for modulating amplitude
-                            var currentPulseProgress = (1 + Math.sin(_this.clock.elapsedTime * _this.grabbingPulseSpeed)) / 2;
-                            var scaleValue = _this.pulseBaseScale + currentPulseProgress * _this.grabbingPulseAmplitude;
-                            landmarkCircle.scale.set(scaleValue, scaleValue, 1);
-                        } else {
-                            landmarkCircle.scale.set(_this.pulseBaseScale, _this.pulseBaseScale, 1); // Reset scale
-                        }
-                        lineGroup.add(landmarkCircle);
-                    }
-                });
-                lineGroup.visible = true;
-            }
-        },
-        {
-            key: "_animate",
-            value: function _animate() {
 
-                requestAnimationFrame(this._animate.bind(this));
-                var deltaTime = this.clock.getDelta();
-                // Update hands if tracking
-                if (this.gameState === 'tracking') {
-                    this._updateHands();
-                }
-                // Update animation mixer
-                if (this.animationMixer) {
-                    this.animationMixer.update(deltaTime);
-                }
-                // Bounding box helper visibility logic REMOVED
-                // _updateGhosts and _updateParticles calls removed.
-                // Always render the scene
-                this.renderer.render(this.scene, this.camera);
-            }
-        },
-        {
-            key: "start",
-            value: function start() {
-                var _this = this;
-                // Add click listener for resuming audio context and potentially restarting on error
-                this.renderDiv.addEventListener('click', function() {
-                    _this.audioManager.resumeContext();
-                    if (_this.gameState === 'error' || _this.gameState === 'paused') {
-                        _this._restartGame(); // Restart tracking
-                    }
-                });
-                console.log('Game setup initiated. Waiting for async operations...');
-            // Note: Game interaction now starts automatically after _init completes.
-            }
-        },
-        {
-            key: "_updateSpeechBubbleAppearance",
-            value: function _updateSpeechBubbleAppearance() {
-                if (!this.speechBubble) return;
-                var isPlaceholder = this.speechBubble.innerHTML === "..." || this.speechBubble.innerText === "...";
-                // Apply active styling only if recognition is generally active AND we are not displaying the placeholder.
-                // This means interim/final text will get the active style, but the "..." placeholder will not,
-                // even if the recognition service itself is still running in the background.
-                var showActiveStyling = this.isSpeechActive && !isPlaceholder;
-                var translateY = isPlaceholder ? '-5px' : '0px';
-                var scale = showActiveStyling ? '1.15' : '1.0';
-                this.speechBubble.style.transform = "translateX(-50%) translateY(".concat(translateY, ") scale(").concat(scale, ")");
-                if (showActiveStyling) {
-                    // Cyan glow, blue drop shadow, enhanced original shadow
-                    // Active speech bubble: brighter color, stronger shadow
-                    this.speechBubble.style.boxShadow = '5px 5px 0px #007bff'; // Active blue shadow
-                    this.speechBubble.style.border = '2px solid black'; // Keep black border
-                    this.speechBubble.style.padding = '18px 28px'; // Slightly larger padding
-                    this.speechBubble.style.fontSize = 'clamp(20px, 3.5vw, 26px)'; // Larger font when active
-                    this.speechBubble.style.top = '15px'; // Increased top margin when active, reduced from 30px to complement base 10px
-                } else {
-                    // Default/inactive styling
-                    // Default/inactive speech bubble styling
-                    this.speechBubble.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)'; // Hard black shadow
-                    this.speechBubble.style.border = '2px solid black'; // Black border
-                    this.speechBubble.style.padding = '15px 25px';
-                    this.speechBubble.style.fontSize = 'clamp(16px, 3vw, 22px)'; // Original font size
-                    this.speechBubble.style.top = '10px'; // Original top margin, changed from 20px
-                }
-            }
-        },        {
-            key: "_setupSpeechRecognition",
-            value: function _setupSpeechRecognition() {
-                var _this = this;
-                  // 创建语音识别状态显示元素
-                this.speechStatusElement = document.createElement('div');
-                this.speechStatusElement.id = 'speech-status';
-                this.speechStatusElement.className = 'text-box';
-                this.speechStatusElement.style.backgroundColor = 'rgba(0,0,0,0.6)';
-                this.speechStatusElement.style.color = 'white';
-                this.speechStatusElement.style.padding = '5px 10px';
-                this.speechStatusElement.style.borderRadius = '4px';
-                this.speechStatusElement.style.fontSize = '14px';
-                this.speechStatusElement.style.marginTop = '4px';
-                this.speechStatusElement.innerHTML = '语音识别状态：<span id="speech-status-text">已启用</span>';
-                this.speechStatusTextElement = this.speechStatusElement.querySelector('#speech-status-text');
-                this.interactionModeContainer.appendChild(this.speechStatusElement);
-                
-                // 根据设置更新语音状态显示
-                this.updateSpeechStatusDisplay = function() {
-                    const speechEnabled = localStorage.getItem('speechRecognitionEnabled') !== 'false';
-                    if (_this.speechStatusElement && _this.speechStatusTextElement) {
-                        _this.speechStatusTextElement.textContent = speechEnabled ? '已启用' : '已禁用';
-                        _this.speechStatusElement.style.backgroundColor = speechEnabled ? 'rgba(0,123,255,0.6)' : 'rgba(108,117,125,0.6)';
-                    }
-                };
-                
-                // 初始化时显示语音状态
-                this.updateSpeechStatusDisplay();
-                
-                // 监听localStorage变化（其他标签页设置可能改变）
-                window.addEventListener('storage', function(e) {
-                    if (e.key === 'speechRecognitionEnabled') {
-                        _this.speechManager.updateSpeechRecognitionState();
-                        _this.updateSpeechStatusDisplay();
-                    }
-                });
-                
-                this.speechManager = new SpeechManager(function(finalTranscript, interimTranscript) {
-                    if (_this.speechBubble) {
-                        clearTimeout(_this.speechBubbleTimeout);
-                        if (finalTranscript) {
-                            _this.speechBubble.innerHTML = finalTranscript;
-                            _this.speechBubble.style.opacity = '1';
-                            _this.speechBubbleTimeout = setTimeout(function() {
-                                _this.speechBubble.innerHTML = "...";
-                                _this.speechBubble.style.opacity = '0.7';
-                                _this._updateSpeechBubbleAppearance(); // Update appearance for "..."
-                            }, 2000);
-                        } else if (interimTranscript) {
-                            _this.speechBubble.innerHTML = '<i style="color: #888;">'.concat(interimTranscript, "</i>");
-                            _this.speechBubble.style.opacity = '1';
-                        } else {
-                            _this.speechBubbleTimeout = setTimeout(function() {
-                                if (_this.speechBubble.innerHTML !== "...") {
-                                    _this.speechBubble.innerHTML = "...";
-                                }
-                                _this.speechBubble.style.opacity = '0.7';
-                                _this._updateSpeechBubbleAppearance(); // Update appearance for "..."
-                            }, 500);
-                        }
-                        _this._updateSpeechBubbleAppearance();
-                    }
-                }, function(isActive) {
-                    _this.isSpeechActive = isActive;
-                    _this._updateSpeechBubbleAppearance();
-                }, function(command) {                    console.log("Game received command: ".concat(command));
-                    var validCommands = [
-                        'drag',
-                        'rotate',
-                        'scale',
-                        'fixed'
-                    ];
-                    if (validCommands.includes(command.toLowerCase())) {
-                        _this._setInteractionMode(command.toLowerCase());
-                    } else {
-                        console.warn("Unrecognized command via speech: ".concat(command));
-                    }
-                });
-                // Initialize speech bubble with "..." and apply initial appearance
-                if (this.speechBubble) {
-                    this.speechBubble.innerHTML = "...";
-                    this.speechBubble.style.opacity = '0.7';
-                    this._updateSpeechBubbleAppearance(); // Apply initial styles (isSpeechActive will be false)
-                }
-            // We will call requestPermissionAndStart() on user interaction (e.g., start button)
-            }
-        },
-        {
-            key: "_playAnimation",
-            value: function _playAnimation(name) {
-                if (!this.animationActions[name]) {
-                    console.warn('Animation "'.concat(name, '" not found.'));
-                    return;
-                }
-                var newAction = this.animationActions[name];
-                if (this.currentAction === newAction && newAction.isRunning()) {
-                    console.log('Animation "'.concat(name, '" is already playing.'));
-                    return; // Already playing this animation
-                }
-                if (this.currentAction) {
-                    this.currentAction.fadeOut(0.5); // Fade out current animation over 0.5 seconds
-                }
-                newAction.reset().fadeIn(0.5).play(); // Reset, fade in and play new animation
-                this.currentAction = newAction;
-                console.log("Playing animation: ".concat(name));
-                this._updateButtonStyles(name);
-            }
-        },
-        {
-            key: "_updateButtonStyles",
-            value: function _updateButtonStyles(activeAnimationName) {
-                var buttons = this.animationButtonsContainer.children;
-                for(var i = 0; i < buttons.length; i++){
-                    var button = buttons[i];
-                    var isActive = button.innerText === activeAnimationName;
-                    button.style.backgroundColor = isActive ? '#007bff' : '#f0f0f0'; // Blue if active, light grey if not
-                    button.style.color = isActive ? 'white' : 'black';
-                    button.style.fontWeight = isActive ? 'bold' : 'normal';
-                    // Active button has its shadow "pressed"
-                    button.style.boxShadow = isActive ? '1px 1px 0px black' : '2px 2px 0px black';
-                }
-            }
-        },
-        {
-            key: "_setInteractionMode",
-            value: function _setInteractionMode(mode) {
-                var _this = this;
-                if (this.interactionMode === mode) return; // No change
-                console.log("Setting interaction mode to: ".concat(mode));
-                this.interactionMode = mode;
-                  // 显示模式切换提示
-                var modeNames = {
-                    'drag': '拖拽',
-                    'rotate': '旋转',
-                    'scale': '缩放',
-                    'fixed': '固定'
-                };
-                var modeName = modeNames[mode] || mode;
-                if (this.modelLoadingBubble) {
-                    this.modelLoadingBubble.showMessage("已切换至" + modeName + "操作", 3000);
-                }
-                
-                // If currently grabbing, release the model
-                if (this.grabbingHandIndex !== -1 && this.pickedUpModel) {
-                    console.log("Interaction mode changed while grabbing. Releasing model from hand ".concat(this.grabbingHandIndex, "."));
-                    this.grabbingHandIndex = -1;
-                    this.pickedUpModel = null;
-                    this.rotateLastHandX = null;
-                    this.scaleInitialPinchDistance = null; // Reset scaling variables
-                    this.scaleInitialModelScale = null;
-                }
-                this._updateHandMaterialsForMode(mode); // Update hand colors for new mode
-                this._updateInteractionModeButtonStyles();                // Show/hide animation buttons container based on mode
-                if (this.animationButtonsContainer) {
-                    // 由于移除了动画功能，动画按钮容器始终隐藏
-                    this.animationButtonsContainer.style.opacity = '0';
-                    this.animationButtonsContainer.style.display = 'none';
-                }
-                this._updateInstructionText(); // Update instruction text when mode changes
-            }
-        },
-        {
-            key: "_updateInstructionText",
-            value: function _updateInstructionText() {
-                if (this.instructionTextElement) {
-                    var instruction = this.interactionModeInstructions[this.interactionMode] || "使用手势进行交互";
-                    this.instructionTextElement.innerText = instruction;
-                    // The instruction text should always be 10px from the bottom.
-                    // The animation buttons are positioned from the top-left and should not affect this.
-                    this.instructionTextElement.style.bottom = '10px'; // Decreased bottom margin
-                }
-            }
-        },
-        {
-            key: "_updateHandMaterialsForMode",
-            value: function _updateHandMaterialsForMode(mode) {
-                var modeConfig = this.interactionModeColors[mode];
-                var colorToSet = modeConfig ? modeConfig.hand : new THREE.Color(0x00ccff); // Fallback color
-                if (this.fingertipMaterialHand1) {
-                    this.fingertipMaterialHand1.color.set(colorToSet);
-                }
-                if (this.fingertipMaterialHand2) {
-                    this.fingertipMaterialHand2.color.set(colorToSet);
-                }
-            }
-        },
-        {
-            key: "_updateInteractionModeButtonStyles",
-            value: function _updateInteractionModeButtonStyles() {
-                var _this = this;
-                for(var modeKey in this.interactionModeButtons){
-                    var button = this.interactionModeButtons[modeKey];
-                    var modeConfig = this.interactionModeColors[modeKey];
-                    var fallbackColor = '#6c757d';
-                    var fallbackTextColor = 'white';
-                    if (modeKey === this.interactionMode) {
-                        button.style.border = '2px solid black'; // All buttons have black border
-                        if (modeConfig) {
-                            button.style.backgroundColor = modeConfig.base;
-                            button.style.color = modeConfig.text;
-                        } else {
-                            button.style.backgroundColor = fallbackColor;
-                            button.style.color = fallbackTextColor;
-                        }
-                        button.style.fontWeight = 'bold'; // Already bold from initial setup, but ensure it stays
-                        button.style.boxShadow = '1px 1px 0px black'; // "Pressed" shadow for active button
-                    } else {
-                        button.style.backgroundColor = 'rgba(255, 255, 255, 0.5)'; // More opaque transparent white background
-                        button.style.border = '2px solid black'; // Black border for inactive
-                        if (modeConfig) {
-                            button.style.color = modeConfig.base; // Neon text color
-                        } else {
-                            button.style.color = fallbackColor; // Fallback text color for inactive
-                        }
-                        button.style.fontWeight = 'bold'; // Always bold
-                        button.style.boxShadow = '2px 2px 0px black'; // Default shadow for inactive
-                    }
-                }                // Explicitly set display for animationButtonsContainer based on current mode
-                // 由于移除了动画功能，动画按钮容器始终隐藏
-                if (this.animationButtonsContainer) {
-                    this.animationButtonsContainer.style.opacity = '0';
-                    this.animationButtonsContainer.style.display = 'none';
-                }
-                this._updateInstructionText(); // Also call here to adjust position if animation buttons are shown/hidden
-            }
-        },
-        {
-            key: "_setupDragAndDrop",
-            value: function _setupDragAndDrop() {
-                var _this = this;
-                this.renderDiv.addEventListener('dragover', function(event) {
-                    event.preventDefault(); // Prevent default behavior to allow drop
-                    event.dataTransfer.dropEffect = 'copy'; // Show a copy icon
-                    _this.renderDiv.style.border = '2px dashed #007bff'; // Visual feedback
-                });
-                this.renderDiv.addEventListener('dragleave', function(event) {
-                    _this.renderDiv.style.border = 'none'; // Remove visual feedback
-                });
-                this.renderDiv.addEventListener('drop', function(event) {
-                    event.preventDefault();
-                    _this.renderDiv.style.border = 'none'; // Remove visual feedback
-                    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-                        var file = event.dataTransfer.files[0];
-                        var fileName = file.name.toLowerCase();
-                        var fileType = file.type.toLowerCase();
-                        if (fileName.endsWith('.gltf') || fileName.endsWith('.glb') || fileType === 'model/gltf+json' || fileType === 'model/gltf-binary') {
-                            console.log("GLTF file dropped: ".concat(file.name), file);
-                            // Next step: Process and load this file.
-                            _this._loadDroppedModel(file);
-                        } else {
-                            console.warn('Dropped file is not a recognized GLTF format:', file.name, file.type);
-                            _this._showStatusScreen('"'.concat(file.name, '" is not a GLTF model.'), 'orange', false);
-                            setTimeout(function() {
-                                if (_this.gameOverContainer.style.display === 'block' && _this.gameOverText.innerText.includes(file.name)) {
-                                    _this.gameOverContainer.style.display = 'none';
-                                }
-                            }, 3000);
-                        }
-                        event.dataTransfer.clearData();
-                    }
-                });
-            }
-        },
-        {
-            key: "_loadDroppedModel",
-            value: function _loadDroppedModel(file) {
-                var _this = this;
-                console.log("Processing dropped model:", file.name, file.type);
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    // Pass file.type as well, it might be useful for _parseAndLoadGltf context
-                    _this._parseAndLoadGltf(e.target.result, file.name, file.type);
-                };
-                reader.onerror = function(error) {
-                    console.error("FileReader error for ".concat(file.name, ":"), error);
-                    _this._showError("Error reading file ".concat(file.name, "."));
-                    // Ensure loading message is hidden if it was shown by this function
-                    if (_this.gameOverContainer.style.display === 'block' && _this.gameOverText.innerText.startsWith('Loading "'.concat(file.name, '"'))) {
-                        _this.gameOverContainer.style.display = 'none';
-                    }
-                };
-                var fileNameLower = file.name.toLowerCase();
-                var fileTypeLower = file.type ? file.type.toLowerCase() : '';
-                if (fileNameLower.endsWith('.glb') || fileTypeLower === 'model/gltf-binary') {
-                    console.log("Reading ".concat(file.name, " as ArrayBuffer."));
-                    reader.readAsArrayBuffer(file);
-                } else if (fileNameLower.endsWith('.gltf') || fileTypeLower === 'model/gltf+json') {
-                    console.log("Reading ".concat(file.name, " as text."));
-                    reader.readAsText(file);
-                } else {
-                    var message = file.type ? "Unsupported file type: ".concat(file.type) : 'Cannot determine file type.';
-                    console.warn("Unknown file format for GLTF loader: ".concat(file.name, ", Type: ").concat(file.type));
-                    this._showError("".concat(message, " for ").concat(file.name, ". Please drop a .gltf or .glb file."));
-                    // Ensure loading message is hidden
-                    if (this.gameOverContainer.style.display === 'block' && this.gameOverText.innerText.startsWith('Loading "'.concat(file.name, '"'))) {
-                        this.gameOverContainer.style.display = 'none';
-                    }
-                }
-            }
-        },
-        {
-            key: "_parseAndLoadGltf",
-            value: function _parseAndLoadGltf(content, fileName, fileType) {
-                var _this = this;
-                var loader = new GLTFLoader(); // GLTFLoader is already imported at the top
-                try {
-                    // The 'path' argument is for resolving relative paths for external resources like .bin or textures.
-                    // For a single file drop, this is typically empty. If it's a .gltf with external files,
-                    // those files would need to be handled separately (e.g., by being dropped together and identified).
-                    // This setup works best for self-contained .glb files or .gltf files using data URIs.
-                    loader.parse(content, '', function(gltf) {
-                        console.log("Successfully parsed GLTF model: ".concat(fileName), gltf);
-                        // 1. If a previous model exists, remove it and clean up its animations
-                        if (_this.pandaModel) {
-                            _this.scene.remove(_this.pandaModel);
-                            // Consider disposing geometry/materials of this.pandaModel here for memory management in a larger app
-                            console.log("Removed previous model from scene.");
-                            if (_this.animationMixer) {
-                                _this.animationMixer.stopAllAction();
-                                _this.currentAction = null;
-                            }
-                            // Clear out old animation buttons
-                            while(_this.animationButtonsContainer.firstChild){
-                                _this.animationButtonsContainer.removeChild(_this.animationButtonsContainer.firstChild);
-                            }
-                            _this.animationActions = {};
-                            _this.animationClips = [];
-                        }
-                        // 2. Set the new model as the current model
-                        _this.pandaModel = gltf.scene;
-                        // 3. Scale and position the new model
-                        var scale = 80;
-                        _this.pandaModel.scale.set(scale, scale, scale);
-                        var sceneHeight = _this.renderDiv.clientHeight;
-                        _this.pandaModel.position.set(0, sceneHeight * -0.45, -1000);
-                        // 4. Add the new model to the scene
-                        _this.scene.add(_this.pandaModel);
-                        console.log('Added new model "'.concat(fileName, '" to scene.'));
-                        // 5. Setup animations for the new model
-                        _this.animationMixer = new THREE.AnimationMixer(_this.pandaModel);
-                        _this.animationClips = gltf.animations;
-                        _this.animationActions = {}; // Ensure it's clean for new actions
-                        if (_this.animationClips && _this.animationClips.length) {
-                            _this.animationClips.forEach(function(clip, index) {
-                                var action = _this.animationMixer.clipAction(clip);
-                                var actionName = clip.name || "Animation ".concat(index + 1);
-                                _this.animationActions[actionName] = action;
-                                var button = document.createElement('button');
-                                
-                                // 使用翻译函数获取中文按钮文本
-                                var displayName = _this._getTranslatedAnimationName(actionName);
-                                button.innerText = displayName;
-                                button.dataset.originalName = actionName; // 存储原始名称以供引用
-                                
-                                button.style.padding = '5px 10px';
-                                button.style.fontSize = '13px';
-                                button.style.backgroundColor = '#f0f0f0';
-                                button.style.color = 'black';
-                                button.style.border = '2px solid black';
-                                button.style.borderRadius = '4px';
-                                button.style.cursor = 'pointer';
-                                button.style.transition = 'background-color 0.2s ease, box-shadow 0.2s ease';
-                                button.style.boxShadow = '2px 2px 0px black';
-                                button.addEventListener('click', function() {
-                                    return _this._playAnimation(actionName);
-                                });
-                                _this.animationButtonsContainer.appendChild(button);
-                            });
-                            var defaultActionName = Object.keys(_this.animationActions)[0];
-                            var idleActionKey = Object.keys(_this.animationActions).find(function(name) {
-                                return name.toLowerCase().includes('idle');
-                            });
-                            if (idleActionKey) {
-                                defaultActionName = idleActionKey;
-                            }
-                            if (defaultActionName && _this.animationActions[defaultActionName]) {
-                                _this.currentAction = _this.animationActions[defaultActionName];
-                                _this.currentAction.reset().play();
-                                _this._updateButtonStyles(defaultActionName);
-                            } else {
-                                _this.currentAction = null;
-                            }
-                        } else {
-                            console.log('New model "'.concat(fileName, '" has no embedded animations.'));
-                            _this.currentAction = null;
-                        }
-                        // 6. Reset interaction states
-                        _this.grabbingHandIndex = -1;
-                        _this.pickedUpModel = null;
-                        _this.rotateLastHandX = null;
-                        _this.scaleInitialPinchDistance = null;
-                        _this.scaleInitialModelScale = null;
-                        _this.animationControlHandIndex = -1;
-                        _this.animationControlInitialPinchY = null;
-                        // This will ensure animation buttons are shown/hidden correctly based on current mode
-                        _this._updateInteractionModeButtonStyles();
-                        _this.loadedDroppedModelData = null; // Clear the temp storage
-                    }, function(error) {
-                        console.error("Error parsing GLTF model ".concat(fileName, ":"), error);
-                        _this._showError('Failed to parse "'.concat(fileName, '". Model might be corrupt or unsupported. Check console.'));
-                    });
-                } catch (e) {
-                    // This catch is for synchronous errors during loader.parse() setup, though most errors are async.
-                    console.error("Critical error during GLTF parsing setup for ".concat(fileName, ":"), e);
-                    this._showError('Error setting up parser for "'.concat(fileName, '".'));
-                }
-            }
-        },
-        {
-            key: "_getTranslatedAnimationName",
-            value: function _getTranslatedAnimationName(englishName) {
-                // 将名称转换为小写以进行不区分大小写的匹配
-                const lowerName = englishName.toLowerCase();
-                
-                // 检查是否有直接匹配的翻译
-                for (const [key, value] of Object.entries(this.animationNameTranslations)) {
-                    if (lowerName === key.toLowerCase()) {
-                        return value;
-                    }
-                }
-                
-                // 检查名称是否包含可翻译的关键词
-                for (const [key, value] of Object.entries(this.animationNameTranslations)) {
-                    if (lowerName.includes(key.toLowerCase())) {
-                        return value;
-                    }
-                }
-                
-                // 如果是"Animation X"格式的名称
-                if (lowerName.startsWith("animation ")) {
-                    const num = lowerName.replace("animation ", "");
-                    return `动画 ${num}`;
-                }
-                
-                // 如果没有找到匹配的翻译，返回原始名称
-                return englishName;
-            },
+    // ========== DOM设置 ==========
+    _setupDOM() {
+        this._setupContainer();
+        this._setupVideo();
+        this._setupStatusContainer();
+        this._setupSpeechBubble();
+        this._setupAnimationButtons();
+        this._setupInteractionModeButtons();
+        this._setupDragAndDrop();
+    }
+
+    _setupContainer() {
+        this.renderDiv.style.cssText = `
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #111;
+        `;
+    }
+
+    _setupVideo() {
+        this.videoElement = document.createElement('video');
+        this.videoElement.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            z-index: 0;
+        `;
+        this.videoElement.autoplay = true;
+        this.videoElement.muted = true;
+        this.videoElement.playsInline = true;
+        this.renderDiv.appendChild(this.videoElement);
+    }
+
+    _setupStatusContainer() {
+        this.gameOverContainer = document.createElement('div');
+        this.gameOverContainer.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            display: none;
+            pointer-events: none;
+            text-align: center;
+            color: white;
+            font-family: "Arial", "Helvetica Neue", Helvetica, sans-serif;
+        `;
+
+        this.gameOverText = document.createElement('div');
+        this.gameOverText.style.cssText = `
+            font-size: clamp(36px, 10vw, 72px);
+            font-weight: bold;
+            margin-bottom: 10px;
+        `;
+        
+        this.restartHintText = document.createElement('div');
+        this.restartHintText.style.cssText = `
+            font-size: clamp(16px, 3vw, 24px);
+            font-weight: normal;
+            opacity: 0.8;
+        `;
+        this.restartHintText.innerText = '(点击重启追踪)';
+
+        this.gameOverContainer.appendChild(this.gameOverText);
+        this.gameOverContainer.appendChild(this.restartHintText);
+        this.renderDiv.appendChild(this.gameOverContainer);
+    }
+
+    _setupSpeechBubble() {
+        this.speechBubble = document.createElement('div');
+        this.speechBubble.id = 'speech-bubble';
+        this.speechBubble.style.cssText = `
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid black;
+            border-radius: 4px;
+            box-shadow: 4px 4px 0px rgba(0,0,0,1);
+            color: #333;
+            font-family: "Arial", "Helvetica Neue", Helvetica, sans-serif;
+            font-size: clamp(16px, 3vw, 22px);
+            max-width: 80%;
+            text-align: center;
+            z-index: 25;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out, 
+                        box-shadow 0.3s ease-in-out, border 0.3s ease-in-out, 
+                        padding 0.3s ease-in-out, font-size 0.3s ease-in-out, 
+                        top 0.3s ease-in-out;
+            pointer-events: none;
+        `;
+        this.speechBubble.innerHTML = "...";
+        this.renderDiv.appendChild(this.speechBubble);
+    }
+
+    _setupAnimationButtons() {
+        this.animationButtonsContainer = document.createElement('div');
+        this.animationButtonsContainer.style.cssText = `
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 30;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        `;
+        this.renderDiv.appendChild(this.animationButtonsContainer);
+    }
+
+    _setupInteractionModeButtons() {
+        this.interactionModeContainer = document.createElement('div');
+        this.interactionModeContainer.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        `;
+
+        ['拖拽', '旋转', '缩放', '固定'].forEach(modeName => {
+            const modeMap = { '拖拽': 'drag', '旋转': 'rotate', '缩放': 'scale', '固定': 'fixed' };
+            const modeId = modeMap[modeName];
+            
+            const button = document.createElement('button');
+            button.innerText = modeName;
+            button.id = `interaction-mode-${modeId}`;
+            button.style.cssText = `
+                padding: 10px 22px;
+                font-size: 18px;
+                border: 2px solid black;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+                box-shadow: 2px 2px 0px black;
+            `;
+            
+            button.addEventListener('click', () => this._setInteractionMode(modeId));
+            this.interactionModeContainer.appendChild(button);
+            this.interactionModeButtons[modeId] = button;
+        });
+
+        this.renderDiv.appendChild(this.interactionModeContainer);
+        this._updateInteractionModeButtonStyles();
+        this._updateInstructionText();
+    }
+
+    // ========== Three.js设置 ==========
+    _setupThree() {
+        const width = this.renderDiv.clientWidth;
+        const height = this.renderDiv.clientHeight;
+
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.OrthographicCamera(
+            width / -2, width / 2, 
+            height / 2, height / -2, 
+            CONFIG.camera.nearPlane, 
+            CONFIG.camera.farPlane
+        );
+        this.camera.position.z = 100;
+
+        this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        this.renderer.setSize(width, height);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.domElement.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        `;
+        this.renderDiv.appendChild(this.renderer.domElement);
+
+        // 灯光
+        const ambientLight = new THREE.AmbientLight(0xffffff, CONFIG.light.ambientIntensity);
+        this.scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, CONFIG.light.directionalIntensity);
+        directionalLight.position.set(0, 0, 100);
+        this.scene.add(directionalLight);
+
+        // 初始化手部可视化
+        this._initHandVisualization();
+    }
+
+    _initHandVisualization() {
+        const initialColor = INTERACTION_MODES[this.interactionMode].hand;
+
+        this.handLineMaterial = new THREE.LineBasicMaterial({
+            color: 0x00ccff,
+            linewidth: 8
+        });
+
+        this.fingertipMaterialHand1 = new THREE.MeshBasicMaterial({
+            color: initialColor.clone(),
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: CONFIG.hand.defaultOpacity
+        });
+
+        this.fingertipMaterialHand2 = new THREE.MeshBasicMaterial({
+            color: initialColor.clone(),
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: CONFIG.hand.defaultOpacity
+        });
+
+        for (let i = 0; i < 2; i++) {
+            const lineGroup = new THREE.Group();
+            lineGroup.visible = false;
+            this.scene.add(lineGroup);
+
+            this.hands.push({
+                landmarks: null,
+                anchorPos: new THREE.Vector3(),
+                lineGroup: lineGroup,
+                isPinching: false,
+                pinchPointScreen: new THREE.Vector2(),
+                isFist: false
+            });
         }
-    ]);
-    return Game;
-}();
+    }
+
+    // ========== 资源加载 ==========
+    async _loadAssets() {
+        const gltfLoader = new GLTFLoader();
+        
+        try {
+            await new Promise((resolve, reject) => {
+                gltfLoader.load('assets/teacup.gltf', 
+                    (gltf) => this._onModelLoaded(gltf, resolve),
+                    undefined,
+                    reject
+                );
+            });
+        } catch (error) {
+            console.error("加载模型失败:", error);
+            this._showError("加载3D模型失败");
+            throw error;
+        }
+    }
+
+    _onModelLoaded(gltf, resolve) {
+        this.pandaModel = gltf.scene;
+        this.animationMixer = new THREE.AnimationMixer(this.pandaModel);
+        this.animationClips = gltf.animations;
+
+        // 设置模型
+        const scale = CONFIG.model.defaultScale;
+        this.pandaModel.scale.set(scale, scale, scale);
+        this.pandaModel.userData.maxScale = CONFIG.model.defaultMaxScale;
+        this.pandaModel.userData.minScale = CONFIG.model.defaultMinScale;
+
+        const sceneHeight = this.renderDiv.clientHeight;
+        this.pandaModel.position.set(
+            0, 
+            sceneHeight * CONFIG.model.positionYFactor, 
+            CONFIG.model.positionZ
+        );
+
+        this.scene.add(this.pandaModel);
+
+        // 处理动画
+        if (this.animationClips?.length) {
+            this._setupModelAnimations();
+        }
+
+        resolve();
+    }
+
+    _setupModelAnimations() {
+        this.animationClips.forEach((clip, index) => {
+            const action = this.animationMixer.clipAction(clip);
+            const actionName = clip.name || `Animation ${index + 1}`;
+            this.animationActions[actionName] = action;
+
+            this._createAnimationButton(actionName);
+        });
+
+        // 播放默认动画
+        const defaultName = this._findDefaultAnimation();
+        if (defaultName) {
+            this.currentAction = this.animationActions[defaultName];
+            this.currentAction.play();
+            this._updateButtonStyles(defaultName);
+        }
+    }
+
+    _findDefaultAnimation() {
+        const actionNames = Object.keys(this.animationActions);
+        const idleAction = actionNames.find(name => name.toLowerCase().includes('idle'));
+        return idleAction || actionNames[0];
+    }
+
+    _createAnimationButton(actionName) {
+        const button = document.createElement('button');
+        const displayName = this._translateAnimationName(actionName);
+        
+        button.innerText = displayName;
+        button.dataset.originalName = actionName;
+        button.style.cssText = `
+            padding: 5px 10px;
+            font-size: 13px;
+            background-color: #f0f0f0;
+            color: black;
+            border: 2px solid black;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 2px 2px 0px black;
+        `;
+        
+        button.addEventListener('click', () => this._playAnimation(actionName));
+        this.animationButtonsContainer.appendChild(button);
+    }
+
+    _translateAnimationName(englishName) {
+        const lowerName = englishName.toLowerCase();
+        
+        for (const [key, value] of Object.entries(ANIMATION_TRANSLATIONS)) {
+            if (lowerName === key.toLowerCase() || lowerName.includes(key.toLowerCase())) {
+                return value;
+            }
+        }
+        
+        if (lowerName.startsWith("animation ")) {
+            const num = lowerName.replace("animation ", "");
+            return `动画 ${num}`;
+        }
+        
+        return englishName;
+    }
+
+    // ========== 手势追踪设置 ==========
+    async _setupHandTracking() {
+        try {
+            const vision = await FilesetResolver.forVisionTasks(
+                'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm'
+            );
+
+            this.handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+                    delegate: 'GPU'
+                },
+                numHands: 2,
+                runningMode: 'VIDEO'
+            });
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } },
+                audio: false
+            });
+
+            this.videoElement.srcObject = stream;
+
+            return new Promise(resolve => {
+                this.videoElement.onloadedmetadata = () => {
+                    this.videoElement.style.width = this.renderDiv.clientWidth + 'px';
+                    this.videoElement.style.height = this.renderDiv.clientHeight + 'px';
+                    resolve();
+                };
+            });
+        } catch (error) {
+            console.error('手势追踪或摄像头设置错误:', error);
+            this._showError(`摄像头/手势追踪错误: ${error.message}。请允许摄像头访问。`);
+            throw error;
+        }
+    }
+
+    // ========== 手势更新 ==========
+    _updateHands() {
+        if (!this.handLandmarker || !this.videoElement.srcObject || 
+            this.videoElement.readyState < 2 || this.videoElement.videoWidth === 0) {
+            return;
+        }
+
+        // 固定模式下禁用手势识别
+        if (this.interactionMode === 'fixed') {
+            this.hands.forEach(hand => {
+                if (hand.lineGroup) hand.lineGroup.visible = false;
+            });
+            return;
+        }
+
+        const videoTime = this.videoElement.currentTime;
+        if (videoTime <= this.lastVideoTime) return;
+        
+        this.lastVideoTime = videoTime;
+
+        try {
+            const results = this.handLandmarker.detectForVideo(this.videoElement, performance.now());
+            const videoParams = this._getVisibleVideoParameters();
+            if (!videoParams) return;
+
+            const canvasWidth = this.renderDiv.clientWidth;
+            const canvasHeight = this.renderDiv.clientHeight;
+
+            this._processHands(results, videoParams, canvasWidth, canvasHeight);
+            this._handleScaleMode();
+        } catch (error) {
+            console.error("手势检测错误:", error);
+        }
+    }
+
+    _processHands(results, videoParams, canvasWidth, canvasHeight) {
+        for (let i = 0; i < this.hands.length; i++) {
+            const hand = this.hands[i];
+            
+            if (results.landmarks && results.landmarks[i]) {
+                const smoothedLandmarks = this._smoothLandmarks(results.landmarks[i], i);
+                hand.landmarks = smoothedLandmarks;
+
+                // 更新手部位置
+                this._updateHandPosition(hand, smoothedLandmarks, videoParams, canvasWidth, canvasHeight);
+
+                // 检测手势
+                const prevIsPinching = hand.isPinching;
+                const pinchResult = GestureDetector.detectPinch(smoothedLandmarks, videoParams, canvasWidth, canvasHeight);
+                
+                if (pinchResult) {
+                    hand.isPinching = pinchResult.isPinching;
+                    if (pinchResult.pinchPoint) {
+                        hand.pinchPointScreen.set(pinchResult.pinchPoint.x, pinchResult.pinchPoint.y);
+                    }
+                }
+
+                hand.isFist = GestureDetector.detectFist(smoothedLandmarks);
+
+                // 处理交互逻辑
+                this._handleInteraction(i, hand, prevIsPinching);
+
+                // 更新手部可视化
+                this._updateHandLines(i, smoothedLandmarks, videoParams, canvasWidth, canvasHeight);
+            } else {
+                this._handleHandDisappeared(i, hand);
+            }
+
+            // 播放交互音效
+            this._playInteractionSound(i, hand);
+        }
+    }
+
+    _smoothLandmarks(rawLandmarks, handIndex) {
+        if (!this.lastLandmarkPositions[handIndex] || 
+            this.lastLandmarkPositions[handIndex].length !== rawLandmarks.length) {
+            this.lastLandmarkPositions[handIndex] = rawLandmarks.map(lm => ({ ...lm }));
+        }
+
+        const smoothed = rawLandmarks.map((lm, idx) => {
+            const prev = this.lastLandmarkPositions[handIndex][idx];
+            const alpha = CONFIG.hand.smoothingFactor;
+            return {
+                x: alpha * lm.x + (1 - alpha) * prev.x,
+                y: alpha * lm.y + (1 - alpha) * prev.y,
+                z: alpha * lm.z + (1 - alpha) * prev.z
+            };
+        });
+
+        this.lastLandmarkPositions[handIndex] = smoothed.map(lm => ({ ...lm }));
+        return smoothed;
+    }
+
+    _updateHandPosition(hand, landmarks, videoParams, canvasWidth, canvasHeight) {
+        const palm = landmarks[9]; // 中指MCP关节
+        const screenPos = CoordinateTransformer.landmarkToScreen(palm, videoParams, canvasWidth, canvasHeight);
+        hand.anchorPos.set(screenPos.x, screenPos.y, 1);
+    }
+
+    _handleInteraction(handIndex, hand, prevIsPinching) {
+        if (this.interactionMode === 'fixed') {
+            this._releaseModel(handIndex);
+            return;
+        }
+
+        switch (this.interactionMode) {
+            case 'drag':
+                this._handleDragInteraction(handIndex, hand, prevIsPinching);
+                break;
+            case 'rotate':
+                this._handleRotateInteraction(handIndex, hand, prevIsPinching);
+                break;
+            case 'scale':
+                // 缩放模式在_handleScaleMode中处理
+                break;
+        }
+    }
+
+    _handleDragInteraction(handIndex, hand, prevIsPinching) {
+        if (hand.isPinching) {
+            if (!prevIsPinching && this.grabbingHandIndex === -1 && this.pandaModel) {
+                // 开始拖拽
+                this.grabbingHandIndex = handIndex;
+                this.pickedUpModel = this.pandaModel;
+                this.modelGrabStartDepth = this.pickedUpModel.position.z;
+
+                const pinchPoint3D = this._screenToWorld(hand.pinchPointScreen);
+                pinchPoint3D.z = this.modelGrabStartDepth;
+                this.modelDragOffset.subVectors(this.pickedUpModel.position, pinchPoint3D);
+            } else if (this.grabbingHandIndex === handIndex && this.pickedUpModel) {
+                // 更新位置
+                const newPoint3D = this._screenToWorld(hand.pinchPointScreen);
+                newPoint3D.z = this.modelGrabStartDepth;
+                this.pickedUpModel.position.addVectors(newPoint3D, this.modelDragOffset);
+                
+                // 限制Z轴范围
+                this.pickedUpModel.position.z = Math.max(
+                    CONFIG.model.minZ, 
+                    Math.min(CONFIG.model.maxZ, this.pickedUpModel.position.z)
+                );
+            }
+        } else if (prevIsPinching && this.grabbingHandIndex === handIndex) {
+            this._releaseModel(handIndex);
+        }
+    }
+
+    _handleRotateInteraction(handIndex, hand, prevIsPinching) {
+        if (hand.isPinching) {
+            if (!prevIsPinching && this.grabbingHandIndex === -1 && this.pandaModel) {
+                // 开始旋转
+                this.grabbingHandIndex = handIndex;
+                this.pickedUpModel = this.pandaModel;
+                this.rotateLastHandX = hand.pinchPointScreen.x;
+            } else if (this.grabbingHandIndex === handIndex && this.pickedUpModel && this.rotateLastHandX !== null) {
+                // 更新旋转
+                const deltaX = hand.pinchPointScreen.x - this.rotateLastHandX;
+                if (Math.abs(deltaX) > 0.5) {
+                    this.pickedUpModel.rotation.y -= deltaX * this.rotateSensitivity;
+                }
+                this.rotateLastHandX = hand.pinchPointScreen.x;
+            }
+        } else if (prevIsPinching && this.grabbingHandIndex === handIndex) {
+            this._releaseModel(handIndex);
+            this.rotateLastHandX = null;
+        }
+    }
+
+    _handleScaleMode() {
+        if (this.interactionMode !== 'scale') return;
+
+        const hand0 = this.hands[0];
+        const hand1 = this.hands[1];
+
+        const bothHandsPinching = hand0?.landmarks && hand1?.landmarks && 
+                                   hand0.isPinching && hand1.isPinching;
+
+        if (bothHandsPinching) {
+            const dist = hand0.pinchPointScreen.distanceTo(hand1.pinchPointScreen);
+
+            if (this.scaleInitialPinchDistance === null) {
+                // 开始缩放
+                this.scaleInitialPinchDistance = dist;
+                this.scaleInitialModelScale = this.pandaModel.scale.clone();
+                this.grabbingHandIndex = 0;
+                this.pickedUpModel = this.pandaModel;
+            } else {
+                // 继续缩放
+                const deltaDistance = dist - this.scaleInitialPinchDistance;
+                const scaleChange = deltaDistance * this.scaleSensitivity;
+                let newScale = this.scaleInitialModelScale.x + scaleChange;
+
+                const minScale = this.pandaModel.userData?.minScale || CONFIG.model.defaultMinScale;
+                const maxScale = this.pandaModel.userData?.maxScale || CONFIG.model.defaultMaxScale;
+                newScale = Math.max(minScale, Math.min(maxScale, newScale));
+
+                this.pandaModel.scale.set(newScale, newScale, newScale);
+            }
+        } else if (this.scaleInitialPinchDistance !== null) {
+            // 结束缩放
+            this.scaleInitialPinchDistance = null;
+            this.scaleInitialModelScale = null;
+            this.grabbingHandIndex = -1;
+            this.pickedUpModel = null;
+        }
+    }
+
+    _handleHandDisappeared(handIndex, hand) {
+        if (this.interactionMode === 'drag' || this.interactionMode === 'rotate') {
+            if (this.grabbingHandIndex === handIndex) {
+                this._releaseModel(handIndex);
+            }
+        } else if (this.interactionMode === 'scale' && this.scaleInitialPinchDistance !== null) {
+            const hand0Exists = this.hands[0]?.landmarks;
+            const hand1Exists = this.hands[1]?.landmarks;
+            if (!hand0Exists || !hand1Exists) {
+                this.scaleInitialPinchDistance = null;
+                this.scaleInitialModelScale = null;
+                this.grabbingHandIndex = -1;
+                this.pickedUpModel = null;
+            }
+        }
+
+        hand.landmarks = null;
+        hand.isPinching = false;
+        hand.isFist = false;
+        if (hand.lineGroup) hand.lineGroup.visible = false;
+    }
+
+    _releaseModel(handIndex) {
+        this.grabbingHandIndex = -1;
+        this.pickedUpModel = null;
+    }
+
+    _playInteractionSound(handIndex, hand) {
+        let isActive = false;
+
+        if (this.interactionMode === 'drag' || this.interactionMode === 'rotate') {
+            isActive = this.grabbingHandIndex === handIndex && 
+                      this.pickedUpModel === this.pandaModel;
+        } else if (this.interactionMode === 'scale') {
+            isActive = this.scaleInitialPinchDistance !== null && 
+                      (handIndex === 0 || handIndex === 1);
+        }
+
+        if (hand.isPinching && isActive) {
+            this.audioManager.playInteractionClickSound();
+        }
+    }
+
+    _screenToWorld(screenPoint) {
+        const ndcX = screenPoint.x / (this.renderDiv.clientWidth / 2);
+        const ndcY = screenPoint.y / (this.renderDiv.clientHeight / 2);
+        const point3D = new THREE.Vector3(ndcX, ndcY, 0.5);
+        point3D.unproject(this.camera);
+        return point3D;
+    }
+
+    // ========== 手部可视化 ==========
+    _updateHandLines(handIndex, landmarks, videoParams, canvasWidth, canvasHeight) {
+        const hand = this.hands[handIndex];
+        const lineGroup = hand.lineGroup;
+
+        // 确定是否正在交互
+        const isInteracting = this._isHandInteracting(handIndex);
+        const material = handIndex === 0 ? this.fingertipMaterialHand1 : this.fingertipMaterialHand2;
+        if (material) {
+            material.opacity = isInteracting ? CONFIG.hand.grabOpacity : CONFIG.hand.defaultOpacity;
+        }
+
+        // 清空旧的可视化
+        while (lineGroup.children.length) {
+            const child = lineGroup.children[0];
+            lineGroup.remove(child);
+            if (child.geometry) child.geometry.dispose();
+        }
+
+        if (!landmarks?.length || !videoParams) {
+            lineGroup.visible = false;
+            return;
+        }
+
+        // 检查是否所有地标都在屏幕内
+        const allOnScreen = landmarks.every(lm => 
+            CoordinateTransformer.isLandmarkOnScreen(lm, videoParams)
+        );
+
+        if (!allOnScreen) {
+            lineGroup.visible = false;
+            return;
+        }
+
+        // 转换为屏幕坐标
+        const points3D = landmarks.map(lm => {
+            const screen = CoordinateTransformer.landmarkToScreen(lm, videoParams, canvasWidth, canvasHeight);
+            return new THREE.Vector3(screen.x, screen.y, 1.1);
+        });
+
+        // 绘制连接线
+        HAND_CONNECTIONS.forEach(([idx1, idx2]) => {
+            const p1 = points3D[idx1]?.clone().setZ(1);
+            const p2 = points3D[idx2]?.clone().setZ(1);
+            if (p1 && p2) {
+                const geometry = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+                const line = new THREE.Line(geometry, this.handLineMaterial);
+                lineGroup.add(line);
+            }
+        });
+
+        // 绘制指尖圆圈
+        CONFIG.hand.fingertipIndices.forEach(idx => {
+            const pos = points3D[idx];
+            if (pos) {
+                const radius = idx === 0 ? CONFIG.hand.wristRadius : CONFIG.hand.fingertipRadius;
+                const geometry = new THREE.CircleGeometry(radius, CONFIG.hand.circleSegments);
+                const circle = new THREE.Mesh(geometry, material);
+                circle.position.copy(pos);
+
+                // 添加脉冲效果
+                if (isInteracting) {
+                    const pulseProgress = (1 + Math.sin(this.clock.elapsedTime * CONFIG.interaction.pulseSpeed)) / 2;
+                    const scale = CONFIG.interaction.pulseBaseScale + 
+                                 pulseProgress * CONFIG.interaction.pulseAmplitude;
+                    circle.scale.set(scale, scale, 1);
+                } else {
+                    circle.scale.set(CONFIG.interaction.pulseBaseScale, CONFIG.interaction.pulseBaseScale, 1);
+                }
+
+                lineGroup.add(circle);
+            }
+        });
+
+        lineGroup.visible = true;
+    }
+
+    _isHandInteracting(handIndex) {
+        if (this.interactionMode === 'drag' || this.interactionMode === 'rotate') {
+            return this.grabbingHandIndex === handIndex && this.pickedUpModel === this.pandaModel;
+        } else if (this.interactionMode === 'scale') {
+            return this.scaleInitialPinchDistance !== null && (handIndex === 0 || handIndex === 1);
+        }
+        return false;
+    }
+
+    // ========== 视频参数计算 ==========
+    _getVisibleVideoParameters() {
+        if (!this.videoElement || this.videoElement.videoWidth === 0 || 
+            this.videoElement.videoHeight === 0) {
+            return null;
+        }
+
+        const vNatW = this.videoElement.videoWidth;
+        const vNatH = this.videoElement.videoHeight;
+        const rW = this.renderDiv.clientWidth;
+        const rH = this.renderDiv.clientHeight;
+
+        if (vNatW === 0 || vNatH === 0 || rW === 0 || rH === 0) return null;
+
+        const videoAR = vNatW / vNatH;
+        const renderAR = rW / rH;
+
+        let offsetX, offsetY, visibleWidth, visibleHeight;
+
+        if (videoAR > renderAR) {
+            // 视频更宽，水平裁剪
+            const scale = rH / vNatH;
+            const scaledVideoWidth = vNatW * scale;
+            const totalCroppedX = (scaledVideoWidth - rW) / scale;
+            offsetX = totalCroppedX / 2;
+            offsetY = 0;
+            visibleWidth = vNatW - totalCroppedX;
+            visibleHeight = vNatH;
+        } else {
+            // 视频更高，垂直裁剪
+            const scale = rW / vNatW;
+            const scaledVideoHeight = vNatH * scale;
+            const totalCroppedY = (scaledVideoHeight - rH) / scale;
+            offsetX = 0;
+            offsetY = totalCroppedY / 2;
+            visibleWidth = vNatW;
+            visibleHeight = vNatH - totalCroppedY;
+        }
+
+        if (visibleWidth <= 0 || visibleHeight <= 0) {
+            return {
+                offsetX: 0, offsetY: 0,
+                visibleWidth: vNatW, visibleHeight: vNatH,
+                videoNaturalWidth: vNatW, videoNaturalHeight: vNatH
+            };
+        }
+
+        return {
+            offsetX, offsetY, visibleWidth, visibleHeight,
+            videoNaturalWidth: vNatW, videoNaturalHeight: vNatH
+        };
+    }
+
+    // ========== 语音识别 ==========
+    _setupSpeechRecognition() {
+        // 创建语音状态显示
+        this.speechStatusElement = document.createElement('div');
+        this.speechStatusElement.style.cssText = `
+            background-color: rgba(0,0,0,0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-top: 4px;
+        `;
+        this.speechStatusElement.innerHTML = '语音识别状态：<span id="speech-status-text">已启用</span>';
+        this.speechStatusTextElement = this.speechStatusElement.querySelector('#speech-status-text');
+        this.interactionModeContainer.appendChild(this.speechStatusElement);
+
+        this.updateSpeechStatusDisplay = () => {
+            const enabled = localStorage.getItem('speechRecognitionEnabled') !== 'false';
+            if (this.speechStatusTextElement) {
+                this.speechStatusTextElement.textContent = enabled ? '已启用' : '已禁用';
+                this.speechStatusElement.style.backgroundColor = enabled ? 
+                    'rgba(0,123,255,0.6)' : 'rgba(108,117,125,0.6)';
+            }
+        };
+
+        this.updateSpeechStatusDisplay();
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'speechRecognitionEnabled') {
+                this.speechManager.updateSpeechRecognitionState();
+                this.updateSpeechStatusDisplay();
+            }
+        });
+
+        // 初始化SpeechManager
+        this.speechManager = new SpeechManager(
+            (finalTranscript, interimTranscript) => this._onSpeechResult(finalTranscript, interimTranscript),
+            (isActive) => this._onSpeechActiveChange(isActive),
+            (command) => this._onSpeechCommand(command)
+        );
+
+        if (this.speechBubble) {
+            this.speechBubble.innerHTML = "...";
+            this.speechBubble.style.opacity = '0.7';
+            this._updateSpeechBubbleAppearance();
+        }
+    }
+
+    _onSpeechResult(finalTranscript, interimTranscript) {
+        if (!this.speechBubble) return;
+
+        clearTimeout(this.speechBubbleTimeout);
+
+        if (finalTranscript) {
+            this.speechBubble.innerHTML = finalTranscript;
+            this.speechBubble.style.opacity = '1';
+            this.speechBubbleTimeout = setTimeout(() => {
+                this.speechBubble.innerHTML = "...";
+                this.speechBubble.style.opacity = '0.7';
+                this._updateSpeechBubbleAppearance();
+            }, 2000);
+        } else if (interimTranscript) {
+            this.speechBubble.innerHTML = `<i style="color: #888;">${interimTranscript}</i>`;
+            this.speechBubble.style.opacity = '1';
+        } else {
+            this.speechBubbleTimeout = setTimeout(() => {
+                if (this.speechBubble.innerHTML !== "...") {
+                    this.speechBubble.innerHTML = "...";
+                }
+                this.speechBubble.style.opacity = '0.7';
+                this._updateSpeechBubbleAppearance();
+            }, 500);
+        }
+
+        this._updateSpeechBubbleAppearance();
+    }
+
+    _onSpeechActiveChange(isActive) {
+        this.isSpeechActive = isActive;
+        this._updateSpeechBubbleAppearance();
+    }
+
+    _onSpeechCommand(command) {
+        const validCommands = ['drag', 'rotate', 'scale', 'fixed'];
+        if (validCommands.includes(command.toLowerCase())) {
+            this._setInteractionMode(command.toLowerCase());
+        }
+    }
+
+    _updateSpeechBubbleAppearance() {
+        if (!this.speechBubble) return;
+
+        const isPlaceholder = this.speechBubble.innerHTML === "..." || 
+                             this.speechBubble.innerText === "...";
+        const showActive = this.isSpeechActive && !isPlaceholder;
+
+        const translateY = isPlaceholder ? '-5px' : '0px';
+        const scale = showActive ? '1.15' : '1.0';
+        this.speechBubble.style.transform = `translateX(-50%) translateY(${translateY}) scale(${scale})`;
+
+        if (showActive) {
+            this.speechBubble.style.boxShadow = '5px 5px 0px #007bff';
+            this.speechBubble.style.padding = '18px 28px';
+            this.speechBubble.style.fontSize = 'clamp(20px, 3.5vw, 26px)';
+            this.speechBubble.style.top = '15px';
+        } else {
+            this.speechBubble.style.boxShadow = '4px 4px 0px rgba(0,0,0,1)';
+            this.speechBubble.style.padding = '15px 25px';
+            this.speechBubble.style.fontSize = 'clamp(16px, 3vw, 22px)';
+            this.speechBubble.style.top = '10px';
+        }
+    }
+
+    _showSpeechMessage(message, duration) {
+        if (this.speechBubble) {
+            this.speechBubble.innerHTML = message;
+            this.speechBubble.style.opacity = '1';
+            setTimeout(() => {
+                this.speechBubble.innerHTML = "...";
+                this.speechBubble.style.opacity = '0.7';
+                this._updateSpeechBubbleAppearance();
+            }, duration);
+        }
+    }
+
+    // ========== 交互模式管理 ==========
+    _setInteractionMode(mode) {
+        if (this.interactionMode === mode) return;
+
+        this.interactionMode = mode;
+
+        const modeNames = { 'drag': '拖拽', 'rotate': '旋转', 'scale': '缩放', 'fixed': '固定' };
+        this.modelLoadingBubble?.showMessage(`已切换至${modeNames[mode]}操作`, 3000);
+
+        // 释放当前抓取
+        if (this.grabbingHandIndex !== -1 && this.pickedUpModel) {
+            this.grabbingHandIndex = -1;
+            this.pickedUpModel = null;
+            this.rotateLastHandX = null;
+            this.scaleInitialPinchDistance = null;
+            this.scaleInitialModelScale = null;
+        }
+
+        this._updateHandMaterialsForMode(mode);
+        this._updateInteractionModeButtonStyles();
+        this._updateInstructionText();
+    }
+
+    _updateHandMaterialsForMode(mode) {
+        const color = INTERACTION_MODES[mode]?.hand || new THREE.Color(0x00ccff);
+        if (this.fingertipMaterialHand1) this.fingertipMaterialHand1.color.set(color);
+        if (this.fingertipMaterialHand2) this.fingertipMaterialHand2.color.set(color);
+    }
+
+    _updateInteractionModeButtonStyles() {
+        for (const modeKey in this.interactionModeButtons) {
+            const button = this.interactionModeButtons[modeKey];
+            const modeConfig = INTERACTION_MODES[modeKey];
+
+            if (modeKey === this.interactionMode) {
+                button.style.backgroundColor = modeConfig.base;
+                button.style.color = modeConfig.text;
+                button.style.boxShadow = '1px 1px 0px black';
+            } else {
+                button.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                button.style.color = modeConfig.base;
+                button.style.boxShadow = '2px 2px 0px black';
+            }
+        }
+
+        // 动画按钮容器始终隐藏（已移除动画功能）
+        if (this.animationButtonsContainer) {
+            this.animationButtonsContainer.style.opacity = '0';
+            this.animationButtonsContainer.style.display = 'none';
+        }
+    }
+
+    _updateInstructionText() {
+        if (this.instructionTextElement) {
+            const instruction = INTERACTION_MODES[this.interactionMode]?.instruction || "使用手势进行交互";
+            this.instructionTextElement.innerText = instruction;
+            this.instructionTextElement.style.bottom = '10px';
+        }
+    }
+
+    // ========== 动画播放 ==========
+    _playAnimation(name) {
+        if (!this.animationActions[name]) return;
+
+        const newAction = this.animationActions[name];
+        if (this.currentAction === newAction && newAction.isRunning()) return;
+
+        if (this.currentAction) {
+            this.currentAction.fadeOut(0.5);
+        }
+
+        newAction.reset().fadeIn(0.5).play();
+        this.currentAction = newAction;
+        this._updateButtonStyles(name);
+    }
+
+    _updateButtonStyles(activeAnimationName) {
+        const buttons = this.animationButtonsContainer.children;
+        for (let i = 0; i < buttons.length; i++) {
+            const button = buttons[i];
+            const isActive = button.dataset.originalName === activeAnimationName;
+            
+            button.style.backgroundColor = isActive ? '#007bff' : '#f0f0f0';
+            button.style.color = isActive ? 'white' : 'black';
+            button.style.fontWeight = isActive ? 'bold' : 'normal';
+            button.style.boxShadow = isActive ? '1px 1px 0px black' : '2px 2px 0px black';
+        }
+    }
+
+    // ========== 拖拽上传 ==========
+    _setupDragAndDrop() {
+        this.renderDiv.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            this.renderDiv.style.border = '2px dashed #007bff';
+        });
+
+        this.renderDiv.addEventListener('dragleave', () => {
+            this.renderDiv.style.border = 'none';
+        });
+
+        this.renderDiv.addEventListener('drop', (e) => {
+            e.preventDefault();
+            this.renderDiv.style.border = 'none';
+
+            if (e.dataTransfer.files?.length > 0) {
+                const file = e.dataTransfer.files[0];
+                const fileName = file.name.toLowerCase();
+                const fileType = file.type.toLowerCase();
+
+                if (fileName.endsWith('.gltf') || fileName.endsWith('.glb') || 
+                    fileType === 'model/gltf+json' || fileType === 'model/gltf-binary') {
+                    this._loadDroppedModel(file);
+                } else {
+                    this._showTemporaryMessage(`"${file.name}" 不是GLTF模型`, 3000);
+                }
+            }
+        });
+    }
+
+    _loadDroppedModel(file) {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            this._parseAndLoadGltf(e.target.result, file.name, file.type);
+        };
+
+        reader.onerror = (error) => {
+            console.error(`读取文件错误 ${file.name}:`, error);
+            this._showError(`读取文件 ${file.name} 失败`);
+        };
+
+        const fileNameLower = file.name.toLowerCase();
+        const fileTypeLower = file.type?.toLowerCase() || '';
+
+        if (fileNameLower.endsWith('.glb') || fileTypeLower === 'model/gltf-binary') {
+            reader.readAsArrayBuffer(file);
+        } else if (fileNameLower.endsWith('.gltf') || fileTypeLower === 'model/gltf+json') {
+            reader.readAsText(file);
+        } else {
+            this._showError(`不支持的文件类型: ${file.name}`);
+        }
+    }
+
+    _parseAndLoadGltf(content, fileName, fileType) {
+        const loader = new GLTFLoader();
+
+        try {
+            loader.parse(content, '', 
+                (gltf) => this._replaceModelWithLoaded(gltf, fileName),
+                (error) => {
+                    console.error(`解析GLTF模型失败 ${fileName}:`, error);
+                    this._showError(`解析 "${fileName}" 失败。模型可能损坏或不受支持。`);
+                }
+            );
+        } catch (e) {
+            console.error(`GLTF解析设置错误 ${fileName}:`, e);
+            this._showError(`设置解析器失败 "${fileName}"`);
+        }
+    }
+
+    _replaceModelWithLoaded(gltf, fileName) {
+        // 移除旧模型
+        if (this.pandaModel) {
+            this.scene.remove(this.pandaModel);
+            if (this.animationMixer) {
+                this.animationMixer.stopAllAction();
+                this.currentAction = null;
+            }
+            while (this.animationButtonsContainer.firstChild) {
+                this.animationButtonsContainer.removeChild(this.animationButtonsContainer.firstChild);
+            }
+            this.animationActions = {};
+            this.animationClips = [];
+        }
+
+        // 设置新模型
+        this.pandaModel = gltf.scene;
+        const scale = 80;
+        this.pandaModel.scale.set(scale, scale, scale);
+        
+        const sceneHeight = this.renderDiv.clientHeight;
+        this.pandaModel.position.set(0, sceneHeight * CONFIG.model.positionYFactor, CONFIG.model.positionZ);
+        
+        this.scene.add(this.pandaModel);
+
+        // 设置动画
+        this.animationMixer = new THREE.AnimationMixer(this.pandaModel);
+        this.animationClips = gltf.animations;
+        this.animationActions = {};
+
+        if (this.animationClips?.length) {
+            this._setupModelAnimations();
+        }
+
+        // 重置交互状态
+        this.grabbingHandIndex = -1;
+        this.pickedUpModel = null;
+        this.rotateLastHandX = null;
+        this.scaleInitialPinchDistance = null;
+        this.scaleInitialModelScale = null;
+
+        this._updateInteractionModeButtonStyles();
+    }
+
+    // ========== 窗口调整 ==========
+    _onResize() {
+        const width = this.renderDiv.clientWidth;
+        const height = this.renderDiv.clientHeight;
+
+        this.camera.left = width / -2;
+        this.camera.right = width / 2;
+        this.camera.top = height / 2;
+        this.camera.bottom = height / -2;
+        this.camera.updateProjectionMatrix();
+
+        this.renderer.setSize(width, height);
+        this.videoElement.style.width = width + 'px';
+        this.videoElement.style.height = height + 'px';
+    }
+
+    // ========== 动画循环 ==========
+    _animate() {
+        requestAnimationFrame(this._animate.bind(this));
+
+        const deltaTime = this.clock.getDelta();
+
+        if (this.gameState === 'tracking') {
+            this._updateHands();
+        }
+
+        if (this.animationMixer) {
+            this.animationMixer.update(deltaTime);
+        }
+
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    // ========== UI消息显示 ==========
+    _showStatusScreen(message, color = 'white', showRestartHint = false) {
+        this.gameOverContainer.style.display = 'block';
+        this.gameOverText.innerText = message;
+        this.gameOverText.style.color = color;
+        this.restartHintText.style.display = showRestartHint ? 'block' : 'none';
+    }
+
+    _showError(message) {
+        this.gameOverContainer.style.display = 'block';
+        this.gameOverText.innerText = `错误: ${message}`;
+        this.gameOverText.style.color = 'orange';
+        this.restartHintText.style.display = 'block';
+        this.gameState = 'error';
+
+        this.hands.forEach(hand => {
+            if (hand.lineGroup) hand.lineGroup.visible = false;
+        });
+    }
+
+    _showTemporaryMessage(message, duration) {
+        this._showStatusScreen(message, 'orange', false);
+        setTimeout(() => {
+            if (this.gameOverContainer.style.display === 'block' && 
+                this.gameOverText.innerText.includes(message)) {
+                this.gameOverContainer.style.display = 'none';
+            }
+        }, duration);
+    }
+
+    _restartGame() {
+        this.gameOverContainer.style.display = 'none';
+        this.hands.forEach(hand => {
+            if (hand.lineGroup) hand.lineGroup.visible = false;
+        });
+
+        this.gameState = 'tracking';
+        this.lastVideoTime = -1;
+        this.clock.start();
+    }
+
+    // ========== 启动 ==========
+    start() {
+        this.renderDiv.addEventListener('click', () => {
+            this.audioManager.resumeContext();
+            if (this.gameState === 'error' || this.gameState === 'paused') {
+                this._restartGame();
+            }
+        });
+    }
+
+    // ========== 资源清理 ==========
+    dispose() {
+        // 清理几何体和材质
+        this.scene.traverse((obj) => {
+            if (obj.geometry) obj.geometry.dispose();
+            if (obj.material) {
+                if (Array.isArray(obj.material)) {
+                    obj.material.forEach(m => m.dispose());
+                } else {
+                    obj.material.dispose();
+                }
+            }
+        });
+
+        // 停止摄像头流
+        if (this.videoElement?.srcObject) {
+            this.videoElement.srcObject.getTracks().forEach(track => track.stop());
+        }
+
+        // 移除事件监听
+        window.removeEventListener('resize', this._onResize);
+        window.removeEventListener('storage', this._setupStorageListener);
+
+        // 清理管理器
+        if (this.speechManager) this.speechManager.dispose?.();
+        if (this.audioManager) this.audioManager.dispose?.();
+    }
+}

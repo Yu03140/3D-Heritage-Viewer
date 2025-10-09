@@ -1,3 +1,4 @@
+// videoHelper.js - 视频加载辅助工具，用于处理视频加载失败时的备用方案
 // 这是一个辅助脚本，用于在视频加载失败时尝试使用Blob URL加载视频
 // 会在video_demo.html页面引用
 function loadVideoWithFetch(videoElement, videoPath) {

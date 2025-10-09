@@ -1,3 +1,4 @@
+// audioManager.js - 音频管理器，负责管理交互音效和背景音乐播放
 // 基础Web音频API声音管理器
 function _class_call_check(instance, Constructor) {
     if (!(instance instanceof Constructor)) {

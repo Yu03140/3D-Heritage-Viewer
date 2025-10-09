@@ -1,3 +1,4 @@
+// SpeechManager.js - 语音识别管理器，负责处理语音命令识别和语音转文本功能
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
     try {
         var info = gen[key](arg);
