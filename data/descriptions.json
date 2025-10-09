@@ -1,24 +1,32 @@
-{
+﻿{
   "Stan": {
     "title": "茶壶",
-    "description": "青色茶壶的釉彩技艺起源于宋代龙泉窑，与东青釉同源发展。明代正德年间，釉色浅淡闪黄；至清代景德镇仿制时称“嫩龙泉釉”，康熙时期烧制出釉质坚硬、色泽深润的豆青釉。清代豆青色进一步趋近绿色，成为独立釉色体系‌。豆青釉的烧制工艺复杂，需在高温下控制釉色变化，形成独特的色泽和质感。Green teapot glaze technology originated in the Song Dynasty Longquan kilns, and the development of the same source of the East Green glaze. During the Zhengde period of the Ming dynasty, the glaze color was light and flashing yellow; to the Qing dynasty Jingdezhen imitation called “tender Longquan glaze”, the Kangxi period fired a hard glaze, color and lustre of the dark soybean green glaze. Qing dynasty bean green color further tends to green, become an independent glaze color system. Bean green glaze firing process is complex, need to control the glaze color changes at high temperatures to form a unique color and texture."
+    "dynasty": "清代",
+    "category": "陶瓷器",
+    "description": "青色茶壶的釉彩技艺起源于宋代龙泉窑,与东青釉同源发展。明代正德年间,釉色浅淡闪黄;至清代景德镇仿制时称"嫩龙泉釉",康熙时期烧制出釉质坚硬、色泽深润的豆青釉。清代豆青色进一步趋近绿色,成为独立釉色体系。豆青釉的烧制工艺复杂,需在高温下控制釉色变化,形成独特的色泽和质感。Green teapot glaze technology originated in the Song Dynasty Longquan kilns, and the development of the same source of the East Green glaze. During the Zhengde period of the Ming dynasty, the glaze color was light and flashing yellow; to the Qing dynasty Jingdezhen imitation called \"tender Longquan glaze\", the Kangxi period fired a hard glaze, color and lustre of the dark soybean green glaze. Qing dynasty bean green color further tends to green, become an independent glaze color system. Bean green glaze firing process is complex, need to control the glaze color changes at high temperatures to form a unique color and texture."
   },
-  
-   "teacup": {
+  "teacup": {
     "title": "茶壶",
-    "description": "青色茶壶的釉彩技艺起源于宋代龙泉窑，与东青釉同源发展。明代正德年间，釉色浅淡闪黄；至清代景德镇仿制时称“嫩龙泉釉”，康熙时期烧制出釉质坚硬、色泽深润的豆青釉。清代豆青色进一步趋近绿色，成为独立釉色体系‌。豆青釉的烧制工艺复杂，需在高温下控制釉色变化，形成独特的色泽和质感。Green teapot glaze technology originated in the Song Dynasty Longquan kilns, and the development of the same source of the East Green glaze. During the Zhengde period of the Ming dynasty, the glaze color was light and flashing yellow; to the Qing dynasty Jingdezhen imitation called “tender Longquan glaze”, the Kangxi period fired a hard glaze, color and lustre of the dark soybean green glaze. Qing dynasty bean green color further tends to green, become an independent glaze color system. Bean green glaze firing process is complex, need to control the glaze color changes at high temperatures to form a unique color and texture."
+    "dynasty": "清代",
+    "category": "陶瓷器",
+    "description": "青色茶壶的釉彩技艺起源于宋代龙泉窑,与东青釉同源发展。明代正德年间,釉色浅淡闪黄;至清代景德镇仿制时称"嫩龙泉釉",康熙时期烧制出釉质坚硬、色泽深润的豆青釉。清代豆青色进一步趋近绿色,成为独立釉色体系。豆青釉的烧制工艺复杂,需在高温下控制釉色变化,形成独特的色泽和质感。Green teapot glaze technology originated in the Song Dynasty Longquan kilns, and the development of the same source of the East Green glaze. During the Zhengde period of the Ming dynasty, the glaze color was light and flashing yellow; to the Qing dynasty Jingdezhen imitation called \"tender Longquan glaze\", the Kangxi period fired a hard glaze, color and lustre of the dark soybean green glaze. Qing dynasty bean green color further tends to green, become an independent glaze color system. Bean green glaze firing process is complex, need to control the glaze color changes at high temperatures to form a unique color and texture."
   },
-   "modelNew": {
+  "modelNew": {
     "title": "乐舞俑",
-    "description": "乐舞俑是中国古代用于殉葬的陶俑，主要表现乐舞表演场景，反映了古代社会的音乐、舞蹈文化及丧葬习俗。唐代乐舞俑尤为突出，常见三彩釉陶工艺，题材包括宫廷乐舞、胡人表演等，现多收藏于陕西历史博物馆、中国国家博物馆等机构。Terracotta figurines of music and dance were used for burial in ancient China, mainly showing the scenes of music and dance performances, reflecting the music, dance culture and funeral customs of ancient society. The Tang Dynasty terracotta figurines of music and dance are especially prominent, and are commonly made of three-color glazed pottery, with themes including court music and dance and hu-man performances, etc. They are now mostly collected in the Shaanxi Museum of History, the National Museum of China, and other institutions."
+    "dynasty": "唐代",
+    "category": "雕塑",
+    "description": "乐舞俑是中国古代用于殉葬的陶俑,主要表现乐舞表演场景,反映了古代社会的音乐、舞蹈文化及丧葬习俗。唐代乐舞俑尤为突出,常见三彩釉陶工艺,题材包括宫廷乐舞、胡人表演等,现多收藏于陕西历史博物馆、中国国家博物馆等机构。Terracotta figurines of music and dance were used for burial in ancient China, mainly showing the scenes of music and dance performances, reflecting the music, dance culture and funeral customs of ancient society. The Tang Dynasty terracotta figurines of music and dance are especially prominent, and are commonly made of three-color glazed pottery, with themes including court music and dance and hu-man performances, etc. They are now mostly collected in the Shaanxi Museum of History, the National Museum of China, and other institutions."
   },
-   "egypt_djembe_drum": {
+  "egypt_djembe_drum": {
     "title": "埃及金贝鼓",
-    "description": "非洲鼓，是一个俗称，通常指的是来自西非的Djembe，是西非曼丁文化的代表性乐器。传统上，Djembe是徒手演奏，主要有低、中、高三个音，而且需要和Dunun（墩墩鼓）配合，演奏与特定生活场景相关的鼓曲，来给舞者和歌手伴奏。Djembe已经传播到世界各地，在不同的音乐、培训领域发挥着它独特的价值。The African drum, a common name, usually refers to the Djembe from West Africa and is a representative instrument of the Manding culture of West Africa. Traditionally played unarmed, the Djembe has three main tones: low, medium and high, and is used in conjunction with the dunun (dun drum) to accompany dancers and singers by playing drum tunes related to specific scenes of life.The Djembe has spread all over the world, and plays its unique value in different fields of music and training."
+    "dynasty": "未知",
+    "category": "乐器",
+    "description": "非洲鼓,是一个俗称,通常指的是来自西非的Djembe,是西非曼丁文化的代表性乐器。传统上,Djembe是徒手演奏,主要有低、中、高三个音,而且需要和Dunun(墩墩鼓)配合,演奏与特定生活场景相关的鼓曲,来给舞者和歌手伴奏。Djembe已经传播到世界各地,在不同的音乐、培训领域发挥着它独特的价值。The African drum, a common name, usually refers to the Djembe from West Africa and is a representative instrument of the Manding culture of West Africa. Traditionally played unarmed, the Djembe has three main tones: low, medium and high, and is used in conjunction with the dunun (dun drum) to accompany dancers and singers by playing drum tunes related to specific scenes of life.The Djembe has spread all over the world, and plays its unique value in different fields of music and training."
   },
-   "copper-chew": {
+  "copper-chew": {
     "title": "二里头文化青铜器",
-    "description": "二里头文化青铜器以中国河南省洛阳市偃师二里头遗址命名的同类型文化遗存出土的青铜器。年代约当公元前21～前16世纪。可分为 4期，青铜器大部分属于第三期。二里头文化青铜器的年代，有夏代晚期和商代早期两种不同看法。在这个遗址的晚期堆积中，曾发现过一些小件青铜器。1973年第一次在第三期堆积层中出土了一件青铜容器爵，以后又陆续有所发现。Erlitou Culture Bronzes Bronzes excavated from the remains of the same type of culture named after the Erlitou site in Yanshi, Luoyang City, Henan Province, China. The date is about 21st to 16th century BC. Can be divided into 4 phases, most of the bronzes belong to the third phase. There are two different views on the age of the Erlitou culture bronzes, the late Xia Dynasty and the early Shang Dynasty. In the late accumulation of this site, there have been found some small pieces of bronze. 1973 in the third phase of the accumulation layer for the first time in the unearthed a bronze container jue, and later found one after another."
+    "dynasty": "夏商",
+    "category": "青铜器",
+    "description": "二里头文化青铜器以中国河南省洛阳市偃师二里头遗址命名的同类型文化遗存出土的青铜器。年代约当公元前21～前16世纪。可分为 4期,青铜器大部分属于第三期。二里头文化青铜器的年代,有夏代晚期和商代早期两种不同看法。在这个遗址的晚期堆积中,曾发现过一些小件青铜器。1973年第一次在第三期堆积层中出土了一件青铜容器爵,以后又陆续有所发现。Erlitou Culture Bronzes Bronzes excavated from the remains of the same type of culture named after the Erlitou site in Yanshi, Luoyang City, Henan Province, China. The date is about 21st to 16th century BC. Can be divided into 4 phases, most of the bronzes belong to the third phase. There are two different views on the age of the Erlitou culture bronzes, the late Xia Dynasty and the early Shang Dynasty. In the late accumulation of this site, there have been found some small pieces of bronze. 1973 in the third phase of the accumulation layer for the first time in the unearthed a bronze container jue, and later found one after another."
   }
- 
 }

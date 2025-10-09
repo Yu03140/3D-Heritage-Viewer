@@ -318,6 +318,85 @@ export class Game {
                 this.modelLoadingBubble?.showMessage("旋转灵敏度已更新", 2000);
             }
         });
+
+        // 监听模型切换事件
+        window.addEventListener('loadNewModel', (e) => {
+            const modelPath = e.detail.modelPath;
+            console.log("接收到加载新模型事件:", modelPath);
+            this.loadNewModel(modelPath);
+        });
+    }
+
+    async loadNewModel(modelPath) {
+        try {
+            // 显示加载提示
+            this.modelLoadingBubble?.showMessage("正在加载模型...", 0);
+
+            // 移除旧模型
+            if (this.pandaModel) {
+                this.scene.remove(this.pandaModel);
+                this.pandaModel = null;
+            }
+
+            // 清空动画
+            this.animationMixer = null;
+            this.animationClips = [];
+            this.animationActions = {};
+            this.currentAction = null;
+
+            // 清空动画按钮
+            const buttonContainer = document.getElementById('animation-buttons');
+            if (buttonContainer) {
+                buttonContainer.innerHTML = '';
+            }
+
+            // 加载新模型
+            const gltfLoader = new GLTFLoader();
+            await new Promise((resolve, reject) => {
+                gltfLoader.load(
+                    modelPath,
+                    (gltf) => {
+                        this.pandaModel = gltf.scene;
+                        this.animationMixer = new THREE.AnimationMixer(this.pandaModel);
+                        this.animationClips = gltf.animations;
+
+                        // 设置模型
+                        const scale = CONFIG.model.defaultScale;
+                        this.pandaModel.scale.set(scale, scale, scale);
+                        this.pandaModel.userData.maxScale = CONFIG.model.defaultMaxScale;
+                        this.pandaModel.userData.minScale = CONFIG.model.defaultMinScale;
+
+                        const sceneHeight = this.renderDiv.clientHeight;
+                        this.pandaModel.position.set(
+                            0,
+                            sceneHeight * CONFIG.model.positionYFactor,
+                            CONFIG.model.positionZ
+                        );
+
+                        this.scene.add(this.pandaModel);
+
+                        // 处理动画
+                        if (this.animationClips?.length) {
+                            this._setupModelAnimations();
+                        }
+
+                        // 触发modelChanged事件
+                        window.dispatchEvent(new CustomEvent('modelChanged', {
+                            detail: { modelPath: modelPath }
+                        }));
+
+                        resolve();
+                    },
+                    undefined,
+                    reject
+                );
+            });
+
+            this.modelLoadingBubble?.showMessage("模型加载成功!", 2000);
+        } catch (error) {
+            console.error("加载模型失败:", error);
+            this.modelLoadingBubble?.showMessage("加载模型失败", 3000);
+        }
     }
 
     // ========== DOM设置 ==========
@@ -598,6 +677,11 @@ export class Game {
         if (this.animationClips?.length) {
             this._setupModelAnimations();
         }
+
+        // 触发modelChanged事件，让描述管理器知道初始模型已加载
+        window.dispatchEvent(new CustomEvent('modelChanged', {
+            detail: { modelPath: 'assets/teacup.gltf' }
+        }));
 
         resolve();
     }

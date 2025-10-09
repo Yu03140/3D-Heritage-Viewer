@@ -21,14 +21,6 @@ if (!renderDiv) {
         // 不再在这里创建切换按钮，将在game.js的UI初始化中添加
     });
     
-    // 在初始化后触发默认模型加载完成事件
-    setTimeout(() => {
-        const initialModelChangedEvent = new CustomEvent('modelChanged', { 
-            detail: { modelPath: 'teacup.gltf' } // 默认加载teacup.gltf
-        });
-        window.dispatchEvent(initialModelChangedEvent);
-    }, 2000); // 等待2秒，确保其他组件已初始化
-    
     // 导出game实例以便在控制台中调试
     window.gameInstance = game;
 }

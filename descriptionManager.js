@@ -61,7 +61,29 @@ export class DescriptionManager {
         if (this.descriptions && this.descriptions[modelName]) {
             const modelData = this.descriptions[modelName];
             this.descriptionTitle.textContent = modelData.title;
-            this.descriptionContent.innerHTML = modelData.description;
+            
+            // 构建包含标签的HTML内容
+            let htmlContent = '';
+            
+            // 添加标签区域
+            if (modelData.dynasty || modelData.category) {
+                htmlContent += '<div class="model-tags">';
+                
+                if (modelData.dynasty) {
+                    htmlContent += `<span class="tag tag-dynasty">${modelData.dynasty}</span>`;
+                }
+                
+                if (modelData.category) {
+                    htmlContent += `<span class="tag tag-category">${modelData.category}</span>`;
+                }
+                
+                htmlContent += '</div>';
+            }
+            
+            // 添加描述内容
+            htmlContent += `<div class="model-description-text">${modelData.description}</div>`;
+            
+            this.descriptionContent.innerHTML = htmlContent;
         } else {
             this.descriptionTitle.textContent = "未找到介绍";
             this.descriptionContent.innerHTML = `未找到 "${modelName}" 的介绍信息。`;

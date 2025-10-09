@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>3D文物展示系统</title>
+        <link rel="icon" type="image/png" href="favicon.png">
         <link rel="stylesheet" href="styles.css">
 
         <!-- Primary Meta Tags -->
@@ -48,11 +49,29 @@
             </div>
             <div id="model-selection-card" class="model-selection-card">
                 <h3>选择文物模型</h3>
+                <div class="filter-section">
+                    <div class="filter-group">
+                        <label>朝代筛选：</label>
+                        <button class="filter-btn active" data-filter-type="dynasty" data-filter-value="all">全部</button>
+                        <button class="filter-btn" data-filter-type="dynasty" data-filter-value="清代">清代</button>
+                        <button class="filter-btn" data-filter-type="dynasty" data-filter-value="唐代">唐代</button>
+                        <button class="filter-btn" data-filter-type="dynasty" data-filter-value="夏商">夏商</button>
+                        <button class="filter-btn" data-filter-type="dynasty" data-filter-value="未知">未知</button>
+                    </div>
+                    <div class="filter-group">
+                        <label>类别筛选：</label>
+                        <button class="filter-btn active" data-filter-type="category" data-filter-value="all">全部</button>
+                        <button class="filter-btn" data-filter-type="category" data-filter-value="陶瓷器">陶瓷器</button>
+                        <button class="filter-btn" data-filter-type="category" data-filter-value="雕塑">雕塑</button>
+                        <button class="filter-btn" data-filter-type="category" data-filter-value="乐器">乐器</button>
+                        <button class="filter-btn" data-filter-type="category" data-filter-value="青铜器">青铜器</button>
+                    </div>
+                </div>
                 <div class="model-list">
-                    <div class="model-item selected " data-model="teacup.gltf">茶壶</div>
-                    <div class="model-item " data-model="modelNew.gltf">乐舞俑</div>
-                    <div class="model-item " data-model="egypt_djembe_drum.glb">埃及金贝鼓</div>
-                    <div class="model-item " data-model="copper-chew.gltf">二里头文化青铜器</div>
+                    <div class="model-item selected " data-model="teacup.gltf" data-dynasty="清代" data-category="陶瓷器">茶壶</div>
+                    <div class="model-item " data-model="modelNew.gltf" data-dynasty="唐代" data-category="雕塑">乐舞俑</div>
+                    <div class="model-item " data-model="egypt_djembe_drum.glb" data-dynasty="未知" data-category="乐器">埃及金贝鼓</div>
+                    <div class="model-item " data-model="copper-chew.gltf" data-dynasty="夏商" data-category="青铜器">二里头文化青铜器</div>
                 </div>
                 <button id="closeModelCard">关闭</button>
             </div>
@@ -109,7 +128,58 @@
                         // 关闭模型选择卡片
                         modelSelectionCard.style.display = 'none';
                     });
-                });                console.log("模型选择功能设置完成");
+                });
+
+                // 过滤功能
+                const filterBtns = document.querySelectorAll('.filter-btn');
+                let currentDynastyFilter = 'all';
+                let currentCategoryFilter = 'all';
+
+                filterBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const filterType = this.getAttribute('data-filter-type');
+                        const filterValue = this.getAttribute('data-filter-value');
+                        
+                        // 更新当前过滤器
+                        if (filterType === 'dynasty') {
+                            currentDynastyFilter = filterValue;
+                            // 移除同类型按钮的active状态
+                            document.querySelectorAll('.filter-btn[data-filter-type="dynasty"]').forEach(b => {
+                                b.classList.remove('active');
+                            });
+                        } else if (filterType === 'category') {
+                            currentCategoryFilter = filterValue;
+                            // 移除同类型按钮的active状态
+                            document.querySelectorAll('.filter-btn[data-filter-type="category"]').forEach(b => {
+                                b.classList.remove('active');
+                            });
+                        }
+                        
+                        // 激活当前按钮
+                        this.classList.add('active');
+                        
+                        // 应用过滤
+                        applyFilters();
+                    });
+                });
+
+                function applyFilters() {
+                    modelItems.forEach(item => {
+                        const itemDynasty = item.getAttribute('data-dynasty');
+                        const itemCategory = item.getAttribute('data-category');
+                        
+                        const dynastyMatch = currentDynastyFilter === 'all' || itemDynasty === currentDynastyFilter;
+                        const categoryMatch = currentCategoryFilter === 'all' || itemCategory === currentCategoryFilter;
+                        
+                        if (dynastyMatch && categoryMatch) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                }
+
+                console.log("模型选择功能设置完成");
             });
         </script>
     </body>
