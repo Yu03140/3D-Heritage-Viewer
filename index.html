@@ -17,30 +17,134 @@
         <meta property="og:description" content="使用手势和语音命令实时控制3D文物模型">
         <meta property="og:image" content="assets/siteOGImage.jpg">
     </head>
-    <body style="width: 100%; height: 100%; overflow: hidden; margin: 0; background-color: #f0f0f0;">
-        <div id="welcomeScreen" class="welcome-screen">
-            <div class="welcome-title">3D文物展示系统</div>
-            
-            <div class="welcome-buttons-top">
-                <button id="settingsBtn" class="welcome-button settings-button">设置</button>
-                <button id="tutorialBtn" class="welcome-button tutorial-button">教程</button>
-            </div>
+    <body style="margin: 0; padding: 0; overflow-x: hidden;">
+        <!-- 首页主体 -->
+        <div class="museum-homepage">
+            <!-- 顶部横幅 -->
+            <section class="museum-header">
+                <div class="header-bg"></div>
+                <div class="header-content">
+                    <div class="museum-title">
+                        <h1>古代中国文物——3D形式全新展现</h1>
+                        <p>Ancient Chinese Cultural Relics——Newly Presented in 3D Format</p>
+                    </div>
+                    <!-- <div class="header-nav">
+                        <button id="tutorialBtn" class="header-nav-btn">使用教程</button>
+                        <button id="settingsBtn" class="header-nav-btn">系统设置</button>
+                    </div> -->
+                </div>
+                <div class="artifact-background"></div>
+            </section>
 
-            <div class="welcome-content">
-                <p>使用手势和语音命令实时控制3D文物模型</p>
-                <ul class="feature-list">
-                    <li>说出"拖拽"、"旋转"、"缩放"或"固定"来切换交互模式</li>
-                    <li>捏合手指以控制3D模型</li>
-                    <li>将新的3D模型拖放到页面上以导入</li>
-                </ul>
-            </div>
-            
-            <button id="startBtn" class="welcome-button start-button">开始体验</button>
+            <!-- 公告栏 -->
+            <section class="announcement-bar">
+                <div class="announcement-content">
+                    <div class="announcement-text">
+                        <span class="announcement-dot">●</span>
+                        <span>若需要投稿个人藏品，请查看投稿须知后发送邮件至12345678@email.com</span>
+                        <span class="announcement-date">2025/10/12</span>
+                        <span class="announcement-dot">●</span>
+                        <span>个人投稿须知</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 博物馆信息 -->
+            <section class="museum-info">
+                <div class="info-container">
+                    <div class="opening-hours">
+                        <h3>投稿时间</h3>
+                        <div class="time-info">
+                            <span class="time-main">工作日 09:00 — 16:30 </span>
+                            <p class="time-note">投稿邮箱:12345678@email.com</p>
+                        </div>
+                    </div>
+                    <div class="header-nav">
+                        <button id="tutorialBtn" class="header-nav-btn">使用教程</button>
+                        <button id="settingsBtn" class="header-nav-btn">系统设置</button>
+                    </div>
+                    <div class="service-buttons">
+                        <button class="service-btn">投稿须知</button>
+                        <button class="service-btn">藏主服务</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 主要内容区域 -->
+            <section class="main-content">
+                <div class="content-grid">
+                    <!-- 左侧速览 -->
+                    <div class="news-section">
+                        <div class="section-header">
+                            <h3>速 览</h3>
+                            <button class="more-btn">···</button>
+                        </div>
+                        <div class="news-list">
+                            <div class="news-item">
+                                <div class="news-category">个人藏品</div>
+                                <div class="news-title">家藏清代点翠头面？真点翠还是鹦鹉毛？</div>
+                                <div class="news-date">25/10/9</div>
+                            </div>
+                            <div class="news-item">
+                                <div class="news-category">官方拍卖</div>
+                                <div class="news-title">这只老银簪子以120万元拍卖价成交</div>
+                                <div class="news-date">25/7/21</div>
+                            </div>
+                            <div class="news-item">
+                                <div class="news-category">个人藏品</div>
+                                <div class="news-title">曾经珍贵的粮票，现在还值钱吗？</div>
+                                <div class="news-date">24/8/7</div>
+                            </div>
+                            <div class="news-item">
+                                <div class="news-category">合作讯息</div>
+                                <div class="news-title">我们正式与鉴宝人——老胡说鉴宝——合作啦！</div>
+                                <div class="news-date">25/10/15</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧推广 -->
+                    <div class="promotion-section">
+                        <div class="promotion-card">
+                            <div class="card-content">
+                                <h4>中华文明线上云展藏品征集</h4>
+                                <span class="card-badge">征集信息</span>
+                            </div>
+                        </div>
+                        <div class="promotion-card artifact-card">
+                            <div class="card-content">
+                                <h4>实体博物馆合作征集</h4>
+                                <span class="card-badge">征集信息</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3D展馆入口 -->
+            <section class="digital-entrance">
+                <div class="entrance-content">
+                    <h2>3D数字文物展馆</h2>
+                    <p>运用前沿的手势识别与语音控制技术，让您以全新的方式探索珍贵文物</p>
+                    <button id="startBtn" class="entrance-btn">
+                        <span>进入数字展馆</span>
+                        <span class="btn-icon">🏛️</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 页脚 -->
+            <footer class="museum-footer">
+                <div class="footer-content">
+                    <p>中国数字博物馆 | 传承华夏文明 | 弘扬民族文化</p>
+                    <p class="footer-sub">China Digital Museum | Inheriting Chinese Civilization</p>
+                </div>
+            </footer>
         </div>
 
         <script type="module">
             document.getElementById('startBtn').addEventListener('click', function() {
-                window.location.href = 'main.html';
+                window.location.href = 'gallery.html';
             });
             
             document.getElementById('settingsBtn').addEventListener('click', function() {
@@ -50,6 +154,26 @@
             document.getElementById('tutorialBtn').addEventListener('click', function() {
                 window.location.href = 'tutorial.html';
             });
+
+            // 添加滚动效果
+            window.addEventListener('scroll', function() {
+                const nav = document.querySelector('.homepage-nav');
+                if (window.scrollY > 50) {
+                    nav.style.background = 'rgba(255, 255, 255, 0.95)';
+                    nav.style.backdropFilter = 'blur(10px)';
+                } else {
+                    nav.style.background = 'rgba(255, 255, 255, 0.9)';
+                    nav.style.backdropFilter = 'none';
+                }
+            });
+
+            // 浮动文物动画
+            const floatingArtifact = document.querySelector('.floating-artifact');
+            let rotation = 0;
+            setInterval(() => {
+                rotation += 0.5;
+                floatingArtifact.style.transform = `rotate(${rotation}deg)`;
+            }, 50);
         </script>
     </body>
 </html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D文物展馆 - 个人数字博物馆</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="3D文物展馆 - 个人数字博物馆">
+    <meta name="description" content="探索珍贵文物，按朝代和类别浏览历史文明">
+</head>
+<body style="margin: 0; padding: 0; overflow-x: hidden; background: #f5f5f5;">
+    <!-- 顶部导航 -->
+    <nav class="museum-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <a href="index.html" class="back-home">
+                    <span class="back-icon">←</span>
+                    <span>返回首页</span>
+                </a>
+                <div class="nav-title">
+                    <span class="title-icon">🏛️</span>
+                    <span>个人数字博物馆</span>
+                </div>
+            </div>
+            <div class="nav-right">
+                <button id="tutorialBtn" class="nav-btn">使用教程</button>
+                <button id="settingsBtn" class="nav-btn">系统设置</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="gallery-main">
+        <!-- 页面标题 -->
+        <section class="gallery-header">
+            <div class="header-container">
+                <h1 class="gallery-title">文物展览馆</h1>
+                <p class="gallery-subtitle">按历史朝代浏览珍贵文物</p>
+                <div class="breadcrumb">
+                    <span id="currentPath">选择朝代</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 朝代选择区域 -->
+        <section class="dynasty-selection" id="dynastySelection">
+            <div class="dynasty-container">
+                <div class="dynasty-grid">
+                    <div class="dynasty-card" data-dynasty="夏商">
+                        <div class="dynasty-image">
+                            <div class="dynasty-icon">🏺</div>
+                            <div class="dynasty-period">约公元前2070-1046年</div>
+                        </div>
+                        <div class="dynasty-info">
+                            <h3>夏商时期</h3>
+                            <p>中华文明的起源时期，青铜文化的萌芽与发展</p>
+                            <div class="dynasty-stats">
+                                <span>1件文物</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dynasty-card" data-dynasty="唐代">
+                        <div class="dynasty-image">
+                            <div class="dynasty-icon">💃</div>
+                            <div class="dynasty-period">公元618-907年</div>
+                        </div>
+                        <div class="dynasty-info">
+                            <h3>唐代</h3>
+                            <p>盛世王朝，文化艺术达到高峰的黄金时期</p>
+                            <div class="dynasty-stats">
+                                <span>1件文物</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dynasty-card" data-dynasty="清代">
+                        <div class="dynasty-image">
+                            <div class="dynasty-icon">🫖</div>
+                            <div class="dynasty-period">公元1644-1912年</div>
+                        </div>
+                        <div class="dynasty-info">
+                            <h3>清代</h3>
+                            <p>中国最后一个封建王朝，工艺技术登峰造极</p>
+                            <div class="dynasty-stats">
+                                <span>1件文物</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dynasty-card" data-dynasty="古代世界">
+                        <div class="dynasty-image">
+                            <div class="dynasty-icon">🥁</div>
+                            <div class="dynasty-period">古代文明</div>
+                        </div>
+                        <div class="dynasty-info">
+                            <h3>古代世界</h3>
+                            <p>世界各地古代文明的珍贵遗存</p>
+                            <div class="dynasty-stats">
+                                <span>1件文物</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 文物列表区域（初始隐藏） -->
+        <section class="artifacts-section" id="artifactsSection" style="display: none;">
+            <div class="artifacts-container">
+                <div class="section-header">
+                    <button class="back-btn" id="backToDynasty">
+                        <span>←</span>
+                        <span>返回朝代选择</span>
+                    </button>
+                    <h2 id="currentDynastyTitle">朝代文物</h2>
+                </div>
+                <div class="artifacts-grid" id="artifactsGrid">
+                    <!-- 文物将通过JavaScript动态加载 -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 类别选择弹窗 -->
+    <div class="category-modal" id="categoryModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>选择文物类别</h3>
+                <button class="modal-close" id="modalClose">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="category-grid" id="categoryGrid">
+                    <!-- 类别选项将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="gallery-footer">
+        <div class="footer-content">
+            <p>探索历史文明 | 感受文物魅力 | <a href="index.html">返回首页</a></p>
+        </div>
+    </footer>
+
+    <script type="module">
+        // 文物数据结构
+        const artifactsData = {
+            "夏商": {
+                "青铜器": [
+                    {
+                        id: "copper-chew.gltf",
+                        title: "二里头青铜器",
+                        description: "中国青铜时代早期代表作品，见证了夏商文明的青铜铸造技术发展历程。",
+                        features: ["青铜铸造", "夏商文明"],
+                        period: "约公元前1600-1046年"
+                    }
+                ]
+            },
+            "唐代": {
+                "雕塑": [
+                    {
+                        id: "modelNew.gltf",
+                        title: "唐代乐舞俑",
+                        description: "唐代三彩釉陶工艺代表作，生动展现了盛唐时期宫廷音乐舞蹈的繁荣景象。",
+                        features: ["宫廷乐舞", "三彩釉陶"],
+                        period: "公元618-907年"
+                    }
+                ]
+            },
+            "清代": {
+                "陶瓷器": [
+                    {
+                        id: "teacup.gltf",
+                        title: "清代青瓷茶壶",
+                        description: "豆青釉制作工艺复杂，釉质坚硬、色泽深润，展现了清代景德镇精湛的制瓷技术。",
+                        features: ["豆青釉工艺", "景德镇制"],
+                        period: "公元1644-1912年"
+                    }
+                ]
+            },
+            "古代世界": {
+                "乐器": [
+                    {
+                        id: "egypt_djembe_drum.glb",
+                        title: "埃及金贝鼓",
+                        description: "西非曼丁文化代表性打击乐器，传统徒手演奏，蕴含着丰富的部落文化内涵。",
+                        features: ["西非文化", "打击乐器"],
+                        period: "古代文明"
+                    }
+                ]
+            }
+        };
+
+        // 状态管理
+        let currentDynasty = null;
+        let currentCategory = null;
+
+        // DOM元素
+        const dynastySelection = document.getElementById('dynastySelection');
+        const artifactsSection = document.getElementById('artifactsSection');
+        const categoryModal = document.getElementById('categoryModal');
+        const categoryGrid = document.getElementById('categoryGrid');
+        const artifactsGrid = document.getElementById('artifactsGrid');
+        const currentPath = document.getElementById('currentPath');
+        const currentDynastyTitle = document.getElementById('currentDynastyTitle');
+        const backToDynasty = document.getElementById('backToDynasty');
+        const modalClose = document.getElementById('modalClose');
+
+        // 页面导航
+        document.getElementById('settingsBtn').addEventListener('click', function() {
+            window.location.href = 'settings.html';
+        });
+        
+        document.getElementById('tutorialBtn').addEventListener('click', function() {
+            window.location.href = 'tutorial.html';
+        });
+
+        // 朝代卡片点击事件
+        document.querySelectorAll('.dynasty-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const dynasty = this.getAttribute('data-dynasty');
+                showCategoryModal(dynasty);
+            });
+        });
+
+        // 显示类别选择弹窗
+        function showCategoryModal(dynasty) {
+            currentDynasty = dynasty;
+            const categories = Object.keys(artifactsData[dynasty] || {});
+            
+            if (categories.length === 0) {
+                alert('该朝代暂无文物展示');
+                return;
+            }
+
+            // 如果只有一个类别，直接进入文物展示
+            if (categories.length === 1) {
+                currentCategory = categories[0];
+                showArtifacts(dynasty, categories[0]);
+                return;
+            }
+
+            // 生成类别选项
+            categoryGrid.innerHTML = '';
+            categories.forEach(category => {
+                const categoryItem = document.createElement('div');
+                categoryItem.className = 'category-item';
+                categoryItem.innerHTML = `
+                    <div class="category-icon">${getCategoryIcon(category)}</div>
+                    <div class="category-name">${category}</div>
+                    <div class="category-count">${artifactsData[dynasty][category].length}件文物</div>
+                `;
+                categoryItem.addEventListener('click', () => {
+                    currentCategory = category;
+                    categoryModal.style.display = 'none';
+                    showArtifacts(dynasty, category);
+                });
+                categoryGrid.appendChild(categoryItem);
+            });
+
+            categoryModal.style.display = 'block';
+        }
+
+        // 获取类别图标
+        function getCategoryIcon(category) {
+            const icons = {
+                '青铜器': '🏺',
+                '陶瓷器': '🫖',
+                '雕塑': '💃',
+                '乐器': '🥁',
+                '绘画': '🎨',
+                '书法': '📜',
+                '玉器': '💎',
+                '金银器': '✨'
+            };
+            return icons[category] || '🏛️';
+        }
+
+        // 显示文物列表
+        function showArtifacts(dynasty, category) {
+            dynastySelection.style.display = 'none';
+            artifactsSection.style.display = 'block';
+            
+            currentPath.textContent = `${dynasty} > ${category}`;
+            currentDynastyTitle.textContent = `${dynasty} · ${category}`;
+
+            const artifacts = artifactsData[dynasty][category] || [];
+            artifactsGrid.innerHTML = '';
+
+            artifacts.forEach(artifact => {
+                const artifactCard = document.createElement('div');
+                artifactCard.className = 'artifact-card';
+                artifactCard.innerHTML = `
+                    <div class="artifact-image">
+                        <div class="artifact-icon">${getCategoryIcon(category)}</div>
+                        <div class="artifact-glow-effect"></div>
+                    </div>
+                    <div class="artifact-info">
+                        <div class="artifact-header">
+                            <h3 class="artifact-name">${artifact.title}</h3>
+                            <div class="artifact-tags">
+                                <span class="tag tag-dynasty">${dynasty}</span>
+                                <span class="tag tag-category">${category}</span>
+                            </div>
+                        </div>
+                        <p class="artifact-description">${artifact.description}</p>
+                        <div class="artifact-features">
+                            ${artifact.features.map(feature => `
+                                <div class="feature-item">
+                                    <span class="feature-icon">✦</span>
+                                    <span>${feature}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="artifact-period">
+                            <span class="period-label">历史时期:</span>
+                            <span>${artifact.period}</span>
+                        </div>
+                        <button class="view-artifact-btn" data-model="${artifact.id}">
+                            <span>3D观赏</span>
+                            <span class="btn-arrow">→</span>
+                        </button>
+                    </div>
+                `;
+
+                // 添加点击事件
+                const viewBtn = artifactCard.querySelector('.view-artifact-btn');
+                viewBtn.addEventListener('click', () => {
+                    window.location.href = `main.html?model=${artifact.id}`;
+                });
+
+                // 添加悬停效果
+                artifactCard.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px)';
+                    const glowEffect = this.querySelector('.artifact-glow-effect');
+                    if (glowEffect) {
+                        glowEffect.style.opacity = '0.6';
+                    }
+                });
+
+                artifactCard.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    const glowEffect = this.querySelector('.artifact-glow-effect');
+                    if (glowEffect) {
+                        glowEffect.style.opacity = '0.2';
+                    }
+                });
+
+                artifactsGrid.appendChild(artifactCard);
+            });
+        }
+
+        // 返回朝代选择
+        backToDynasty.addEventListener('click', () => {
+            artifactsSection.style.display = 'none';
+            dynastySelection.style.display = 'block';
+            currentPath.textContent = '选择朝代';
+            currentDynasty = null;
+            currentCategory = null;
+        });
+
+        // 关闭弹窗
+        modalClose.addEventListener('click', () => {
+            categoryModal.style.display = 'none';
+        });
+
+        // 点击弹窗背景关闭
+        categoryModal.addEventListener('click', (e) => {
+            if (e.target === categoryModal || e.target.classList.contains('modal-overlay')) {
+                categoryModal.style.display = 'none';
+            }
+        });
+
+        // 添加朝代卡片悬停效果
+        document.querySelectorAll('.dynasty-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // 滚动效果
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('.museum-nav');
+            if (window.scrollY > 100) {
+                nav.style.background = 'rgba(255, 255, 255, 0.95)';
+                nav.style.backdropFilter = 'blur(10px)';
+            } else {
+                nav.style.background = 'rgba(255, 255, 255, 0.9)';
+                nav.style.backdropFilter = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
