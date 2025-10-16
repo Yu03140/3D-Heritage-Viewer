@@ -190,8 +190,9 @@ class GestureDetector {
 
 // ==================== 主Game类 ====================
 export class Game {
-    constructor(renderDiv) {
+    constructor(renderDiv, initialModelPath = 'assets/teacup.gltf') {
         this.renderDiv = renderDiv;
+        this.initialModelPath = initialModelPath;
         this._initProperties();
         this._init().catch(error => {
             console.error("初始化失败:", error);
@@ -640,7 +641,7 @@ export class Game {
         
         try {
             await new Promise((resolve, reject) => {
-                gltfLoader.load('assets/teacup.gltf', 
+                gltfLoader.load(this.initialModelPath, 
                     (gltf) => this._onModelLoaded(gltf, resolve),
                     undefined,
                     reject
@@ -680,7 +681,7 @@ export class Game {
 
         // 触发modelChanged事件，让描述管理器知道初始模型已加载
         window.dispatchEvent(new CustomEvent('modelChanged', {
-            detail: { modelPath: 'assets/teacup.gltf' }
+            detail: { modelPath: this.initialModelPath }
         }));
 
         resolve();
