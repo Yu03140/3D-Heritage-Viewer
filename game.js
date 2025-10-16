@@ -298,8 +298,7 @@ export class Game {
         this.clock.start();
         window.addEventListener('resize', this._onResize.bind(this));
         this.gameState = 'tracking';
-        this._animate();
-
+        
         // 初始化额外组件
         this.modelLoadingBubble = new ModelLoadingBubble(this.renderDiv);
         this.modelSelector = new ModelSelector(this);
@@ -307,6 +306,11 @@ export class Game {
 
         // 监听设置变化
         this._setupStorageListener();
+        
+        // 强制触发一次 resize 确保所有坐标和尺寸正确
+        setTimeout(() => this._onResize(), 100);
+        
+        this._animate();
     }
 
     _setupStorageListener() {
@@ -322,9 +326,7 @@ export class Game {
 
         // 监听模型切换事件
         window.addEventListener('loadNewModel', (e) => {
-            const modelPath = e.detail.modelPath;
-            console.log("接收到加载新模型事件:", modelPath);
-            this.loadNewModel(modelPath);
+            this.loadNewModel(e.detail.modelPath);
         });
     }
 
@@ -333,22 +335,60 @@ export class Game {
             // 显示加载提示
             this.modelLoadingBubble?.showMessage("正在加载模型...", 0);
 
-            // 移除旧模型
+            // 移除旧模型并清理
             if (this.pandaModel) {
                 this.scene.remove(this.pandaModel);
+                
+                // 清理几何体和材质
+                this.pandaModel.traverse((child) => {
+                    if (child.geometry) {
+                        child.geometry.dispose();
+                    }
+                    if (child.material) {
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(m => {
+                                if (m.map) m.map.dispose();
+                                if (m.normalMap) m.normalMap.dispose();
+                                if (m.roughnessMap) m.roughnessMap.dispose();
+                                if (m.metalnessMap) m.metalnessMap.dispose();
+                                m.dispose();
+                            });
+                        } else {
+                            if (child.material.map) child.material.map.dispose();
+                            if (child.material.normalMap) child.material.normalMap.dispose();
+                            if (child.material.roughnessMap) child.material.roughnessMap.dispose();
+                            if (child.material.metalnessMap) child.material.metalnessMap.dispose();
+                            child.material.dispose();
+                        }
+                    }
+                });
+                
                 this.pandaModel = null;
             }
 
             // 清空动画
+            if (this.animationMixer) {
+                this.animationMixer.stopAllAction();
+            }
             this.animationMixer = null;
             this.animationClips = [];
             this.animationActions = {};
             this.currentAction = null;
 
+            // 重置交互状态
+            this.grabbingHandIndex = -1;
+            this.pickedUpModel = null;
+            this.rotateLastHandX = null;
+            this.scaleInitialPinchDistance = null;
+            this.scaleInitialModelScale = null;
+
             // 清空动画按钮
             const buttonContainer = document.getElementById('animation-buttons');
             if (buttonContainer) {
                 buttonContainer.innerHTML = '';
+            }
+            if (this.animationButtonsContainer) {
+                this.animationButtonsContainer.innerHTML = '';
             }
 
             // 加载新模型
@@ -361,18 +401,38 @@ export class Game {
                         this.animationMixer = new THREE.AnimationMixer(this.pandaModel);
                         this.animationClips = gltf.animations;
 
-                        // 设置模型
-                        const scale = CONFIG.model.defaultScale;
-                        this.pandaModel.scale.set(scale, scale, scale);
-                        this.pandaModel.userData.maxScale = CONFIG.model.defaultMaxScale;
-                        this.pandaModel.userData.minScale = CONFIG.model.defaultMinScale;
+                        // 根据模型文件名设置特定的缩放和位置
+                        const fileName = modelPath.split('/').pop();
+                        let scale = CONFIG.model.defaultScale;
+                        let maxScale = CONFIG.model.defaultMaxScale;
+                        let minScale = CONFIG.model.defaultMinScale;
+                        let posY = this.renderDiv.clientHeight * CONFIG.model.positionYFactor;
+                        let posZ = CONFIG.model.positionZ;
 
-                        const sceneHeight = this.renderDiv.clientHeight;
-                        this.pandaModel.position.set(
-                            0,
-                            sceneHeight * CONFIG.model.positionYFactor,
-                            CONFIG.model.positionZ
-                        );
+                        // 为不同模型设置特定参数
+                        if (fileName === 'modelNew.gltf') {
+                            scale = 20;
+                            maxScale = 60;
+                        } else if (fileName === 'copper-chew.gltf') {
+                            scale = 5000;
+                            maxScale = 9000;
+                        } else if (fileName === 'teacup.gltf') {
+                            scale = 2000;
+                            maxScale = 5000;
+                        } else if (fileName === 'egypt_djembe_drum.glb') {
+                            scale = 2000;
+                            maxScale = 5000;
+                            posY = 450;
+                            posZ = -500;
+                        }
+
+                        this.pandaModel.scale.set(scale, scale, scale);
+                        this.pandaModel.userData.maxScale = maxScale;
+                        this.pandaModel.userData.minScale = minScale;
+                        this.pandaModel.position.set(0, posY, posZ);
+                        
+                        // 更新当前模型路径，用于窗口调整时判断
+                        this.initialModelPath = modelPath;
 
                         this.scene.add(this.pandaModel);
 
@@ -577,6 +637,13 @@ export class Game {
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(width, height);
         this.renderer.setPixelRatio(window.devicePixelRatio);
+        
+        // 确保每帧都清除画布
+        this.renderer.autoClear = true;
+        this.renderer.autoClearColor = true;
+        this.renderer.autoClearDepth = true;
+        this.renderer.autoClearStencil = true;
+        
         this.renderer.domElement.style.cssText = `
             position: absolute;
             top: 0;
@@ -659,18 +726,35 @@ export class Game {
         this.animationMixer = new THREE.AnimationMixer(this.pandaModel);
         this.animationClips = gltf.animations;
 
-        // 设置模型
-        const scale = CONFIG.model.defaultScale;
-        this.pandaModel.scale.set(scale, scale, scale);
-        this.pandaModel.userData.maxScale = CONFIG.model.defaultMaxScale;
-        this.pandaModel.userData.minScale = CONFIG.model.defaultMinScale;
+        // 根据模型文件名设置特定的缩放和位置
+        const fileName = this.initialModelPath.split('/').pop();
+        let scale = CONFIG.model.defaultScale;
+        let maxScale = CONFIG.model.defaultMaxScale;
+        let minScale = CONFIG.model.defaultMinScale;
+        let posY = this.renderDiv.clientHeight * CONFIG.model.positionYFactor;
+        let posZ = CONFIG.model.positionZ;
 
-        const sceneHeight = this.renderDiv.clientHeight;
-        this.pandaModel.position.set(
-            0, 
-            sceneHeight * CONFIG.model.positionYFactor, 
-            CONFIG.model.positionZ
-        );
+        // 为不同模型设置特定参数
+        if (fileName === 'modelNew.gltf') {
+            scale = 20;
+            maxScale = 60;
+        } else if (fileName === 'copper-chew.gltf') {
+            scale = 5000;
+            maxScale = 9000;
+        } else if (fileName === 'teacup.gltf') {
+            scale = 2000;
+            maxScale = 5000;
+        } else if (fileName === 'egypt_djembe_drum.glb') {
+            scale = 2000;
+            maxScale = 5000;
+            posY = 450;
+            posZ = -500;
+        }
+
+        this.pandaModel.scale.set(scale, scale, scale);
+        this.pandaModel.userData.maxScale = maxScale;
+        this.pandaModel.userData.minScale = minScale;
+        this.pandaModel.position.set(0, posY, posZ);
 
         this.scene.add(this.pandaModel);
 
@@ -1470,9 +1554,20 @@ export class Game {
     }
 
     _replaceModelWithLoaded(gltf, fileName) {
-        // 移除旧模型
+        // 移除旧模型并清理
         if (this.pandaModel) {
             this.scene.remove(this.pandaModel);
+            // 清理几何体和材质
+            this.pandaModel.traverse((child) => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) {
+                        child.material.forEach(m => m.dispose());
+                    } else {
+                        child.material.dispose();
+                    }
+                }
+            });
             if (this.animationMixer) {
                 this.animationMixer.stopAllAction();
                 this.currentAction = null;
@@ -1482,12 +1577,15 @@ export class Game {
             }
             this.animationActions = {};
             this.animationClips = [];
+            this.pandaModel = null;
         }
 
-        // 设置新模型
+        // 设置新模型 - 使用统一的配置
         this.pandaModel = gltf.scene;
-        const scale = 80;
+        const scale = CONFIG.model.defaultScale;
         this.pandaModel.scale.set(scale, scale, scale);
+        this.pandaModel.userData.maxScale = CONFIG.model.defaultMaxScale;
+        this.pandaModel.userData.minScale = CONFIG.model.defaultMinScale;
         
         const sceneHeight = this.renderDiv.clientHeight;
         this.pandaModel.position.set(0, sceneHeight * CONFIG.model.positionYFactor, CONFIG.model.positionZ);
@@ -1525,8 +1623,20 @@ export class Game {
         this.camera.updateProjectionMatrix();
 
         this.renderer.setSize(width, height);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        
         this.videoElement.style.width = width + 'px';
         this.videoElement.style.height = height + 'px';
+        
+        // 更新模型位置（如果存在且不是特殊位置的模型）
+        if (this.pandaModel) {
+            const fileName = this.initialModelPath?.split('/').pop() || '';
+            // 只有非特殊位置的模型才需要调整 Y 轴位置
+            if (fileName !== 'egypt_djembe_drum.glb') {
+                const newPosY = height * CONFIG.model.positionYFactor;
+                this.pandaModel.position.y = newPosY;
+            }
+        }
     }
 
     // ========== 动画循环 ==========
@@ -1544,6 +1654,14 @@ export class Game {
         }
 
         this.renderer.render(this.scene, this.camera);
+    }
+
+    // ========== 调试工具 ==========
+    debugSceneObjects() {
+        console.log("=== 场景调试 ===");
+        console.log("对象总数:", this.scene.children.length);
+        console.log("模型位置:", this.pandaModel?.position);
+        console.log("================");
     }
 
     // ========== UI消息显示 ==========

@@ -1,9 +1,6 @@
 // main.js - 应用入口文件，负责初始化和启动游戏主类
 import { Game } from './game.js';
 
-// 显示调试信息，方便排查模型加载问题
-console.log("main.js loaded");
-
 // 获取URL参数中的模型信息
 function getModelFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -21,11 +18,8 @@ var renderDiv = document.getElementById('renderDiv');
 if (!renderDiv) {
     console.error('致命错误: 未找到renderDiv元素。');
 } else {
-    console.log("已找到renderDiv，正在初始化游戏...");
-    
     // 获取要加载的模型
     const modelPath = getModelFromURL();
-    console.log("将加载模型:", modelPath);
     
     // 使用渲染目标初始化游戏
     var game = new Game(renderDiv, modelPath);
@@ -39,4 +33,5 @@ if (!renderDiv) {
     
     // 导出game实例以便在控制台中调试
     window.gameInstance = game;
+    window.debugScene = () => game?.debugSceneObjects();
 }

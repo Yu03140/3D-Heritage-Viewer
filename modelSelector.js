@@ -10,113 +10,21 @@ export class ModelSelector {
     }
 
     setupEventListeners() {
-        // 监听模型选择事件
-        window.addEventListener('loadNewModel', (event) => {
-            const modelPath = event.detail.modelPath;
-            console.log("模型选择器接收到加载请求:", modelPath);
-            this.loadModel(modelPath);
-        });
-        console.log("ModelSelector 事件监听器已设置");
+        // 注意：模型加载逻辑已完全移至 game.js 的 loadNewModel 方法
+        // ModelSelector 类现在只用于初始化，不处理任何加载逻辑
+        console.log("ModelSelector 初始化完成（模型加载由 game.js 处理）");
     }
 
+    // 已禁用：所有模型加载逻辑已移至 game.js
     loadModel(modelPath) {
-        // 显示加载提示
-        this.showFeedback(`加载模型中: ${modelPath.split('/').pop()}`);
-        
-        // 使用GLTFLoader加载模型
-        const loader = new GLTFLoader();
-        loader.load(
-            modelPath,
-            (gltf) => this.onModelLoaded(gltf, modelPath),
-            (xhr) => {
-                // 加载进度回调
-                if (xhr.lengthComputable) {
-                    const percent = Math.floor((xhr.loaded / xhr.total) * 100);
-                    this.showFeedback(`加载中: ${percent}%`);
-                }
-            },
-            (error) => {
-                console.error('加载模型时出错:', error);
-                this.showFeedback('加载模型失败');
-            }
-        );
+        console.warn("ModelSelector.loadModel 已禁用，请使用 game.loadNewModel");
+        return;
     }
 
+    // 已禁用：所有模型加载逻辑已移至 game.js
     onModelLoaded(gltf, modelPath) {
-        console.log(`模型 ${modelPath} 加载成功`, gltf);
-        
-        // 如果已有模型，先清除
-        if (this.game.pandaModel) {
-            this.game.scene.remove(this.game.pandaModel);
-            console.log("已移除旧模型");
-            
-            if (this.game.animationMixer) {
-                this.game.animationMixer.stopAllAction();
-                this.game.currentAction = null;
-            }
-            
-            // 清除旧的动画按钮
-            while(this.game.animationButtonsContainer.firstChild){
-                this.game.animationButtonsContainer.removeChild(this.game.animationButtonsContainer.firstChild);
-            }
-            
-            this.game.animationActions = {};
-            this.game.animationClips = [];
-        }
-        
-        // 设置新模型
-        this.game.pandaModel = gltf.scene;
-        
-        // 按模型文件名自定义缩放比例和最大缩放、初始位置
-        let scale = 80;
-        let maxScale = 300;
-        let posY = this.game.renderDiv.clientHeight * -0.45;
-        let posZ = -1000;
-        const fileName = modelPath.split('/').pop();
-
-
-
-        if (fileName === 'modelNew.gltf') {
-            scale = 20;
-        }
-         if (fileName === 'copper-chew.gltf') {
-            scale = 5000;
-            maxScale = 9000;
-        }
-        if (fileName === 'teacup.gltf') {
-            scale = 2000;
-            maxScale = 5000;
-        }
-        if (fileName === 'egypt_djembe_drum.glb') {
-            // 让鼓初始位置在屏幕中心
-            posY = 450;
-            posZ = -500;
-            scale = 2000;
-            maxScale = 5000;
-        }
-        this.game.pandaModel.scale.set(scale, scale, scale);
-        this.game.pandaModel.userData.maxScale = maxScale;
-        this.game.pandaModel.userData.minScale = 10;
-        this.game.pandaModel.position.set(0, posY, posZ);
-        
-        // 将新模型添加到场景
-        this.game.scene.add(this.game.pandaModel);
-        console.log(`已添加新模型 "${modelPath}" 到场景`);
-        
-        // 设置新模型的动画
-        this.setupAnimations(gltf);
-        
-        // 重置交互状态
-        this.resetInteractionStates();
-        
-        // 触发模型变更事件，以便更新描述
-        const modelChangedEvent = new CustomEvent('modelChanged', { 
-            detail: { modelPath }
-        });
-        window.dispatchEvent(modelChangedEvent);
-        
-        // 显示成功反馈
-        this.showFeedback(`模型 "${modelPath.split('/').pop()}" 已加载`);
+        console.warn("ModelSelector.onModelLoaded 已禁用");
+        return;
     }
 
     setupAnimations(gltf) {
