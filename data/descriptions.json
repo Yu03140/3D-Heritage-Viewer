@@ -1,15 +1,9 @@
 ﻿{
-  "Stan": {
-    "title": "茶壶",
-    "dynasty": "清代",
-    "category": "陶瓷器",
-    "description": "青色茶壶的釉彩技艺起源于宋代龙泉窑,与东青釉同源发展。明代正德年间,釉色浅淡闪黄;至清代景德镇仿制时称"嫩龙泉釉",康熙时期烧制出釉质坚硬、色泽深润的豆青釉。清代豆青色进一步趋近绿色,成为独立釉色体系。豆青釉的烧制工艺复杂,需在高温下控制釉色变化,形成独特的色泽和质感。Green teapot glaze technology originated in the Song Dynasty Longquan kilns, and the development of the same source of the East Green glaze. During the Zhengde period of the Ming dynasty, the glaze color was light and flashing yellow; to the Qing dynasty Jingdezhen imitation called \"tender Longquan glaze\", the Kangxi period fired a hard glaze, color and lustre of the dark soybean green glaze. Qing dynasty bean green color further tends to green, become an independent glaze color system. Bean green glaze firing process is complex, need to control the glaze color changes at high temperatures to form a unique color and texture."
-  },
   "teacup": {
     "title": "茶壶",
     "dynasty": "清代",
     "category": "陶瓷器",
-    "description": "青色茶壶的釉彩技艺起源于宋代龙泉窑,与东青釉同源发展。明代正德年间,釉色浅淡闪黄;至清代景德镇仿制时称"嫩龙泉釉",康熙时期烧制出釉质坚硬、色泽深润的豆青釉。清代豆青色进一步趋近绿色,成为独立釉色体系。豆青釉的烧制工艺复杂,需在高温下控制釉色变化,形成独特的色泽和质感。Green teapot glaze technology originated in the Song Dynasty Longquan kilns, and the development of the same source of the East Green glaze. During the Zhengde period of the Ming dynasty, the glaze color was light and flashing yellow; to the Qing dynasty Jingdezhen imitation called \"tender Longquan glaze\", the Kangxi period fired a hard glaze, color and lustre of the dark soybean green glaze. Qing dynasty bean green color further tends to green, become an independent glaze color system. Bean green glaze firing process is complex, need to control the glaze color changes at high temperatures to form a unique color and texture."
+    "description": "青色茶壶的釉彩技艺起源于宋代龙泉窑,与东青釉同源发展。明代正德年间,釉色浅淡闪黄;至清代景德镇仿制时称\"嫩龙泉釉\",康熙时期烧制出釉质坚硬、色泽深润的豆青釉。清代豆青色进一步趋近绿色,成为独立釉色体系。豆青釉的烧制工艺复杂,需在高温下控制釉色变化,形成独特的色泽和质感。Green teapot glaze technology originated in the Song Dynasty Longquan kilns, and the development of the same source of the East Green glaze. During the Zhengde period of the Ming dynasty, the glaze color was light and flashing yellow; to the Qing dynasty Jingdezhen imitation called \"tender Longquan glaze\", the Kangxi period fired a hard glaze, color and lustre of the dark soybean green glaze. Qing dynasty bean green color further tends to green, become an independent glaze color system. Bean green glaze firing process is complex, need to control the glaze color changes at high temperatures to form a unique color and texture."
   },
   "modelNew": {
     "title": "乐舞俑",
