@@ -47,11 +47,45 @@ export class ModelSelector {
         
         // 如果已有模型，先清除
         if (this.game.pandaModel) {
+            // 从场景中移除
             this.game.scene.remove(this.game.pandaModel);
-            console.log("已移除旧模型");
+            
+            // 深度清理资源
+            this.game.pandaModel.traverse((child) => {
+                if (child.isMesh) {
+                    if (child.geometry) {
+                        child.geometry.dispose();
+                    }
+                    if (child.material) {
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(mat => {
+                                if (mat.map) mat.map.dispose();
+                                if (mat.normalMap) mat.normalMap.dispose();
+                                if (mat.roughnessMap) mat.roughnessMap.dispose();
+                                if (mat.metalnessMap) mat.metalnessMap.dispose();
+                                mat.dispose();
+                            });
+                        } else {
+                            if (child.material.map) child.material.map.dispose();
+                            if (child.material.normalMap) child.material.normalMap.dispose();
+                            if (child.material.roughnessMap) child.material.roughnessMap.dispose();
+                            if (child.material.metalnessMap) child.material.metalnessMap.dispose();
+                            child.material.dispose();
+                        }
+                    }
+                }
+            });
+            
+            // 确保从场景中完全移除（包括所有子对象）
+            while(this.game.pandaModel.children.length > 0) {
+                this.game.pandaModel.remove(this.game.pandaModel.children[0]);
+            }
+            
+            console.log("已移除并清理旧模型资源");
             
             if (this.game.animationMixer) {
                 this.game.animationMixer.stopAllAction();
+                this.game.animationMixer = null;
                 this.game.currentAction = null;
             }
             
@@ -62,6 +96,9 @@ export class ModelSelector {
             
             this.game.animationActions = {};
             this.game.animationClips = [];
+            
+            // 将旧模型引用设为 null
+            this.game.pandaModel = null;
         }
         
         // 设置新模型
@@ -94,14 +131,82 @@ export class ModelSelector {
             scale = 2000;
             maxScale = 5000;
         }
+        if (modelPath.includes('armillary_sphere_1771')) {
+            scale = 1000;  
+            maxScale = 2000;
+            posY = -100;
+            posZ = -500;
+        }
+        if (modelPath.includes('ding_censer_with_an_openwork_cover')) {
+            scale = 1;   // 极小缩放以匹配其他模型
+            maxScale = 30;
+            posY = 0;
+            posZ = -1500;
+        }
+        if (modelPath.includes('mass_chalice')) {
+            scale = 12;   
+            maxScale = 40;
+            posY = 0;
+            posZ = -1500;
+        }
+        if (modelPath.includes('sculpture_bust_of_roza_loewenfeld')) {
+            scale = 3000;    
+            maxScale = 6000;
+            posY = -100;  // 降低位置，因为模型中心偏移较大
+            posZ = -500;
+        }
         this.game.pandaModel.scale.set(scale, scale, scale);
         this.game.pandaModel.userData.maxScale = maxScale;
-        this.game.pandaModel.userData.minScale = 10;
-        this.game.pandaModel.position.set(0, posY, posZ);
+        // minScale 设置为初始缩放的 10%，避免缩得太小
+        this.game.pandaModel.userData.minScale = Math.max(0.1, scale * 0.1);
         
-        // 将新模型添加到场景
+        // 先临时添加到场景以计算包围盒
+        this.game.pandaModel.position.set(0, 0, posZ);
         this.game.scene.add(this.game.pandaModel);
+        
+        // 对于有中心偏移的模型，计算并补偿偏移
+        if (modelPath.includes('sculpture_bust_of_roza_loewenfeld')) {
+            // 计算包围盒以获取模型的实际中心
+            const tempBox = new THREE.Box3().setFromObject(this.game.pandaModel);
+            const tempCenter = new THREE.Vector3();
+            tempBox.getCenter(tempCenter);
+            
+            // 调整位置：让模型的中心对准目标位置
+            // 目标是让模型中心在posY，所以位置应该是 posY - 中心偏移
+            this.game.pandaModel.position.y = posY - tempCenter.y;
+            console.log(`🔧 姆萨乌中心偏移补偿: 目标y=${posY}, 模型中心偏移=${tempCenter.y.toFixed(2)}, 最终位置y=${this.game.pandaModel.position.y.toFixed(2)}`);
+        } else {
+            // 其他模型直接设置位置
+            this.game.pandaModel.position.y = posY;
+        }
+        
+        // 调试信息：输出模型的详细信息
         console.log(`已添加新模型 "${modelPath}" 到场景`);
+        console.log(`模型缩放: ${scale}, 最大缩放: ${maxScale}`);
+        console.log(`模型位置: x=0, y=${posY.toFixed(2)}, z=${posZ}`);
+        
+        // 计算模型的包围盒
+        const box = new THREE.Box3().setFromObject(this.game.pandaModel);
+        const size = new THREE.Vector3();
+        const center = new THREE.Vector3();
+        box.getSize(size);
+        box.getCenter(center);
+        console.log(`模型实际尺寸: x=${size.x.toFixed(2)}, y=${size.y.toFixed(2)}, z=${size.z.toFixed(2)}`);
+        console.log(`模型中心: x=${center.x.toFixed(2)}, y=${center.y.toFixed(2)}, z=${center.z.toFixed(2)}`);
+        
+        // 检查模型的可见性和子对象
+        console.log(`模型可见性: ${this.game.pandaModel.visible}`);
+        console.log(`模型子对象数量: ${this.game.pandaModel.children.length}`);
+        
+        // 遍历检查所有网格对象
+        let meshCount = 0;
+        this.game.pandaModel.traverse((child) => {
+            if (child.isMesh) {
+                meshCount++;
+                console.log(`  └─ Mesh ${meshCount}: visible=${child.visible}, material=${child.material?.type || 'none'}`);
+            }
+        });
+        console.log(`🔺 总共找到 ${meshCount} 个网格对象`);
         
         // 设置新模型的动画
         this.setupAnimations(gltf);
@@ -176,6 +281,7 @@ export class ModelSelector {
     }
 
     resetInteractionStates() {
+        // 完全重置所有交互状态
         this.game.grabbingHandIndex = -1;
         this.game.pickedUpModel = null;
         this.game.rotateLastHandX = null;
@@ -184,8 +290,24 @@ export class ModelSelector {
         this.game.animationControlHandIndex = -1;
         this.game.animationControlInitialPinchY = null;
         
+        // 重置手部可视化
+        if (this.game.hands) {
+            this.game.hands.forEach(hand => {
+                if (hand.circles) {
+                    hand.circles.forEach(circle => {
+                        circle.scale.set(1, 1, 1);
+                        circle.material.opacity = 0.3;
+                    });
+                }
+                hand.isPinching = false;
+                hand.isFist = false;
+            });
+        }
+        
         // 更新交互模式按钮样式
         this.game._updateInteractionModeButtonStyles();
+        
+        console.log("✅ 交互状态已重置");
     }    showFeedback(message) {
         // 使用模型加载提示框显示消息，而不是语音反馈系统
         console.log("显示反馈信息:", message);

@@ -86,7 +86,7 @@
                             <h3>清代</h3>
                             <p>中国最后一个封建王朝，工艺技术登峰造极</p>
                             <div class="dynasty-stats">
-                                <span>1件文物</span>
+                                <span>2件文物</span>
                             </div>
                         </div>
                     </div>
@@ -100,7 +100,7 @@
                             <h3>古代世界</h3>
                             <p>世界各地古代文明的珍贵遗存</p>
                             <div class="dynasty-stats">
-                                <span>1件文物</span>
+                                <span>4件文物</span>
                             </div>
                         </div>
                     </div>
@@ -181,6 +181,13 @@
                         description: "豆青釉制作工艺复杂，釉质坚硬、色泽深润，展现了清代景德镇精湛的制瓷技术。",
                         features: ["豆青釉工艺", "景德镇制"],
                         period: "公元1644-1912年"
+                    },
+                    {
+                        id: "ding_censer_with_an_openwork_cover/scene.gltf",
+                        title: "鼎式镂空盖香炉",
+                        description: "采用掐丝珐琅工艺装饰，与镀金金属片的图形和镂空装饰完美契合，以龙及其丰富的造型为主导图案。",
+                        features: ["掐丝珐琅", "镂空工艺"],
+                        period: "1736-1795年（乾隆时期）"
                     }
                 ]
             },
@@ -192,6 +199,33 @@
                         description: "西非曼丁文化代表性打击乐器，传统徒手演奏，蕴含着丰富的部落文化内涵。",
                         features: ["西非文化", "打击乐器"],
                         period: "古代文明"
+                    }
+                ],
+                "科学仪器": [
+                    {
+                        id: "armillary_sphere_1771/scene.gltf",
+                        title: "浑天仪",
+                        description: "天文仪器和天球模型，用于演示天象并确定时间、赤道坐标和黄道坐标，能够模拟各种天文现象。",
+                        features: ["天文观测", "时间测量"],
+                        period: "1771年"
+                    }
+                ],
+                "金银器": [
+                    {
+                        id: "mass_chalice/scene.gltf",
+                        title: "弥撒圣杯",
+                        description: "镀金银制成，采用洛可可风格装饰，由金匠大师马钦·莱克斯奇基制作，具有精美的藤蔓和植物图案。",
+                        features: ["洛可可风格", "宗教器物"],
+                        period: "1773年"
+                    }
+                ],
+                "书画": [
+                    {
+                        id: "sculpture_bust_of_roza_loewenfeld/scene.gltf",
+                        title: "姆萨乌·日姆斯基",
+                        description: "采用手工纸印刷，并采用皮革封面装订的一本罗马弥撒经书",
+                        features: ["手工印刷", "皮革封面"],
+                        period: "1767年"
                     }
                 ]
             }
@@ -277,7 +311,8 @@
                 '绘画': '🎨',
                 '书法': '📜',
                 '玉器': '💎',
-                '金银器': '✨'
+                '金银器': '✨',
+                '科学仪器': '🔭'
             };
             return icons[category] || '🏛️';
         }

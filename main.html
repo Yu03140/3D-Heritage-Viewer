@@ -1,186 +1,866 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>3D文物展示系统</title>
-        <link rel="icon" type="image/png" href="favicon.png">
-        <link rel="stylesheet" href="styles.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D文物展示系统</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="styles.css">
 
-        <!-- Primary Meta Tags -->
-        <meta name="title" content="3D文物展示系统">
-        <meta name="description" content="使用手势和语音命令实时控制3D文物模型">
-
-        <!-- Open Graph / Facebook -->
-        <meta property="og:type" content="website">
-        <meta property="og:title" content="3D文物展示系统">
-        <meta property="og:description" content="使用手势和语音命令实时控制3D文物模型">
-        <meta property="og:image" content="assets/siteOGImage.jpg">
-
-        <script type="importmap">
-            {
-                "imports": {
-                    "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
-                    "three/examples/": "https://unpkg.com/three@0.161.0/examples/jsm/",
-                    "three/loaders/": "https://unpkg.com/three@0.161.0/examples/jsm/loaders/"
-                }
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.161.0/build/three.module.js",
+                "three/examples/": "https://unpkg.com/three@0.161.0/examples/jsm/",
+                "three/loaders/": "https://unpkg.com/three@0.161.0/examples/jsm/loaders/"
             }
-        </script>
-    </head>
-    <body style="width: 100%; height: 100%; overflow: hidden; margin: 0;">
-        <div id="renderDiv" style="width: 100%; height: 100%; margin: 0;">            <div id="instruction-text" class="text-box"></div>
-            <div id="back-link" class="text-box">
-                <a href="gallery.html">返回展馆</a>
-            </div>
-            <div id="description-button" class="text-box">
-                <button id="showDescriptionBtn">文本介绍</button>
-            </div>
-            <div id="description-card" class="description-card">
-                <div class="description-header">
-                    <h3 id="description-title">文物介绍</h3>
-                    <button id="closeDescriptionCard">关闭</button>
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+
+        /* 顶部导航栏 */
+        .model-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .back-link {
+            background: #4a90e2;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background: #357abd;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+
+        .nav-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 2px solid #4a90e2;
+            color: #4a90e2;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #4a90e2;
+            color: white;
+        }
+
+        /* 主要布局 */
+        .viewer-layout {
+            display: flex;
+            max-width: 1600px;
+            margin: 20px auto;
+            gap: 20px;
+            padding: 0 20px;
+            height: calc(100vh - 90px);
+        }
+
+        /* 左侧边栏 - 相关介绍 */
+        .left-sidebar {
+            width: 280px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            color: #e74c3c;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e74c3c;
+        }
+
+        .model-description {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .model-description h4 {
+            margin: 15px 0 8px 0;
+            color: #2c3e50;
+            font-size: 15px;
+        }
+
+        .model-description p {
+            margin: 8px 0;
+        }
+
+        .model-meta {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .meta-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+        }
+
+        .meta-label {
+            color: #888;
+        }
+
+        .meta-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        /* 中间3D展示区域 */
+        .center-viewer {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            min-width: 0; /* 防止flex item溢出 */
+        }
+
+        #renderDiv {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #renderDiv canvas {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            width: auto !important;
+            height: 100% !important;
+        }
+
+        #renderDiv video {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            width: auto !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            transform: translate(-50%, -50%) scaleX(-1) !important;
+        }
+
+        .camera-label {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            z-index: 10;
+        }
+
+        .model-switch-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
+            padding: 10px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .model-switch-btn:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* 右侧边栏 */
+        .right-sidebar {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Details 区域 */
+        .details-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .detail-label {
+            color: #888;
+        }
+
+        .detail-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        /* 评论区域 */
+        .comments-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-height: 500px;
+        }
+
+        .comment-input-area {
+            margin-bottom: 15px;
+        }
+
+        .comment-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .comment-submit-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .comment-submit-btn:hover {
+            background: #357abd;
+        }
+
+        .comments-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .comment-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid #4a90e2;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+        }
+
+        .comment-time {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .comment-content {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .no-comments {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+            font-size: 13px;
+        }
+
+        /* AI问答区域 */
+        .ai-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-placeholder {
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .ai-placeholder::before {
+            content: "🤖";
+            display: block;
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        /* 模型选择卡片 */
+        .model-selection-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            animation: fadeIn 0.3s;
+        }
+
+        .model-selection-card {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -45%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .model-selection-card h3 {
+            margin: 0 0 20px 0;
+            color: #2c3e50;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .filter-btn {
+            padding: 6px 15px;
+            margin: 0 5px 5px 0;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            border-color: #4a90e2;
+            color: #4a90e2;
+        }
+
+        .filter-btn.active {
+            background: #4a90e2;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .model-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .model-item {
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .model-item:hover {
+            border-color: #4a90e2;
+            background: #f0f7ff;
+            transform: translateY(-2px);
+        }
+
+        .model-item.selected {
+            border-color: #4a90e2;
+            background: #e3f2fd;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            width: 100%;
+            padding: 10px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: #5a6268;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="model-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <a href="gallery.html" class="back-link">← 返回上级</a>
+                <div class="nav-title">
+                    <span>🏛️</span>
+                    <span>ONLINE 3D VIEWER</span>
                 </div>
-                <div id="description-content" class="description-content">
-                    加载中...
-                </div>
             </div>
-            <div id="model-select-button" class="text-box">
-                <button id="selectModelBtn">选择文物</button>
-            </div>
-            <div id="model-selection-card" class="model-selection-card">
-                <h3>选择文物模型</h3>
-                <div class="filter-section">
-                    <div class="filter-group">
-                        <label>朝代筛选：</label>
-                        <button class="filter-btn active" data-filter-type="dynasty" data-filter-value="all">全部</button>
-                        <button class="filter-btn" data-filter-type="dynasty" data-filter-value="清代">清代</button>
-                        <button class="filter-btn" data-filter-type="dynasty" data-filter-value="唐代">唐代</button>
-                        <button class="filter-btn" data-filter-type="dynasty" data-filter-value="夏商">夏商</button>
-                        <button class="filter-btn" data-filter-type="dynasty" data-filter-value="未知">未知</button>
-                    </div>
-                    <div class="filter-group">
-                        <label>类别筛选：</label>
-                        <button class="filter-btn active" data-filter-type="category" data-filter-value="all">全部</button>
-                        <button class="filter-btn" data-filter-type="category" data-filter-value="陶瓷器">陶瓷器</button>
-                        <button class="filter-btn" data-filter-type="category" data-filter-value="雕塑">雕塑</button>
-                        <button class="filter-btn" data-filter-type="category" data-filter-value="乐器">乐器</button>
-                        <button class="filter-btn" data-filter-type="category" data-filter-value="青铜器">青铜器</button>
-                    </div>
-                </div>
-                <div class="model-list">
-                    <div class="model-item selected " data-model="teacup.gltf" data-dynasty="清代" data-category="陶瓷器">茶壶</div>
-                    <div class="model-item " data-model="modelNew.gltf" data-dynasty="唐代" data-category="雕塑">乐舞俑</div>
-                    <div class="model-item " data-model="egypt_djembe_drum.glb" data-dynasty="未知" data-category="乐器">埃及金贝鼓</div>
-                    <div class="model-item " data-model="copper-chew.gltf" data-dynasty="夏商" data-category="青铜器">二里头文化青铜器</div>
-                </div>
-                <button id="closeModelCard">关闭</button>
+            <div class="nav-right">
+                <button class="nav-btn" onclick="window.location.href='tutorial.html'">使用教程</button>
+                <button class="nav-btn" onclick="window.location.href='settings.html'">系统设置</button>
             </div>
         </div>
-        <script type="module" src="main.js"></script>
-        <script type="module">
-            // 模型选择功能
-            document.addEventListener('DOMContentLoaded', function() {
-                console.log("DOM内容已加载，设置模型选择功能...");
-                
-                const selectModelBtn = document.getElementById('selectModelBtn');
-                const modelSelectionCard = document.getElementById('model-selection-card');
-                const closeModelCard = document.getElementById('closeModelCard');
-                const modelItems = document.querySelectorAll('.model-item');
-                
-                if (!selectModelBtn || !modelSelectionCard || !closeModelCard) {
-                    console.error("未找到模型选择相关元素!");
-                    return;
-                }
-                
-                console.log("找到所有模型选择元素，设置事件处理...");
-                
-                // 初始状态隐藏模型选择卡片
-                modelSelectionCard.style.display = 'none';
-                
-                // 点击"选择文物"按钮显示卡片
-                selectModelBtn.addEventListener('click', function() {
-                    console.log("点击了选择文物按钮");
-                    modelSelectionCard.style.display = 'block';
-                });
-                
-                // 点击"关闭"按钮隐藏卡片
-                closeModelCard.addEventListener('click', function() {
-                    console.log("点击了关闭按钮");
-                    modelSelectionCard.style.display = 'none';
-                });
-                
-                // 点击模型项选择模型
-                modelItems.forEach(item => {
-                    item.addEventListener('click', function() {
-                        const modelPath = this.getAttribute('data-model');
-                        console.log("选择了模型:", modelPath);
-                        
-                        // 使用自定义事件通知game.js加载新模型
-                        const event = new CustomEvent('loadNewModel', { 
-                            detail: { modelPath: 'assets/' + modelPath }
-                        });
-                        window.dispatchEvent(event);
-                        
-                        // 高亮选中的模型
-                        modelItems.forEach(m => m.classList.remove('selected'));
-                        this.classList.add('selected');
-                        
-                        // 关闭模型选择卡片
-                        modelSelectionCard.style.display = 'none';
-                    });
-                });
+    </nav>
 
-                // 过滤功能
-                const filterBtns = document.querySelectorAll('.filter-btn');
-                let currentDynastyFilter = 'all';
-                let currentCategoryFilter = 'all';
+    <!-- 主要布局 -->
+    <div class="viewer-layout">
+        <!-- 左侧边栏 - 相关介绍 -->
+        <aside class="left-sidebar">
+            <h3 class="sidebar-title">相关介绍</h3>
+            <div class="model-description" id="modelDescription">
+                <p>加载中...</p>
+            </div>
+        </aside>
 
-                filterBtns.forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const filterType = this.getAttribute('data-filter-type');
-                        const filterValue = this.getAttribute('data-filter-value');
-                        
-                        // 更新当前过滤器
-                        if (filterType === 'dynasty') {
-                            currentDynastyFilter = filterValue;
-                            // 移除同类型按钮的active状态
-                            document.querySelectorAll('.filter-btn[data-filter-type="dynasty"]').forEach(b => {
-                                b.classList.remove('active');
-                            });
-                        } else if (filterType === 'category') {
-                            currentCategoryFilter = filterValue;
-                            // 移除同类型按钮的active状态
-                            document.querySelectorAll('.filter-btn[data-filter-type="category"]').forEach(b => {
-                                b.classList.remove('active');
-                            });
-                        }
-                        
-                        // 激活当前按钮
-                        this.classList.add('active');
-                        
-                        // 应用过滤
-                        applyFilters();
-                    });
+        <!-- 中间3D展示区域 -->
+        <main class="center-viewer">
+            <div id="renderDiv">
+                <div class="camera-label">摄像头区域</div>
+                <button class="model-switch-btn" id="selectModelBtn">切换模型</button>
+            </div>
+        </main>
+
+        <!-- 右侧边栏 -->
+        <aside class="right-sidebar">
+            <!-- Details 区域 -->
+            <div class="details-panel">
+                <h3 class="panel-title">Details</h3>
+                <div id="modelDetails">
+                    <div class="detail-item">
+                        <span class="detail-label">加载中...</span>
+                        <span class="detail-value">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 评论区域 -->
+            <div class="comments-panel">
+                <h3 class="panel-title">评论（页面可以滚动）</h3>
+                
+                <div class="comment-input-area">
+                    <textarea 
+                        class="comment-input" 
+                        id="commentInput" 
+                        placeholder="写下你的评论..."></textarea>
+                    <button class="comment-submit-btn" id="submitComment">发布</button>
+                </div>
+
+                <div class="comments-list" id="commentsList">
+                    <div class="no-comments">暂无评论</div>
+                </div>
+            </div>
+
+            <!-- AI问答区域 -->
+            <div class="ai-panel">
+                <div class="ai-placeholder">
+                    AI问答功能
+                    <div style="margin-top: 10px; font-size: 12px;">即将接入大模型</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 模型选择弹窗 -->
+    <div class="model-selection-overlay" id="modelSelectionOverlay">
+        <div class="model-selection-card">
+            <h3>选择文物模型</h3>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label>朝代筛选：</label>
+                    <button class="filter-btn active" data-filter-type="dynasty" data-filter-value="all">全部</button>
+                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="清代">清代</button>
+                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="唐代">唐代</button>
+                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="夏商">夏商</button>
+                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="未知">未知</button>
+                </div>
+                <div class="filter-group">
+                    <label>类别筛选：</label>
+                    <button class="filter-btn active" data-filter-type="category" data-filter-value="all">全部</button>
+                    <button class="filter-btn" data-filter-type="category" data-filter-value="陶瓷器">陶瓷器</button>
+                    <button class="filter-btn" data-filter-type="category" data-filter-value="雕塑">雕塑</button>
+                    <button class="filter-btn" data-filter-type="category" data-filter-value="乐器">乐器</button>
+                    <button class="filter-btn" data-filter-type="category" data-filter-value="青铜器">青铜器</button>
+                    <button class="filter-btn" data-filter-type="category" data-filter-value="科学仪器">科学仪器</button>
+                    <button class="filter-btn" data-filter-type="category" data-filter-value="金银器">金银器</button>
+                    <button class="filter-btn" data-filter-type="category" data-filter-value="书画">书画</button>
+                </div>
+            </div>
+            <div class="model-list" id="modelList">
+                <div class="model-item selected" data-model="teacup.gltf" data-dynasty="清代" data-category="陶瓷器">茶壶</div>
+                <div class="model-item" data-model="modelNew.gltf" data-dynasty="唐代" data-category="雕塑">乐舞俑</div>
+                <div class="model-item" data-model="egypt_djembe_drum.glb" data-dynasty="未知" data-category="乐器">埃及金贝鼓</div>
+                <div class="model-item" data-model="copper-chew.gltf" data-dynasty="夏商" data-category="青铜器">二里头文化青铜器</div>
+                <div class="model-item" data-model="armillary_sphere_1771/scene.gltf" data-dynasty="未知" data-category="科学仪器">浑天仪</div>
+                <div class="model-item" data-model="ding_censer_with_an_openwork_cover/scene.gltf" data-dynasty="清代" data-category="陶瓷器">鼎式镂空盖香炉</div>
+                <div class="model-item" data-model="mass_chalice/scene.gltf" data-dynasty="未知" data-category="金银器">弥撒圣杯</div>
+                <div class="model-item" data-model="sculpture_bust_of_roza_loewenfeld/scene.gltf" data-dynasty="未知" data-category="书画">姆萨乌·日姆斯基</div>
+            </div>
+            <button class="close-btn" id="closeModelCard">关闭</button>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+    <script type="module" src="comments.js"></script>
+    <script type="module">
+        // 确保渲染器在布局完成后正确调整大小
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                console.log('触发窗口调整事件以适应新布局');
+            }, 100);
+        });
+    </script>
+    <script type="module">
+        // 获取当前URL参数中的模型路径
+        const urlParams = new URLSearchParams(window.location.search);
+        const modelParam = urlParams.get('model');
+        let currentModelPath = modelParam || 'teacup.gltf';
+
+        // 加载描述数据
+        let descriptionsData = {};
+        fetch('data/descriptions.json')
+            .then(res => res.json())
+            .then(data => {
+                descriptionsData = data;
+                updateModelInfo(currentModelPath);
+            })
+            .catch(err => console.error('加载描述数据失败:', err));
+
+        // 更新模型信息
+        function updateModelInfo(modelPath) {
+            const modelKey = getModelKey(modelPath);
+            const modelData = descriptionsData[modelKey];
+
+            if (modelData) {
+                // 更新左侧介绍
+                const descriptionDiv = document.getElementById('modelDescription');
+                descriptionDiv.innerHTML = `
+                    <h4>${modelData.title || '未知文物'}</h4>
+                    ${modelData.dynasty ? `<div class="model-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">朝代：</span>
+                            <span class="meta-value">${modelData.dynasty}</span>
+                        </div>
+                    </div>` : ''}
+                    ${modelData.year ? `<div class="meta-item">
+                        <span class="meta-label">年代：</span>
+                        <span class="meta-value">${modelData.year}</span>
+                    </div>` : ''}
+                    ${modelData.category ? `<div class="meta-item">
+                        <span class="meta-label">类别：</span>
+                        <span class="meta-value">${modelData.category}</span>
+                    </div>` : ''}
+                    <p style="margin-top: 15px; line-height: 1.8;">${modelData.description || '暂无描述信息'}</p>
+                `;
+
+                // 更新右侧Details
+                const detailsDiv = document.getElementById('modelDetails');
+                detailsDiv.innerHTML = `
+                    <div class="detail-item">
+                        <span class="detail-label">名称：</span>
+                        <span class="detail-value">${modelData.title || '-'}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">朝代：</span>
+                        <span class="detail-value">${modelData.dynasty || '-'}</span>
+                    </div>
+                    ${modelData.year ? `<div class="detail-item">
+                        <span class="detail-label">年代：</span>
+                        <span class="detail-value">${modelData.year}</span>
+                    </div>` : ''}
+                    <div class="detail-item">
+                        <span class="detail-label">类别：</span>
+                        <span class="detail-value">${modelData.category || '-'}</span>
+                    </div>
+                `;
+            }
+        }
+
+        // 根据模型路径获取对应的key
+        function getModelKey(path) {
+            if (path.includes('teacup')) return 'teacup';
+            if (path.includes('modelNew')) return 'modelNew';
+            if (path.includes('egypt_djembe_drum')) return 'egypt_djembe_drum';
+            if (path.includes('copper-chew')) return 'copper-chew';
+            if (path.includes('armillary_sphere_1771')) return 'armillary_sphere_1771';
+            if (path.includes('ding_censer')) return 'ding_censer_with_an_openwork_cover';
+            if (path.includes('mass_chalice')) return 'mass_chalice';
+            if (path.includes('sculpture_bust')) return 'sculpture_bust_of_roza_loewenfeld';
+            return 'teacup';
+        }
+
+        // 模型选择功能
+        const selectModelBtn = document.getElementById('selectModelBtn');
+        const modelSelectionOverlay = document.getElementById('modelSelectionOverlay');
+        const closeModelCard = document.getElementById('closeModelCard');
+        const modelItems = document.querySelectorAll('.model-item');
+
+        selectModelBtn.addEventListener('click', () => {
+            modelSelectionOverlay.style.display = 'block';
+        });
+
+        closeModelCard.addEventListener('click', () => {
+            modelSelectionOverlay.style.display = 'none';
+        });
+
+        modelSelectionOverlay.addEventListener('click', (e) => {
+            if (e.target === modelSelectionOverlay) {
+                modelSelectionOverlay.style.display = 'none';
+            }
+        });
+
+        modelItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const modelPath = this.getAttribute('data-model');
+                
+                // 触发模型加载事件
+                const event = new CustomEvent('loadNewModel', { 
+                    detail: { modelPath: 'assets/' + modelPath }
                 });
-
-                function applyFilters() {
-                    modelItems.forEach(item => {
-                        const itemDynasty = item.getAttribute('data-dynasty');
-                        const itemCategory = item.getAttribute('data-category');
-                        
-                        const dynastyMatch = currentDynastyFilter === 'all' || itemDynasty === currentDynastyFilter;
-                        const categoryMatch = currentCategoryFilter === 'all' || itemCategory === currentCategoryFilter;
-                        
-                        if (dynastyMatch && categoryMatch) {
-                            item.style.display = 'block';
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
-                }
-
-                console.log("模型选择功能设置完成");
+                window.dispatchEvent(event);
+                
+                // 更新选中状态
+                modelItems.forEach(m => m.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                // 更新模型信息
+                currentModelPath = modelPath;
+                updateModelInfo(modelPath);
+                
+                // 关闭弹窗
+                modelSelectionOverlay.style.display = 'none';
             });
-        </script>
-    </body>
+        });
+
+        // 过滤功能
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        let currentDynastyFilter = 'all';
+        let currentCategoryFilter = 'all';
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const filterType = this.getAttribute('data-filter-type');
+                const filterValue = this.getAttribute('data-filter-value');
+                
+                if (filterType === 'dynasty') {
+                    currentDynastyFilter = filterValue;
+                    document.querySelectorAll('.filter-btn[data-filter-type="dynasty"]').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                } else if (filterType === 'category') {
+                    currentCategoryFilter = filterValue;
+                    document.querySelectorAll('.filter-btn[data-filter-type="category"]').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                }
+                
+                this.classList.add('active');
+                applyFilters();
+            });
+        });
+
+        function applyFilters() {
+            modelItems.forEach(item => {
+                const itemDynasty = item.getAttribute('data-dynasty');
+                const itemCategory = item.getAttribute('data-category');
+                
+                const dynastyMatch = currentDynastyFilter === 'all' || itemDynasty === currentDynastyFilter;
+                const categoryMatch = currentCategoryFilter === 'all' || itemCategory === currentCategoryFilter;
+                
+                item.style.display = (dynastyMatch && categoryMatch) ? 'block' : 'none';
+            });
+        }
+
+        // 监听模型变更事件
+        window.addEventListener('modelChanged', (e) => {
+            const modelPath = e.detail.modelPath;
+            if (modelPath) {
+                currentModelPath = modelPath.replace('assets/', '');
+                updateModelInfo(currentModelPath);
+                
+                // 通知评论系统更新
+                if (window.commentManager) {
+                    console.log('通知评论系统更新模型路径:', modelPath);
+                    window.commentManager.setCurrentModelPath(modelPath);
+                }
+            }
+        });
+    </script>
+</body>
 </html>

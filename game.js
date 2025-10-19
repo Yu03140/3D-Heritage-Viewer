@@ -321,11 +321,12 @@ export class Game {
         });
 
         // 监听模型切换事件
-        window.addEventListener('loadNewModel', (e) => {
-            const modelPath = e.detail.modelPath;
-            console.log("接收到加载新模型事件:", modelPath);
-            this.loadNewModel(modelPath);
-        });
+        // 注释掉此处的监听器，因为 modelSelector.js 已经在处理模型加载
+        // window.addEventListener('loadNewModel', (e) => {
+        //     const modelPath = e.detail.modelPath;
+        //     console.log("接收到加载新模型事件:", modelPath);
+        //     this.loadNewModel(modelPath);
+        // });
     }
 
     async loadNewModel(modelPath) {
@@ -414,8 +415,8 @@ export class Game {
     _setupContainer() {
         this.renderDiv.style.cssText = `
             position: relative;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
             background: #111;
         `;
@@ -425,12 +426,14 @@ export class Game {
         this.videoElement = document.createElement('video');
         this.videoElement.style.cssText = `
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
+            top: 50%;
+            left: 50%;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
             height: 100%;
-            object-fit: cover;
-            transform: scaleX(-1);
+            object-fit: contain;
+            transform: translate(-50%, -50%) scaleX(-1);
             z-index: 0;
         `;
         this.videoElement.autoplay = true;
@@ -579,8 +582,11 @@ export class Game {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.domElement.style.cssText = `
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 100%;
+            max-height: 100%;
             z-index: 1;
         `;
         this.renderDiv.appendChild(this.renderer.domElement);
@@ -659,18 +665,76 @@ export class Game {
         this.animationMixer = new THREE.AnimationMixer(this.pandaModel);
         this.animationClips = gltf.animations;
 
-        // 设置模型
-        const scale = CONFIG.model.defaultScale;
-        this.pandaModel.scale.set(scale, scale, scale);
-        this.pandaModel.userData.maxScale = CONFIG.model.defaultMaxScale;
-        this.pandaModel.userData.minScale = CONFIG.model.defaultMinScale;
+        // 根据模型文件名设置缩放比例
+        let scale = CONFIG.model.defaultScale;
+        let maxScale = CONFIG.model.defaultMaxScale;
+        let posY = this.renderDiv.clientHeight * CONFIG.model.positionYFactor;
+        let posZ = CONFIG.model.positionZ;
+        const fileName = this.initialModelPath.split('/').pop();
 
-        const sceneHeight = this.renderDiv.clientHeight;
-        this.pandaModel.position.set(
-            0, 
-            sceneHeight * CONFIG.model.positionYFactor, 
-            CONFIG.model.positionZ
-        );
+        // 为不同模型设置特定的缩放值
+        if (fileName === 'modelNew.gltf') {
+            scale = 20;
+        }
+        if (fileName === 'copper-chew.gltf') {
+            scale = 5000;
+            maxScale = 9000;
+        }
+        if (fileName === 'teacup.gltf') {
+            scale = 2000;
+            maxScale = 5000;
+        }
+        if (fileName === 'egypt_djembe_drum.glb') {
+            posY = 450;
+            posZ = -500;
+            scale = 2000;
+            maxScale = 5000;
+        }
+        if (this.initialModelPath.includes('armillary_sphere_1771')) {
+            scale = 1000;
+            maxScale = 2000;
+            posY = -100;
+            posZ = -500;
+        }
+        if (this.initialModelPath.includes('ding_censer_with_an_openwork_cover')) {
+            scale = 1;
+            maxScale = 30;
+            posY = 0;
+            posZ = -1500;
+        }
+        if (this.initialModelPath.includes('mass_chalice')) {
+            // 原始尺寸5.7，但中心偏移严重，继续缩小
+            scale = 12;
+            maxScale = 40;
+            posY = 0;
+            posZ = -1500;
+        }
+        if (this.initialModelPath.includes('sculpture_bust_of_roza_loewenfeld')) {
+            // 原始尺寸350.7，非常大，需要极小缩放
+            scale = 1;
+            maxScale = 4;
+            posY = 0;
+            posZ = -2000;
+        }
+
+        // 设置模型
+        this.pandaModel.scale.set(scale, scale, scale);
+        this.pandaModel.userData.maxScale = maxScale;
+        // minScale 设置为初始缩放的 10%，避免缩得太小
+        this.pandaModel.userData.minScale = Math.max(0.1, scale * 0.1);
+
+        this.pandaModel.position.set(0, posY, posZ);
+        
+        // 对于有中心偏移的模型，计算并补偿偏移
+        if (this.initialModelPath.includes('sculpture_bust_of_roza_loewenfeld') || 
+            this.initialModelPath.includes('ding_censer_with_an_openwork_cover') ||
+            this.initialModelPath.includes('mass_chalice')) {
+            const tempBox = new THREE.Box3().setFromObject(this.pandaModel);
+            const tempCenter = new THREE.Vector3();
+            tempBox.getCenter(tempCenter);
+            this.pandaModel.position.y = posY - tempCenter.y;
+            console.log(`初始加载补偿中心偏移: y调整为 ${this.pandaModel.position.y.toFixed(2)}`);
+        }
 
         this.scene.add(this.pandaModel);
 
@@ -775,8 +839,9 @@ export class Game {
 
             return new Promise(resolve => {
                 this.videoElement.onloadedmetadata = () => {
-                    this.videoElement.style.width = this.renderDiv.clientWidth + 'px';
-                    this.videoElement.style.height = this.renderDiv.clientHeight + 'px';
+                    // 移除视频元素尺寸设置，让CSS控制
+                    // this.videoElement.style.width = this.renderDiv.clientWidth + 'px';
+                    // this.videoElement.style.height = this.renderDiv.clientHeight + 'px';
                     resolve();
                 };
             });
@@ -1525,8 +1590,9 @@ export class Game {
         this.camera.updateProjectionMatrix();
 
         this.renderer.setSize(width, height);
-        this.videoElement.style.width = width + 'px';
-        this.videoElement.style.height = height + 'px';
+        // 移除视频元素尺寸设置，让CSS控制
+        // this.videoElement.style.width = width + 'px';
+        // this.videoElement.style.height = height + 'px';
     }
 
     // ========== 动画循环 ==========
