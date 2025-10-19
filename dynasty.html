@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D文物展示系统</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="3D文物展示系统">
+    <meta name="description" content="使用手势和语音命令实时控制3D文物模型">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="3D文物展示系统">
+    <meta property="og:description" content="使用手势和语音命令实时控制3D文物模型">
+    <meta property="og:image" content="assets/siteOGImage.jpg">
+    
+    <style>
+        /* 时间线页面专属样式 */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #f5f5f5;
+            overflow-x: hidden;
+        }
+        
+        /* 页面容器 */
+        .timeline-container {
+            position: relative;
+            padding: 80px 0 100px 0;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* 中央时间轴线 */
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                #957a42 10%, 
+                #957a42 90%, 
+                transparent 100%);
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+        
+        /* 时间轴节点 */
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            width: 24px;
+            height: 24px;
+            background: #957a42;
+            border: 4px solid #1a1a2e;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(149, 122, 66, 0.6);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(149, 122, 66, 0.6);
+                transform: translateX(-50%) scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(149, 122, 66, 0.9);
+                transform: translateX(-50%) scale(1.1);
+            }
+        }
+        
+        /* 章节容器 */
+        .chapter-section {
+            position: relative;
+            margin: 120px 0;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .chapter-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 章节内容卡片 */
+        .chapter-card {
+            position: relative;
+            width: 48%;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 2px solid rgba(149, 122, 66, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.5s ease;
+        }
+        
+        .chapter-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(149, 122, 66, 0.6);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                        0 0 40px rgba(149, 122, 66, 0.3);
+        }
+        
+        /* 左侧布局 */
+        .chapter-left .chapter-card {
+            float: left;
+            transform-origin: right center;
+        }
+        
+        .chapter-left .chapter-card::after {
+            content: '';
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            width: 0;
+            height: 0;
+            border-left: 20px solid rgba(149, 122, 66, 0.3);
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            transform: translateY(-50%);
+        }
+        
+        /* 右侧布局 */
+        .chapter-right .chapter-card {
+            float: right;
+            transform-origin: left center;
+        }
+        
+        .chapter-right .chapter-card::before {
+            content: '';
+            position: absolute;
+            left: -40px;
+            top: 50%;
+            width: 0;
+            height: 0;
+            border-right: 20px solid rgba(149, 122, 66, 0.3);
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            transform: translateY(-50%);
+        }
+        
+        /* 章节标题 */
+        .chapter-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #957a42;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(149, 122, 66, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .chapter-icon {
+            font-size: 1.2em;
+            animation: rotate 3s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 章节副标题 */
+        .chapter-subtitle {
+            font-size: 1.3em;
+            color: #bbb;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+        
+        /* 时间标签 */
+        .chapter-period {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(149, 122, 66, 0.2);
+            border: 1px solid rgba(149, 122, 66, 0.5);
+            border-radius: 20px;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+            color: #957a42;
+            font-weight: 600;
+        }
+        
+        /* 章节描述 */
+        .chapter-description {
+            line-height: 1.8;
+            color: #ddd;
+            font-size: 1.05em;
+            margin-top: 20px;
+        }
+        
+        /* 装饰性图案 */
+        .chapter-pattern {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            opacity: 0.1;
+            background: radial-gradient(circle, #957a42 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .chapter-left .chapter-pattern {
+            right: -50px;
+            top: -50px;
+        }
+        
+        .chapter-right .chapter-pattern {
+            left: -50px;
+            bottom: -50px;
+        }
+        
+        /* 章节装饰图片容器 */
+        .chapter-image-wrapper {
+            position: absolute;
+            width: 400px;
+            height: 350px;
+            z-index: 0;
+            overflow: hidden; /* 添加overflow来实现遮罩效果 */
+            animation: containerFloat 4s ease-in-out infinite;
+            top: 50%;
+        }
+        
+        /* 左侧章节图片在右边 - 使用calc实现对称 */
+        .chapter-left .chapter-image-wrapper {
+            /* 卡片宽度是48%，图片相对于卡片右边界的位置 */
+            left: calc(48% + 200px);
+            transform: translateY(-50%);
+        }
+        
+        /* 右侧章节图片在左边 - 使用calc实现对称 */
+        .chapter-right .chapter-image-wrapper {
+            /* 卡片从右边开始，宽度是48%，图片在卡片左边 */
+            right: calc(48% + 200px);
+            transform: translateY(-50%);
+        }
+        
+        /* 为每个章节的容器设置不同的不规则形状 */
+        /* 第一章：水滴形状 */
+        .chapter-section[data-chapter="1"] .chapter-image-wrapper {
+            border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+            animation-delay: 0s;
+        }
+        
+        /* 第二章：云朵形状 */
+        .chapter-section[data-chapter="2"] .chapter-image-wrapper {
+            border-radius: 48% 52% 38% 62% / 60% 35% 65% 40%;
+            animation-delay: 0.5s;
+        }
+        
+        /* 第三章：有机椭圆形 */
+        .chapter-section[data-chapter="3"] .chapter-image-wrapper {
+            border-radius: 40% 60% 65% 35% / 48% 58% 42% 52%;
+            animation-delay: 1s;
+        }
+        
+        /* 第四章：卵石形状 */
+        .chapter-section[data-chapter="4"] .chapter-image-wrapper {
+            border-radius: 58% 42% 48% 52% / 62% 45% 55% 38%;
+            animation-delay: 1.5s;
+        }
+        
+        /* 第五章：花瓣形状 */
+        .chapter-section[data-chapter="5"] .chapter-image-wrapper {
+            border-radius: 35% 65% 42% 58% / 55% 62% 38% 45%;
+            animation-delay: 2s;
+        }
+        
+        /* 不规则形状遮罩的图片 - 基础样式 */
+        .chapter-image {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.8) contrast(1.1);
+            transition: filter 0.5s ease;
+            animation: imageCounterFloat 4s ease-in-out infinite;
+        }
+        
+        /* 为每个章节的图片设置对应的动画延迟 */
+        .chapter-section[data-chapter="1"] .chapter-image {
+            animation-delay: 0s;
+        }
+        
+        .chapter-section[data-chapter="2"] .chapter-image {
+            animation-delay: 0.5s;
+        }
+        
+        .chapter-section[data-chapter="3"] .chapter-image {
+            animation-delay: 1s;
+        }
+        
+        .chapter-section[data-chapter="4"] .chapter-image {
+            animation-delay: 1.5s;
+        }
+        
+        .chapter-section[data-chapter="5"] .chapter-image {
+            animation-delay: 2s;
+        }
+        
+        .chapter-image:hover {
+            filter: brightness(1) contrast(1.2);
+        }
+        
+        /* 容器向上移动 */
+        @keyframes containerFloat {
+            0%, 100% {
+                transform: translateY(-50%);
+            }
+            50% {
+                transform: translateY(calc(-50% + 50px));
+            }
+        }
+        
+        /* 图片向下移动，抵消容器的移动，视觉上图片保持不动 */
+        @keyframes imageCounterFloat {
+            0%, 100% {
+                top: 0;
+            }
+            50% {
+                top: -2px;
+            }
+        }
+        
+        /* 探索按钮 */
+        .explore-btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #957a42 0%, #c9a962 100%);
+            color: #1a1a2e;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(149, 122, 66, 0.3);
+        }
+        
+        .explore-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(149, 122, 66, 0.5);
+            background: linear-gradient(135deg, #c9a962 0%, #957a42 100%);
+        }
+        
+        /* 清除浮动 */
+        .chapter-section::after {
+            content: '';
+            display: table;
+            clear: both;
+        }
+        
+        /* 页面标题 */
+        .page-header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            margin-top: 60px;
+        }
+        
+        .page-header h1 {
+            font-size: 3.5em;
+            color: #957a42;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 20px rgba(149, 122, 66, 0.6);
+            animation: fadeInDown 1s ease;
+        }
+        
+        .page-header p {
+            font-size: 1.3em;
+            color: #bbb;
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 背景粒子效果 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(149, 122, 66, 0.5);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) translateX(0); 
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { 
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .chapter-card {
+                width: 60%;
+            }
+            
+            .chapter-image-wrapper {
+                width: 300px;
+                height: 280px;
+            }
+            
+            /* 平板端也保持对称 */
+            .chapter-left .chapter-image-wrapper {
+                left: calc(60% + 30px);
+            }
+            
+            .chapter-right .chapter-image-wrapper {
+                right: calc(60% + 30px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .timeline-line {
+                left: 30px;
+            }
+            
+            .timeline-dot {
+                left: 30px;
+            }
+            
+            .chapter-card {
+                width: calc(100% - 80px);
+                margin-left: 80px;
+                float: none !important;
+            }
+            
+            .chapter-left .chapter-card::after,
+            .chapter-right .chapter-card::before {
+                display: none;
+            }
+            
+            .chapter-title {
+                font-size: 2em;
+            }
+            
+            /* 移动端隐藏装饰图片 */
+            .chapter-image-wrapper {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; overflow-x: hidden;">
+    <!-- 顶部导航 -->
+    <nav class="museum-nav">
+        <div class="nav-container">
+            <div class="nav-left">
+                <div class="nav-title">
+                    <span class="title-icon">🏛️</span>
+                    <span>3D数字文物展馆</span>
+                </div>
+            </div>
+            <div class="nav-right">
+                <button id="tutorialBtn" class="nav-btn">使用教程</button>
+                <button id="settingsBtn" class="nav-btn">系统设置</button>
+                <button id="homeBtn" class="nav-btn">返回首页</button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 背景粒子效果 -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <h1>中华文明时间线</h1>
+        <p>跨越千年的文化传承 · 探索历史的璀璨瑰宝</p>
+    </div>
+    
+    <!-- 时间线容器 -->
+    <div class="timeline-container">
+        <!-- 中央时间轴 -->
+        <div class="timeline-line"></div>
+        
+        <!-- 第一章：史前时期 -->
+        <div class="chapter-section chapter-left" data-chapter="1">
+            <div class="timeline-dot" style="top: 0;"></div>
+            <!-- 装饰图片 -->
+            <div class="chapter-image-wrapper">
+                <img class="chapter-image" src="史前时期.jpg" alt="史前时期文物" onerror="this.src='https://via.placeholder.com/400x350/1a1a2e/957a42?text=史前时期'">
+            </div>
+            <div class="chapter-card">
+                <div class="chapter-pattern"></div>
+                <div class="chapter-icon">🌅</div>
+                <h2 class="chapter-title">曙光初现</h2>
+                <div class="chapter-subtitle">史前时期</div>
+                <div class="chapter-period">约170万年前 - 公元前21世纪</div>
+                <div class="chapter-description">
+                    晨光下，原始人点燃篝火，石器闪烁着生命的光。<br>
+洞穴壁画记录了狩猎与神秘仪式的痕迹。<br>
+自然与人类共舞，岁月雕刻出最早的文明轮廓。<br>
+每一片陶器与骨器，都是对远古世界的低语。
+                </div>
+                <a href="#" class="explore-btn">探索文物 →</a>
+            </div>
+        </div>
+        
+        <!-- 第二章：夏商周时期 -->
+        <div class="chapter-section chapter-right" data-chapter="2">
+            <div class="timeline-dot" style="top: 20%;"></div>
+            <!-- 装饰图片 -->
+            <div class="chapter-image-wrapper">
+                <img class="chapter-image" src="夏商周.jpg" alt="夏商周时期文物" onerror="this.src='https://via.placeholder.com/400x350/1a1a2e/957a42?text=青铜礼乐'">
+            </div>
+            <div class="chapter-card">
+                <div class="chapter-pattern"></div>
+                <div class="chapter-icon">⚱️</div>
+                <h2 class="chapter-title">青铜礼乐</h2>
+                <div class="chapter-subtitle">夏商周时期</div>
+                <div class="chapter-period">公元前21世纪 - 公元前221年</div>
+                <div class="chapter-description">
+                    青铜器承载礼仪与权力，敲击出古老的乐章。<br>
+王朝的礼乐制度，如丝线般编织社会秩序。<br>
+甲骨铭文与青铜铭文，记录先民的智慧与心声。<br>
+血脉相连的王权与祭祀，让历史在器物间闪耀。
+                </div>
+                <a href="#" class="explore-btn">探索文物 →</a>
+            </div>
+        </div>
+        
+        <!-- 第三章：秦汉至南北朝 -->
+        <div class="chapter-section chapter-left" data-chapter="3">
+            <div class="timeline-dot" style="top: 40%;"></div>
+            <!-- 装饰图片 -->
+            <div class="chapter-image-wrapper">
+                <img class="chapter-image" src="秦汉.jpg" alt="秦汉至南北朝文物" onerror="this.src='https://via.placeholder.com/400x350/1a1a2e/957a42?text=大一统与交融'">
+            </div>
+            <div class="chapter-card">
+                <div class="chapter-pattern"></div>
+                <div class="chapter-icon">👑</div>
+                <h2 class="chapter-title">大一统与交融</h2>
+                <div class="chapter-subtitle">秦汉至南北朝</div>
+                <div class="chapter-period">公元前221年 - 公元589年</div>
+                <div class="chapter-description">
+                   秦统一六国，长城蜿蜒于山河之巅。<br>
+汉赋诗书，丝绸路上马蹄轻响，东西文明交织。<br>
+南北朝纷乱，却也孕育了文化的多样花朵。<br>
+江河湖海见证着民族融合的初声。
+                </div>
+                <a href="#" class="explore-btn">探索文物 →</a>
+            </div>
+        </div>
+        
+        <!-- 第四章：隋唐至宋元 -->
+        <div class="chapter-section chapter-right" data-chapter="4">
+            <div class="timeline-dot" style="top: 60%;"></div>
+            <!-- 装饰图片 -->
+            <div class="chapter-image-wrapper">
+                <img class="chapter-image" src="隋唐.jpg" alt="隋唐至宋元文物" onerror="this.src='https://via.placeholder.com/400x350/1a1a2e/957a42?text=盛世气象'">
+            </div>
+            <div class="chapter-card">
+                <div class="chapter-pattern"></div>
+                <div class="chapter-icon">🎭</div>
+                <h2 class="chapter-title">盛世气象</h2>
+                <div class="chapter-subtitle">隋唐至宋元</div>
+                <div class="chapter-period">公元589年 - 公元1368年</div>
+                <div class="chapter-description">
+                   长安灯火辉煌，诗歌与绘画盛开在繁华市井。<br>
+丝绸飘动，胡乐萦绕，世界的目光汇聚大唐。<br>
+宋代文人雅集，山水画中藏着哲思与宁静。<br>
+元朝马背民族的勇健，汇入中华画卷。
+                </div>
+                <a href="#" class="explore-btn">探索文物 →</a>
+            </div>
+        </div>
+        
+        <!-- 第五章：明清至近代 -->
+        <div class="chapter-section chapter-left" data-chapter="5">
+            <div class="timeline-dot" style="top: 80%;"></div>
+            <!-- 装饰图片 -->
+            <div class="chapter-image-wrapper">
+                <img class="chapter-image" src="明清.jpg" alt="明清至近代文物" onerror="this.src='https://via.placeholder.com/400x350/1a1a2e/957a42?text=古典余晖与变革'">
+            </div>
+            <div class="chapter-card">
+                <div class="chapter-pattern"></div>
+                <div class="chapter-icon">🌟</div>
+                <h2 class="chapter-title">古典余晖与变革</h2>
+                <div class="chapter-subtitle">明清至近代</div>
+                <div class="chapter-period">公元1368年 - 至今</div>
+                <div class="chapter-description">
+                    明清宫殿与园林，映照着礼乐与文艺的余辉。<br>
+                    手工书画，雕刻与瓷器，闪烁着时代的细腻光泽。<br>
+                    海上丝路与海外贸易，让世界与中国交相辉映。<br>
+                    近代的风雨初起，历史缓缓翻开新的篇章。
+                </div>
+                <a href="#" class="explore-btn">探索文物 →</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 滚动动画观察器
+        const observerOptions = {
+            threshold: 0.2,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+        
+        // 观察所有章节
+        document.querySelectorAll('.chapter-section').forEach(section => {
+            observer.observe(section);
+        });
+        
+        // 生成背景粒子
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (6 + Math.random() * 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        createParticles();
+        
+        // 探索文物按钮 - 跳转到main界面
+        document.querySelectorAll('.explore-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = 'main.html';
+            });
+        });
+        
+        // 导航按钮功能（复用现有逻辑）
+        document.getElementById('tutorialBtn')?.addEventListener('click', () => {
+            window.location.href = 'tutorial.html';
+        });
+        
+        document.getElementById('settingsBtn')?.addEventListener('click', () => {
+            window.location.href = 'settings.html';
+        });
+        
+        document.getElementById('homeBtn')?.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+        
+        // 为卡片添加鼠标视差效果
+        document.querySelectorAll('.chapter-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px) scale(1.02)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
+    </script>
+</body>
+</html>
