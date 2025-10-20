@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>路径测试</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+    </style>
+</head>
+<body>
+    <h1>路径测试</h1>
+    <div id="results"></div>
+    
+    <script>
+        const tests = [
+            { name: 'CSS样式', url: '../styles/styles.css' },
+            { name: 'favicon图标', url: '../images/favicon.png' },
+            { name: '史前时期图片', url: '../images/史前时期.jpg' },
+            { name: '描述数据', url: '../data/descriptions.json' },
+            { name: '茶壶模型', url: '../assets/teacup.gltf' },
+            { name: 'main.js脚本', url: '../scripts/main.js' },
+            { name: 'game.js脚本', url: '../scripts/game.js' },
+        ];
+        
+        const resultsDiv = document.getElementById('results');
+        
+        tests.forEach(async (test) => {
+            try {
+                const response = await fetch(test.url);
+                const div = document.createElement('div');
+                div.className = 'test ' + (response.ok ? 'success' : 'error');
+                div.innerHTML = `
+                    <strong>${test.name}</strong><br>
+                    路径: ${test.url}<br>
+                    状态: ${response.status} ${response.ok ? '✅ 成功' : '❌ 失败'}
+                `;
+                resultsDiv.appendChild(div);
+            } catch (e) {
+                const div = document.createElement('div');
+                div.className = 'test error';
+                div.innerHTML = `
+                    <strong>${test.name}</strong><br>
+                    路径: ${test.url}<br>
+                    错误: ${e.message} ❌
+                `;
+                resultsDiv.appendChild(div);
+            }
+        });
+    </script>
+</body>
+</html>
