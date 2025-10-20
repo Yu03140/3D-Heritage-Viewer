@@ -235,8 +235,9 @@ export class Game {
         this.modelDragOffset = new THREE.Vector3();
         this.modelGrabStartDepth = 0;
 
-        // 旋转模式
+        // 旋转模式 - 支持360°全方向旋转
         this.rotateLastHandX = null;
+        this.rotateLastHandY = null; // 新增Y轴追踪
         this.rotateSensitivity = this._loadSensitivity('rotateSensitivity', CONFIG.interaction.defaultRotateSensitivity);
 
         // 缩放模式
@@ -1005,17 +1006,31 @@ export class Game {
                 this.grabbingHandIndex = handIndex;
                 this.pickedUpModel = this.pandaModel;
                 this.rotateLastHandX = hand.pinchPointScreen.x;
+                this.rotateLastHandY = hand.pinchPointScreen.y; // 新增Y轴追踪
             } else if (this.grabbingHandIndex === handIndex && this.pickedUpModel && this.rotateLastHandX !== null) {
-                // 更新旋转
+                // 更新旋转 - 支持360°全方向旋转
                 const deltaX = hand.pinchPointScreen.x - this.rotateLastHandX;
+                const deltaY = hand.pinchPointScreen.y - this.rotateLastHandY;
+                
+                // X方向移动控制Y轴旋转（左右旋转）
                 if (Math.abs(deltaX) > 0.5) {
                     this.pickedUpModel.rotation.y -= deltaX * this.rotateSensitivity;
                 }
+                
+                // Y方向移动控制X轴旋转（上下旋转）
+                if (Math.abs(deltaY) > 0.5) {
+                    this.pickedUpModel.rotation.x -= deltaY * this.rotateSensitivity;
+                    // 限制X轴旋转范围，避免翻转过头
+                    this.pickedUpModel.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.pickedUpModel.rotation.x));
+                }
+                
                 this.rotateLastHandX = hand.pinchPointScreen.x;
+                this.rotateLastHandY = hand.pinchPointScreen.y;
             }
         } else if (prevIsPinching && this.grabbingHandIndex === handIndex) {
             this._releaseModel(handIndex);
             this.rotateLastHandX = null;
+            this.rotateLastHandY = null; // 重置Y轴追踪
         }
     }
 
@@ -1387,6 +1402,7 @@ export class Game {
             this.grabbingHandIndex = -1;
             this.pickedUpModel = null;
             this.rotateLastHandX = null;
+            this.rotateLastHandY = null; // 重置Y轴追踪
             this.scaleInitialPinchDistance = null;
             this.scaleInitialModelScale = null;
         }
@@ -1572,6 +1588,7 @@ export class Game {
         this.grabbingHandIndex = -1;
         this.pickedUpModel = null;
         this.rotateLastHandX = null;
+        this.rotateLastHandY = null; // 重置Y轴追踪
         this.scaleInitialPinchDistance = null;
         this.scaleInitialModelScale = null;
 
