@@ -17,7 +17,7 @@ export class DescriptionManager {
     async init() {
         try {
             // 加载描述数据
-            const response = await fetch('data/descriptions.json');
+            const response = await fetch('../data/descriptions.json');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

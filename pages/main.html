@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D文物展示系统</title>
-    <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    <link rel="stylesheet" href="../styles/styles.css">
 
     <script type="importmap">
         {
@@ -184,38 +184,163 @@
             gap: 20px;
         }
 
-        /* Details 区域 */
-        .details-panel {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            padding: 20px;
-        }
-
         .panel-title {
             font-size: 16px;
             font-weight: 600;
             color: #2c3e50;
-            margin-bottom: 15px;
+            margin: 0 0 15px 0;
             padding-bottom: 10px;
             border-bottom: 2px solid #eee;
         }
 
-        .detail-item {
+        /* AI问答区域 */
+        .ai-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
             display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
+            flex-direction: column;
+            height: 400px;
+        }
+
+        .ai-chat-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            min-height: 0;
+        }
+
+        .ai-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ai-message {
+            padding: 12px;
+            border-radius: 8px;
+            max-width: 85%;
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .ai-message.user {
+            background: #4a90e2;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .ai-message.assistant {
+            background: white;
+            border: 1px solid #e0e0e0;
+            align-self: flex-start;
+        }
+
+        .ai-message.system {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            align-self: center;
             font-size: 13px;
-            border-bottom: 1px solid #f5f5f5;
+            text-align: center;
         }
 
-        .detail-label {
+        .ai-message.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .message-content {
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .message-time {
+            font-size: 11px;
             color: #888;
+            margin-top: 5px;
         }
 
-        .detail-value {
-            color: #2c3e50;
+        .ai-input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ai-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+            max-height: 150px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .ai-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .ai-submit-btn {
+            width: 100%;
+            padding: 10px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
             font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .ai-submit-btn:hover:not(:disabled) {
+            background: #357abd;
+        }
+
+        .ai-submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-loading::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* 评论区域 */
@@ -227,7 +352,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            max-height: 500px;
+            min-height: 350px;
         }
 
         .comment-input-area {
@@ -236,12 +361,11 @@
 
         .comment-input {
             width: 100%;
-            min-height: 80px;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 13px;
-            resize: vertical;
+            resize: none;
             font-family: inherit;
         }
 
@@ -312,30 +436,7 @@
             font-size: 13px;
         }
 
-        /* AI问答区域 */
-        .ai-panel {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            padding: 20px;
-            min-height: 150px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
 
-        .ai-placeholder {
-            text-align: center;
-            color: #999;
-            font-size: 14px;
-        }
-
-        .ai-placeholder::before {
-            content: "🤖";
-            display: block;
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
 
         /* 模型选择卡片 */
         .model-selection-overlay {
@@ -522,46 +623,55 @@
         <!-- 中间3D展示区域 -->
         <main class="center-viewer">
             <div id="renderDiv">
-                <div class="camera-label">摄像头区域</div>
+                <!--<div class="camera-label">摄像头区域</div>-->
                 <button class="model-switch-btn" id="selectModelBtn">切换模型</button>
             </div>
         </main>
 
         <!-- 右侧边栏 -->
         <aside class="right-sidebar">
-            <!-- Details 区域 -->
-            <div class="details-panel">
-                <h3 class="panel-title">Details</h3>
-                <div id="modelDetails">
-                    <div class="detail-item">
-                        <span class="detail-label">加载中...</span>
-                        <span class="detail-value">-</span>
+            <!-- AI问答区域 -->
+            <div class="ai-panel">
+                <h3 class="panel-title">🤖 AI文物助手</h3>
+                
+                <div class="ai-chat-container" id="aiChatContainer">
+                    <div class="ai-messages" id="aiMessages">
+                        <div class="ai-message system">
+                            <div class="message-content">
+                                你好！我是AI文物助手，可以回答关于当前文物的任何问题。
+                            </div>
+                        </div>
                     </div>
+                </div>
+                
+                <div class="ai-input-area">
+                    <textarea 
+                        class="ai-input" 
+                        id="aiInput" 
+                        placeholder="向AI提问关于这件文物的问题..."
+                        rows="3"></textarea>
+                    <button class="ai-submit-btn" id="aiSubmitBtn">
+                        <span class="btn-text">发送</span>
+                        <span class="btn-loading" style="display: none;">思考中...</span>
+                    </button>
                 </div>
             </div>
 
             <!-- 评论区域 -->
             <div class="comments-panel">
-                <h3 class="panel-title">评论（页面可以滚动）</h3>
+                <h3 class="panel-title">💬 评论区</h3>
                 
                 <div class="comment-input-area">
                     <textarea 
                         class="comment-input" 
                         id="commentInput" 
-                        placeholder="写下你的评论..."></textarea>
-                    <button class="comment-submit-btn" id="submitComment">发布</button>
+                        placeholder="写下你的评论..."
+                        rows="2"></textarea>
+                    <button class="comment-submit-btn" id="submitComment">发布评论</button>
                 </div>
 
                 <div class="comments-list" id="commentsList">
-                    <div class="no-comments">暂无评论</div>
-                </div>
-            </div>
-
-            <!-- AI问答区域 -->
-            <div class="ai-panel">
-                <div class="ai-placeholder">
-                    AI问答功能
-                    <div style="margin-top: 10px; font-size: 12px;">即将接入大模型</div>
+                    <div class="no-comments">暂无评论，快来抢沙发吧！</div>
                 </div>
             </div>
         </aside>
@@ -606,14 +716,14 @@
         </div>
     </div>
 
-    <script type="module" src="main.js"></script>
-    <script type="module" src="comments.js"></script>
+    <script type="module" src="../scripts/main.js"></script>
+    <script type="module" src="../scripts/comments.js"></script>
+    <script type="module" src="../scripts/aiAssistant.js"></script>
     <script type="module">
         // 确保渲染器在布局完成后正确调整大小
         window.addEventListener('load', () => {
             setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
-                console.log('触发窗口调整事件以适应新布局');
             }, 100);
         });
     </script>
@@ -625,7 +735,7 @@
 
         // 加载描述数据
         let descriptionsData = {};
-        fetch('data/descriptions.json')
+        fetch('../data/descriptions.json')
             .then(res => res.json())
             .then(data => {
                 descriptionsData = data;
@@ -660,26 +770,10 @@
                     <p style="margin-top: 15px; line-height: 1.8;">${modelData.description || '暂无描述信息'}</p>
                 `;
 
-                // 更新右侧Details
-                const detailsDiv = document.getElementById('modelDetails');
-                detailsDiv.innerHTML = `
-                    <div class="detail-item">
-                        <span class="detail-label">名称：</span>
-                        <span class="detail-value">${modelData.title || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-label">朝代：</span>
-                        <span class="detail-value">${modelData.dynasty || '-'}</span>
-                    </div>
-                    ${modelData.year ? `<div class="detail-item">
-                        <span class="detail-label">年代：</span>
-                        <span class="detail-value">${modelData.year}</span>
-                    </div>` : ''}
-                    <div class="detail-item">
-                        <span class="detail-label">类别：</span>
-                        <span class="detail-value">${modelData.category || '-'}</span>
-                    </div>
-                `;
+                // 更新AI助手的模型数据
+                if (window.aiAssistant) {
+                    window.aiAssistant.setModelData(modelData);
+                }
             }
         }
 
@@ -722,7 +816,7 @@
                 
                 // 触发模型加载事件
                 const event = new CustomEvent('loadNewModel', { 
-                    detail: { modelPath: 'assets/' + modelPath }
+                    detail: { modelPath: '../assets/' + modelPath }
                 });
                 window.dispatchEvent(event);
                 
@@ -782,7 +876,7 @@
         window.addEventListener('modelChanged', (e) => {
             const modelPath = e.detail.modelPath;
             if (modelPath) {
-                currentModelPath = modelPath.replace('assets/', '');
+                currentModelPath = modelPath.replace('../assets/', '');
                 updateModelInfo(currentModelPath);
                 
                 // 通知评论系统更新

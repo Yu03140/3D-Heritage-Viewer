@@ -9,9 +9,9 @@ function getModelFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
     const modelParam = urlParams.get('model');
     if (modelParam) {
-        return 'assets/' + modelParam;
+        return '../assets/' + modelParam;
     }
-    return 'assets/teacup.gltf'; // 默认模型
+    return '../assets/teacup.gltf'; // 默认模型
 }
 
 // 获取渲染目标div元素
