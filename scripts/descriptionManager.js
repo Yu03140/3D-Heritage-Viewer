@@ -35,6 +35,24 @@ export class DescriptionManager {
         }
     }
     
+    extractModelName(modelPath) {
+        // 规范化路径（移除开头的../等）
+        const normalizedPath = modelPath.replace(/^\.\.\//, '').replace(/^\.\//, '');
+        const parts = normalizedPath.split('/');
+        
+        // 获取文件名（最后一部分）
+        const fileName = parts[parts.length - 1];
+        const fileNameWithoutExt = fileName.split('.')[0];
+        
+        // 如果文件名是通用的 "scene"，则使用父文件夹名称
+        if (fileNameWithoutExt === 'scene' && parts.length > 1) {
+            return parts[parts.length - 2];  // 返回父文件夹名
+        }
+        
+        // 否则返回文件名（不含扩展名）
+        return fileNameWithoutExt;
+    }
+    
     setupEventListeners() {
         // 监听显示描述按钮点击事件
         this.showDescriptionBtn.addEventListener('click', () => {
@@ -49,8 +67,9 @@ export class DescriptionManager {
         // 监听模型切换事件
         window.addEventListener('modelChanged', (event) => {
             const modelPath = event.detail.modelPath;
-            // 从路径中提取模型名称（不含扩展名）
-            const modelName = modelPath.split('/').pop().split('.')[0];
+            // 从路径中提取模型名称
+            const modelName = this.extractModelName(modelPath);
+            console.log(`描述管理器：从路径 "${modelPath}" 提取模型名 "${modelName}"`);
             this.setModelDescription(modelName);
         });
     }

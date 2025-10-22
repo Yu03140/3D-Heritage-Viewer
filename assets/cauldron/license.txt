@@ -1,6 +1,6 @@
 Model Information:
-* title:	Hydria apothecary vase
-* source:	https://sketchfab.com/3d-models/hydria-apothecary-vase-7d6938c0c0b54b06a0210a982a73023e
+* title:	Cauldron
+* source:	https://sketchfab.com/3d-models/cauldron-521be39e2ea94bbaa1f06f3e89b0ad97
 * author:	Virtual Museums of Małopolska (https://sketchfab.com/WirtualneMuzeaMalopolski)
 
 Model License:
