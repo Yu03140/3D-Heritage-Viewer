@@ -6,148 +6,29 @@
         <title>设置 - 3D文物展示系统</title>
         <link rel="icon" type="image/png" href="../images/favicon.png">
         <link rel="stylesheet" href="../styles/styles.css">
-        <style>
-            .setting-item {
-                margin: 20px 0;
-                padding: 15px;
-                background: #fff;
-                border-radius: 8px;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            }
-            .setting-title {
-                font-size: 18px;
-                font-weight: bold;
-                margin-bottom: 10px;
-            }
-            .setting-description {
-                color: #666;
-                margin-bottom: 15px;
-            }
-            .toggle-switch {
-                position: relative;
-                display: inline-block;
-                width: 60px;
-                height: 34px;
-            }
-            .toggle-switch input {
-                opacity: 0;
-                width: 0;
-                height: 0;
-            }
-            .toggle-slider {
-                position: absolute;
-                cursor: pointer;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: #ccc;
-                transition: .4s;
-                border-radius: 34px;
-            }
-            .toggle-slider:before {
-                position: absolute;
-                content: "";
-                height: 26px;
-                width: 26px;
-                left: 4px;
-                bottom: 4px;
-                background-color: white;
-                transition: .4s;
-                border-radius: 50%;
-            }
-            input:checked + .toggle-slider {
-                background-color: #2196F3;
-            }
-            input:checked + .toggle-slider:before {
-                transform: translateX(26px);
-            }
-            .save-message {
-                color: #4CAF50;
-                margin-top: 10px;
-                display: none;
-            }
-            
-            /* 滑块样式 */
-            .slider-container {
-                margin: 15px 0;
-            }
-            .slider-container label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: bold;
-            }
-            .slider-row {
-                display: flex;
-                align-items: center;
-                margin-bottom: 10px;
-            }
-            .slider {
-                flex-grow: 1;
-                height: 5px;
-                border-radius: 5px;
-                background: #d3d3d3;
-                outline: none;
-                -webkit-appearance: none;
-                appearance: none;
-                margin-right: 15px;
-            }
-            .slider::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                background: #2196F3;
-                cursor: pointer;
-                border: 2px solid white;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            }
-            .slider::-moz-range-thumb {
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                background: #2196F3;
-                cursor: pointer;
-                border: 2px solid white;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            }
-            .slider-value {
-                width: 50px;
-                text-align: center;
-                font-weight: bold;
-            }
-            .save-btn {
-                padding: 8px 15px;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-weight: bold;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                transition: all 0.2s;
-            }
-            .save-btn:hover {
-                background-color: #45a049;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            }
-            .save-btn:active {
-                transform: translateY(2px);
-                box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-            }
-        </style>
     </head>
-    <body style="width: 100%; height: 100%; overflow: hidden; margin: 0; background-color: #f0f0f0;">
-        <div style="position: absolute; top: 20px; left: 20px; z-index: 100;">
-            <button onclick="window.location.href='index.html'" class="welcome-button">返回首页</button>
-        </div>
+    <body class="settings-page" style="width: 100%; height: 100%; overflow: auto; margin: 0; background: linear-gradient(to bottom, #FFF9E6 0%, #F5F5DC 100%);">
+        <!-- 顶部导航 -->
+        <nav class="museum-nav">
+            <div class="nav-container">
+                <div class="nav-left">
+                    <div class="nav-title">
+                        <span class="title-icon">🏛️</span>
+                        <span>3D数字文物展馆</span>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <button id="tutorialBtn" class="nav-btn">使用教程</button>
+                    <button id="settingsBtn" class="nav-btn">返回首页</button>
+                </div>
+            </div>
+        </nav>
         
-        <div class="welcome-screen">
-            <div class="welcome-title">设置</div>
-              <div class="welcome-content">
+        <div class="welcome-screen" style="justify-content: flex-start; overflow-y: auto; height: auto; min-height: 100vh; padding-top: 120px; padding-bottom: 50px;">
+            <div class="welcome-title">系统设置</div>
+              <div class="welcome-content" style="max-width: 900px; width: 100%;">
                 <div class="setting-item">
-                    <div class="setting-title">语音识别功能</div>
+                    <div class="setting-title">🎤 语音识别功能</div>
                     <div class="setting-description">控制是否启用语音命令识别功能。关闭后将不再响应语音命令。</div>
                     <label class="toggle-switch">
                         <input type="checkbox" id="speechRecognitionToggle">
@@ -159,7 +40,7 @@
                 
                 <!-- 缩放灵敏度设置 -->
                 <div class="setting-item">
-                    <div class="setting-title">手势灵敏度设置</div>
+                    <div class="setting-title">👋 手势灵敏度设置</div>
                     <div class="setting-description">调整手势操作的灵敏度参数，以适应您的操作习惯。</div>
                     
                     <div class="slider-container">
@@ -289,6 +170,17 @@
                         rotateMessage.style.display = 'none';
                     }, 2000);
                 });
+            });
+        </script>
+        
+        <script>
+            // 导航按钮事件
+            document.getElementById('settingsBtn').addEventListener('click', function() {
+                window.location.href = 'index.html';
+            });
+            
+            document.getElementById('tutorialBtn').addEventListener('click', function() {
+                window.location.href = 'tutorial.html';
             });
         </script>
     </body>
