@@ -42,7 +42,7 @@ const CONFIG = {
     },
     camera: {
         nearPlane: 1,
-        farPlane: 50000  // 增大以支持超大模型和严重偏移的模型
+        farPlane: 2000
     },
     light: {
         ambientIntensity: 1.5,
