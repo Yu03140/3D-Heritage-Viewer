@@ -11,13 +11,7 @@
     "category": "雕塑",
     "description": "乐舞俑是中国古代用于殉葬的陶俑,主要表现乐舞表演场景,反映了古代社会的音乐、舞蹈文化及丧葬习俗。唐代乐舞俑尤为突出,常见三彩釉陶工艺,题材包括宫廷乐舞、胡人表演等,现多收藏于陕西历史博物馆、中国国家博物馆等机构。Terracotta figurines of music and dance were used for burial in ancient China, mainly showing the scenes of music and dance performances, reflecting the music, dance culture and funeral customs of ancient society. The Tang Dynasty terracotta figurines of music and dance are especially prominent, and are commonly made of three-color glazed pottery, with themes including court music and dance and hu-man performances, etc. They are now mostly collected in the Shaanxi Museum of History, the National Museum of China, and other institutions."
   },
-  "egypt_djembe_drum": {
-    "title": "埃及金贝鼓",
-    "dynasty": "未知",
-    "category": "乐器",
-    "description": "非洲鼓,是一个俗称,通常指的是来自西非的Djembe,是西非曼丁文化的代表性乐器。传统上,Djembe是徒手演奏,主要有低、中、高三个音,而且需要和Dunun(墩墩鼓)配合,演奏与特定生活场景相关的鼓曲,来给舞者和歌手伴奏。Djembe已经传播到世界各地,在不同的音乐、培训领域发挥着它独特的价值。The African drum, a common name, usually refers to the Djembe from West Africa and is a representative instrument of the Manding culture of West Africa. Traditionally played unarmed, the Djembe has three main tones: low, medium and high, and is used in conjunction with the dunun (dun drum) to accompany dancers and singers by playing drum tunes related to specific scenes of life.The Djembe has spread all over the world, and plays its unique value in different fields of music and training."
-  },
-  "copper-chew": {
+"copper-chew": {
     "title": "二里头文化青铜器",
     "dynasty": "夏商",
     "category": "青铜器",
@@ -28,84 +22,48 @@
     "dynasty": "未知",
     "year": "1771",
     "category": "科学仪器",
-    "description": "此次展出的展品是一件天文仪器，一个天球模型。它用于演示天象，并确定时间、赤道坐标和黄道坐标。浑天仪能够模拟各种天文现象，包括行星相对于太阳的运动。它由弗朗西斯谢克·斯武普斯基（Franciszek Słupski）制作，是他在克拉科夫大学哲学系博士论文的一部分。浑天仪由同心圆环组成，代表天球的大圆。地平环固定在一个木质底座上，底座由两个交叉的雕花木臂组成，木臂安装在一个异形底座上，底座中央放置一个罗盘。小时环垂直于地平环固定，内藏一个由约翰内斯·弗赖特霍夫（Johannes Vrijthoff）在南极制造的时钟装置。该装置通过用小球设置内部的大圆和轴来驱动浑天仪。"
+    "description": "此次展出的展品是一件天文仪器，一个天球模型。它用于演示天象，并确定时间、赤道坐标和黄道坐标。浑天仪能够模拟各种天文现象，包括行星相对于太阳的运动。它由弗朗西斯谢克·斯武普斯基（Franciszek Słupski）制作，是他在克拉科夫大学哲学系博士论文的一部分。浑天仪由同心圆环组成，代表天球的大圆。地平环固定在一个木质底座上，底座由两个交叉的雕花木臂组成，木臂安装在一个异形底座上，底座中央放置一个罗盘。小时环垂直于地平环固定，内藏一个由约翰内斯·弗赖特霍夫（Johannes Vrijthoff）在南极制造的时钟装置。该装置通过用小球设置内部的大圆和轴来驱动浑天仪。The exhibit on display is an astronomical instrument, a celestial sphere model. It is used to demonstrate celestial phenomena and to determine time, equatorial coordinates, and ecliptic coordinates. The armillary sphere can simulate various astronomical phenomena, including the motion of planets relative to the sun. It was made by Franciszek Słupski as part of his doctoral dissertation in the Faculty of Philosophy at the University of Krakow. The armillary sphere consists of concentric rings representing the great circles of the celestial sphere. The horizon ring is fixed to a wooden base composed of two crossed, carved wooden arms mounted on a shaped base with a compass in the center. The hour ring is fixed perpendicular to the horizon ring and contains a clock mechanism made by Johannes Vrijthoff at the South Pole. The device drives the armillary sphere by setting the inner great circles and axes with small balls."
   },
   "ding_censer_with_an_openwork_cover": {
     "title": "鼎式镂空盖香炉",
     "dynasty": "清代",
     "year": "1736-1795",
     "category": "陶瓷器",
-    "description": "这件香炉采用掐丝珐琅工艺装饰，与镀金金属片的图形和镂空装饰完美契合——掐丝珐琅隔层的金属丝和边缘凸显了植物藤蔓的图案。这件色彩丰富的装饰以龙及其丰富的造型为主导图案。"
+    "description": "这件香炉采用掐丝珐琅工艺装饰，与镀金金属片的图形和镂空装饰完美契合——掐丝珐琅隔层的金属丝和边缘凸显了植物藤蔓的图案。这件色彩丰富的装饰以龙及其丰富的造型为主导图案。This censer is decorated with cloisonné enamel, which perfectly matches the graphics and openwork decoration of the gilded metal sheets—the wires and edges of the cloisonné compartments highlight the pattern of plant vines. This richly colored decoration is dominated by the motif of the dragon and its rich forms."
   },
   "mass_chalice": {
     "title": "弥撒圣杯",
     "dynasty": "未知",
     "year": "1773",
     "category": "金银器",
-    "description": "这里展示的圣杯由圣墓骑士团成员约瑟夫·马约维奇神父于1773年捐赠给梅胡夫的圣十字医院教堂。该圣杯由马钦·莱克斯奇基（Marcin Lekszycki）制作，他于1763年至1798年在克拉科夫担任金匠，是当时的一位金匠大师。他是克拉科夫少数几位在作品上署名的金匠之一（使用椭圆形内的“ML”行会标志）。莱克斯奇基经营着一家大型作坊，拥有众多学徒；他的作坊位于布拉卡街（Bracka Street）。他创作了独特的洛可可风格的圣体匣、圣体盒、圣杯、长明灯、香炉、香舟、托盘和烛台。马钦·莱克斯奇作坊的大部分作品都收藏于克拉科夫和前梅胡夫区的教堂中。这里展示的圣杯由镀金银制成。它采用洛可可风格（贝壳）装饰，并具有莱克斯奇基工作室典型的装饰元素，如藤蔓、花彩、莨苕叶和植物图案。"
-  },
-  "sculpture_bust_of_roza_loewenfeld": {
-    "title": "姆萨乌·日姆斯基",
-    "dynasty": "未知",
-    "year": "1767",
-    "category": "书画",
-    "description": "这本罗马弥撒经书采用手工纸印刷，并采用皮革封面装订。书的封面饰有银质画框和描绘圣人的圆形浮雕。弥撒经书的正面由山毛榉木板制成，覆以棕色小牛皮，饰有骨质银质装饰，画框上饰有风格化的花卉图案，角落处饰有小天使头像。书的中央是一个洛可可风格的涡卷形装饰，上面绘有圣母无染原罪圣母像，右手拿着一根顶端插满鲜花的树枝。涡卷形装饰的底部刻有1726年的日期，表明该装饰是从一本更古老的书籍中移植而来的。罗马弥撒经书是天主教会最重要的礼仪书籍。在梅胡夫展览上展出的这本弥撒经书是梅胡夫圣墓骑士团藏书丰富的最引人入胜的藏品之一。在其鼎盛时期，该书藏书数千册，但随着1819年修会解散，该书被分散——在华沙公共图书馆馆长塞缪尔·林德的授意下，超过4500册藏书被从梅胡夫带走。弥撒经书背面饰有银框，框内饰有小天使和铁艺装饰，并有一枚饰有圣安德烈宗徒像的圆形徽章。徽章上方是圣墓修会的十字架，底部一小块涡卷装饰上刻有铭文：“Ad convenigenes in Miechów”（献给梅胡夫修道院）。"
-  },
-  "a_royal_crown": {
-    "title": "道具王冠",
-    "dynasty": "未知",
-    "year": "2000",
-    "category": "模型",
-    "description": "一顶镂空的儿童王冠，由两根轭状物闭合，轭状物连接处有一个球体，球体上有一处断裂的十字架痕迹。王冠上装饰着八个花饰：其中四个在轭状物底部饰有棕榈丝带图案，另外四个则饰有叶子图案。王冠上则装饰着彩色玻璃仿宝石，这些宝石呈凸圆形切割，并有多种刻面切割。该物品曾被用作克拉科夫美术学院的道具。"
-  },
-  "ring_with_rubies_and_pearls": {
-    "title": "宝石银戒",
-    "dynasty": "未知",
-    "year": "1800",
-    "category": "首饰",
-    "description": "来自Katarzyna Sosenko的家族传承。这枚银戒指镶嵌着红宝石和珍珠。银质部件采用镂空工艺制成圆形，饰有植物卷须状纹饰。银质底座上镶嵌着一颗八角形的大红宝石。戒指周围均匀分布着八个圆形小底座，红宝石和珍珠交替镶嵌。"
+    "description": "这里展示的圣杯由圣墓骑士团成员约瑟夫·马约维奇神父于1773年捐赠给梅胡夫的圣十字医院教堂。该圣杯由马钦·莱克斯奇基（Marcin Lekszycki）制作，他于1763年至1798年在克拉科夫担任金匠，是当时的一位金匠大师。他是克拉科夫少数几位在作品上署名的金匠之一（使用椭圆形内的“ML”行会标志）。莱克斯奇基经营着一家大型作坊，拥有众多学徒；他的作坊位于布拉卡街（Bracka Street）。他创作了独特的洛可可风格的圣体匣、圣体盒、圣杯、长明灯、香炉、香舟、托盘和烛台。马钦·莱克斯奇作坊的大部分作品都收藏于克拉科夫和前梅胡夫区的教堂中。这里展示的圣杯由镀金银制成。它采用洛可可风格（贝壳）装饰，并具有莱克斯奇基工作室典型的装饰元素，如藤蔓、花彩、莨苕叶和植物图案。The chalice displayed here was donated in 1773 to the Church of the Holy Cross Hospital in Miechów by Father Józef Majowicz, a member of the Order of the Holy Sepulchre. The chalice was made by Marcin Lekszycki, a goldsmith in Krakow from 1763 to 1798 and a master of his time. He was one of the few Krakow goldsmiths to sign his work (using the 'ML' guild mark in an oval). Lekszycki ran a large workshop with numerous apprentices; his workshop was located on Bracka Street. He created unique Rococo-style monstrances, ciboria, chalices, sanctuary lamps, censers, incense boats, trays, and candlesticks. Most of the works from Marcin Lekszycki's workshop are housed in churches in Krakow and the former Miechów district. The chalice shown here is made of gilded silver. It is decorated in the Rococo style (shell) and features decorative elements typical of Lekszycki's studio, such as vines, festoons, acanthus leaves, and plant motifs."
   },
   "two_small_vases": {
     "title": "飞鹤花瓶",
     "dynasty": "未知",
     "year": "2000",
     "category": "陶瓷器",
-    "description": "这两个小花瓶形状相同：在低矮的凹底上，有一个加长的卵形腹部，双臂演变成相当短而细的颈部，末端是高脚杯状的流嘴。环形底座和流嘴饰有铜制的箍圈装饰，带有镀银痕迹。花瓶装饰有金属掐丝珐琅，使用银丝。装饰描绘了飞翔的仙鹤，白色带有灰色和红色元素，位于深蓝色背景上。仙鹤图案以连续的方式出现在两个花瓶的瓶身上。在流嘴边缘和底座正上方，可以看到一圈圆形的红色图案。在底座下方，可以看到一个类似于日语片假名中的yo音节的符号。"
+    "description": "这两个小花瓶形状相同：在低矮的凹底上，有一个加长的卵形腹部，双臂演变成相当短而细的颈部，末端是高脚杯状的流嘴。环形底座和流嘴饰有铜制的箍圈装饰，带有镀银痕迹。花瓶装饰有金属掐丝珐琅，使用银丝。装饰描绘了飞翔的仙鹤，白色带有灰色和红色元素，位于深蓝色背景上。仙鹤图案以连续的方式出现在两个花瓶的瓶身上。在流嘴边缘和底座正上方，可以看到一圈圆形的红色图案。在底座下方，可以看到一个类似于日语片假名中的yo音节的符号。These two small vases have the same shape: on a low, concave base, there is an elongated ovoid body, with the arms evolving into a rather short and slender neck, ending in a goblet-shaped spout. The ring base and spout are decorated with copper hoops with traces of silver plating. The vases are decorated with metal cloisonné enamel using silver wire. The decoration depicts flying cranes, white with gray and red elements, on a dark blue background. The crane motif appears continuously on the bodies of both vases. A circular red pattern can be seen around the rim of the spout and just above the base. Below the base, a symbol resembling the 'yo' syllable in Japanese katakana can be seen."
   },
   "cauldron": {
     "title": "釜",
     "dynasty": "未知",
     "year": "1950",
     "category": "陶瓷器",
-    "description": "这口大锅由铜片制成，呈钟形。它由两片金属板构成，分别构成锅底和锅侧。略微凸起的锅底与圆柱形的锅侧连接，采用了罗姆铜匠的传统工艺：开槽并焊接搭接接头。大锅的锅侧顶部略微外扩，壶嘴处形成一个狭窄的平锤式环口。壶嘴边缘下方对称地铆接了两个由弯曲铜棒制成的带有平锤式卷须的凸耳。每个凸耳用三个铜铆钉固定。两个凸耳由一条铁链连接，这条铁链很可能是用来将大锅悬挂在火上的。大锅内部有镀锡的痕迹。涂层因长期使用而磨损。"  
+    "description": "这口大锅由铜片制成，呈钟形。它由两片金属板构成，分别构成锅底和锅侧。略微凸起的锅底与圆柱形的锅侧连接，采用了罗姆铜匠的传统工艺：开槽并焊接搭接接头。大锅的锅侧顶部略微外扩，壶嘴处形成一个狭窄的平锤式环口。壶嘴边缘下方对称地铆接了两个由弯曲铜棒制成的带有平锤式卷须的凸耳。每个凸耳用三个铜铆钉固定。两个凸耳由一条铁链连接，这条铁链很可能是用来将大锅悬挂在火上的。大锅内部有镀锡的痕迹。涂层因长期使用而磨损。This cauldron is made of copper sheets and is bell-shaped. It is constructed from two metal plates, which form the bottom and the sides of the pot. The slightly convex bottom is connected to the cylindrical sides using a traditional Romani coppersmith technique: grooving and soldering a lap joint. The top of the cauldron's side flares out slightly, forming a narrow, flat-hammered rim at the spout. Below the rim, two lugs made of bent copper rods with flat-hammered tendrils are symmetrically riveted. Each lug is secured with three copper rivets. The two lugs are connected by an iron chain, which was likely used to suspend the cauldron over a fire. The interior of the cauldron shows traces of tinning. The coating is worn from long-term use."  
   },
     "ritual_hare_mask": {
     "title": "仪式用野兔面具",
     "dynasty": "未知",
     "year": "1900",
     "category": "模型",
-    "description": "这是马里邦贾加拉悬崖多贡传统面具的典型特征。多贡面具以动物形和几何形体为特色，并配有富有表现力的彩绘装饰，这些装饰通常也以几何图案为主。白色、红色（酒红色、砖红色）和黑色是其主要颜色。大多数面具的面部特征鲜明，呈几何形状（矩形，垂直放置），带有轮廓分明的眼睛、鼻子和嘴巴，或者像所描述的面具一样，面部呈几何形状，呈椭圆形，带有明显的动物形特征。由于其形状，这款面具俗称“野兔面具”。"  
+    "description": "这是马里邦贾加拉悬崖多贡传统面具的典型特征。多贡面具以动物形和几何形体为特色，并配有富有表现力的彩绘装饰，这些装饰通常也以几何图案为主。白色、红色（酒红色、砖红色）和黑色是其主要颜色。大多数面具的面部特征鲜明，呈几何形状（矩形，垂直放置），带有轮廓分明的眼睛、鼻子和嘴巴，或者像所描述的面具一样，面部呈几何形状，呈椭圆形，带有明显的动物形特征。由于其形状，这款面具俗称“野兔面具”。This is a typical feature of traditional Dogon masks from the Bandiagara Escarpment in Mali. Dogon masks are characterized by zoomorphic and geometric forms, accompanied by expressive painted decorations, which are also often dominated by geometric patterns. White, red (burgundy, brick red), and black are its primary colors. Most masks have distinct facial features in geometric shapes (rectangular, placed vertically) with well-defined eyes, nose, and mouth, or, like the mask described, have a geometric, oval-shaped face with pronounced zoomorphic features. Due to its shape, this mask is commonly known as the 'hare mask'."  
   },
   "mikiphone_pocket_phonograph": {
     "title": "袖珍留声机",
     "dynasty": "未知",
     "year": "1926",
     "category": "模型",
-    "description": "该留声机采用弹簧驱动机构，可播放直径为 10 至 25 厘米、转速为 33 rpm 的唱片。它有时被称为维多利亚时代的随身听和 iPod 的曾祖父。它是最早的袖珍可移动设备之一。“Mikiphone”不需要任何电源，因为它采用弹簧驱动机构和一个带孔盒子形状的小型胶木共鸣器，而不是通常用于扩音的大管。1924 年，日内瓦的匈牙利兄弟 Nicolas 和 Entienne Vadász 以 Vadasz 系统名义为 Mikiphone 的构造申请了专利。不久之后，他们与著名的瑞士 Paillard 公司签订了合同，开始生产袖珍留声机。截至 1927 年，共生产了 180,000 台这种设备，包括带有金色或银色外壳的豪华版。尽管 Mikiphone 是一种移动设备，但要使其工作却并非易事，因为它包含一些小元件，拆卸后可以存放在一个小的金属罐中，因此需要用户非常精确地操作。该设备设计用于以 33 rpm 的转速播放直径为 10 至 25 厘米的唱片。"
-    },
-  "ring_for_perfume": {
-    "title": "香水戒指",
-    "dynasty": "未知",
-    "year": "1926",
-    "category": "模型",
-    "description": "来自Katarzyna Sosenko的家族传承。这枚巨大的戒指由金属制成，涂上金色，饰有半球形装饰，托座周围环绕着一圈细细的条纹环。托座内有一颗珍珠。戒指托座安装在铰链上，可以打开。托座内有一个小容器，用于盛放香水。"
-      },
-  "candlestick_for_five_candles": {
-    "title": "犹太教堂烛台",
-    "dynasty": "未知",
-    "year": "1850",
-    "category": "金银器",
-    "description": "这盏烛台是一座可插五根蜡烛的烛台，是在 2004 年对大犹太会堂遗址进行考古发掘时与其他物品一起发现的。"
-   }      
-  
+    "description": "该留声机采用弹簧驱动机构，可播放直径为 10 至 25 厘米、转速为 33 rpm 的唱片。它有时被称为维多利亚时代的随身听和 iPod 的曾祖父。它是最早的袖珍可移动设备之一。“Mikiphone”不需要任何电源，因为它采用弹簧驱动机构和一个带孔盒子形状的小型胶木共鸣器，而不是通常用于扩音的大管。1924 年，日内瓦的匈牙利兄弟 Nicolas 和 Entienne Vadász 以 Vadasz 系统名义为 Mikiphone 的构造申请了专利。不久之后，他们与著名的瑞士 Paillard 公司签订了合同，开始生产袖珍留声机。截至 1927 年，共生产了 180,000 台这种设备，包括带有金色或银色外壳的豪华版。尽管 Mikiphone 是一种移动设备，但要使其工作却并非易事，因为它包含一些小元件，拆卸后可以存放在一个小的金属罐中，因此需要用户非常精确地操作。该设备设计用于以 33 rpm 的转速播放直径为 10 至 25 厘米的唱片。This phonograph uses a spring-driven mechanism and can play records with a diameter of 10 to 25 cm at a speed of 33 rpm. It is sometimes called the Victorian-era Walkman and the great-grandfather of the iPod. It is one of the earliest pocket-sized portable devices. The 'Mikiphone' does not require any power source as it uses a spring-driven mechanism and a small bakelite resonator in the shape of a box with a hole, instead of the large horn typically used for amplification. In 1924, the Hungarian brothers Nicolas and Etienne Vadász of Geneva patented the construction of the Mikiphone under the name Vadasz system. Shortly thereafter, they signed a contract with the famous Swiss company Paillard to begin production of the pocket phonograph. By 1927, 180,000 units of this device had been produced, including luxury versions with gold or silver casings. Although the Mikiphone is a mobile device, getting it to work was not easy, as it contained small components that could be stored in a small metal can after disassembly, requiring very precise operation by the user. The device is designed to play records with a diameter of 10 to 25 cm at a speed of 33 rpm."
+    }
 }

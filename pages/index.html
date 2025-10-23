@@ -201,43 +201,16 @@
             const artifactsData = [
                 {
                     id: "copper-chew.gltf",
-                    title: "二里头青铜器",
+                    title: "二里头文化青铜器",
                     dynasty: "夏商",
                     category: "青铜器",
-                    description: "中国青铜时代早期代表作品，见证了夏商文明的青铜铸造技术发展历程。",
-                    period: "约公元前1600-1046年",
+                    description: "二里头文化青铜器，以其独特的造型和精湛的工艺，展现了夏商时期青铜文明的辉煌成就。",
+                    period: "公元前21-16世纪",
                     icon: "🏺"
-                },
-                {
-                    id: "modelNew.gltf",
-                    title: "唐代乐舞俑",
-                    dynasty: "唐代",
-                    category: "雕塑",
-                    description: "唐代三彩釉陶工艺代表作，生动展现了盛唐时期宫廷音乐舞蹈的繁荣景象。",
-                    period: "公元618-907年",
-                    icon: "💃"
-                },
-                {
-                    id: "teacup.gltf",
-                    title: "清代青瓷茶壶",
-                    dynasty: "清代",
-                    category: "陶瓷器",
-                    description: "豆青釉制作工艺复杂，釉质坚硬、色泽深润，展现了清代景德镇精湛的制瓷技术。",
-                    period: "公元1644-1912年",
-                    icon: "🫖"
-                },
-                {
-                    id: "egypt_djembe_drum.glb",
-                    title: "埃及金贝鼓",
-                    dynasty: "古代世界",
-                    category: "乐器",
-                    description: "西非曼丁文化代表性打击乐器，传统徒手演奏，蕴含着丰富的部落文化内涵。",
-                    period: "古代文明",
-                    icon: "🥁"
                 }
             ];
 
-            // 轮播图状态
+            const container = document.getElementById('featured-models-container');
             let currentArtifactIndex = 0;
             let previousArtifactIndex = -1;
             let autoPlayInterval;

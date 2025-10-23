@@ -8,6 +8,30 @@ export class ModelSelector {
         this.game = game;
         console.log("ModelSelector 初始化");
         this.setupEventListeners();
+        this.handleUrlParams();
+    }
+
+    handleUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const dynasty = urlParams.get('dynasty');
+        if (dynasty) {
+            console.log(`URL参数检测到朝代: ${dynasty}`);
+            // 延迟执行以确保UI完全加载
+            setTimeout(() => {
+                const modelSelectionOverlay = document.getElementById('modelSelectionOverlay');
+                if (modelSelectionOverlay) {
+                    modelSelectionOverlay.style.display = 'block';
+                    
+                    const filterBtn = document.querySelector(`.filter-btn[data-filter-type="dynasty"][data-filter-value="${dynasty}"]`);
+                    if (filterBtn) {
+                        filterBtn.click();
+                        console.log(`已自动触发筛选: ${dynasty}`);
+                    } else {
+                        console.warn(`未找到朝代筛选按钮: ${dynasty}`);
+                    }
+                }
+            }, 500);
+        }
     }
 
     setupEventListeners() {

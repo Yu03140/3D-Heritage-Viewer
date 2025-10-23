@@ -542,7 +542,7 @@
 自然与人类共舞，岁月雕刻出最早的文明轮廓。<br>
 每一片陶器与骨器，都是对远古世界的低语。
                 </div>
-                <a href="#" class="explore-btn">探索文物 →</a>
+                <a href="#" class="explore-btn" data-dynasty="史前时期">探索文物 →</a>
             </div>
         </div>
         
@@ -565,7 +565,7 @@
 甲骨铭文与青铜铭文，记录先民的智慧与心声。<br>
 血脉相连的王权与祭祀，让历史在器物间闪耀。
                 </div>
-                <a href="#" class="explore-btn">探索文物 →</a>
+                <a href="#" class="explore-btn" data-dynasty="夏商周时期">探索文物 →</a>
             </div>
         </div>
         
@@ -588,7 +588,7 @@
 南北朝纷乱，却也孕育了文化的多样花朵。<br>
 江河湖海见证着民族融合的初声。
                 </div>
-                <a href="#" class="explore-btn">探索文物 →</a>
+                <a href="#" class="explore-btn" data-dynasty="秦汉至南北朝">探索文物 →</a>
             </div>
         </div>
         
@@ -611,7 +611,7 @@
 宋代文人雅集，山水画中藏着哲思与宁静。<br>
 元朝马背民族的勇健，汇入中华画卷。
                 </div>
-                <a href="#" class="explore-btn">探索文物 →</a>
+                <a href="#" class="explore-btn" data-dynasty="隋唐至宋元">探索文物 →</a>
             </div>
         </div>
         
@@ -634,7 +634,7 @@
                     海上丝路与海外贸易，让世界与中国交相辉映。<br>
                     近代的风雨初起，历史缓缓翻开新的篇章。
                 </div>
-                <a href="#" class="explore-btn">探索文物 →</a>
+                <a href="#" class="explore-btn" data-dynasty="明清至近代">探索文物 →</a>
             </div>
         </div>
     </div>
@@ -680,7 +680,12 @@
         document.querySelectorAll('.explore-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.location.href = 'main.html';
+                const dynasty = e.target.getAttribute('data-dynasty');
+                if (dynasty) {
+                    window.location.href = `main.html?dynasty=${encodeURIComponent(dynasty)}`;
+                } else {
+                    window.location.href = 'main.html';
+                }
             });
         });
         
