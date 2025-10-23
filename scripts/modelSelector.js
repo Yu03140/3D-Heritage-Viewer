@@ -1,6 +1,7 @@
 // modelSelector.js - 管理模型选择功能
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/loaders/GLTFLoader.js';
+import { getModelConfig } from './modelConfig.js';
 
 export class ModelSelector {
     constructor(game) {
@@ -104,86 +105,41 @@ export class ModelSelector {
         // 设置新模型
         this.game.pandaModel = gltf.scene;
         
-        // 按模型文件名自定义缩放比例和最大缩放、初始位置
-        let scale = 80;
-        let maxScale = 300;
-        let posY = this.game.renderDiv.clientHeight * -0.45;
-        let posZ = -1000;
-        const fileName = modelPath.split('/').pop();
-
-
-
-        if (fileName === 'modelNew.gltf') {
-            scale = 20;
-        }
-         if (fileName === 'copper-chew.gltf') {
-            scale = 5000;
-            maxScale = 9000;
-        }
-        if (fileName === 'teacup.gltf') {
-            scale = 2000;
-            maxScale = 5000;
-        }
-        if (fileName === 'egypt_djembe_drum.glb') {
-            // 让鼓初始位置在屏幕中心
-            posY = 450;
-            posZ = -500;
-            scale = 2000;
-            maxScale = 5000;
-        }
-        if (modelPath.includes('armillary_sphere_1771')) {
-            scale = 1000;  
-            maxScale = 2000;
-            posY = -100;
-            posZ = -500;
-        }
-        if (modelPath.includes('ding_censer_with_an_openwork_cover')) {
-            scale = 1;   // 极小缩放以匹配其他模型
-            maxScale = 30;
-            posY = 0;
-            posZ = -1500;
-        }
-        if (modelPath.includes('mass_chalice')) {
-            scale = 12;   
-            maxScale = 40;
-            posY = 0;
-            posZ = -1500;
-        }
-        if (modelPath.includes('sculpture_bust_of_roza_loewenfeld')) {
-            scale = 3000;    
-            maxScale = 6000;
-            posY = -100;  // 降低位置，因为模型中心偏移较大
-            posZ = -500;
-        }
-        this.game.pandaModel.scale.set(scale, scale, scale);
-        this.game.pandaModel.userData.maxScale = maxScale;
-        // minScale 设置为初始缩放的 10%，避免缩得太小
-        this.game.pandaModel.userData.minScale = Math.max(0.1, scale * 0.1);
+        // 从配置文件获取模型的缩放和位置配置
+        const config = getModelConfig(modelPath, this.game.renderDiv.clientHeight);
         
-        // 先临时添加到场景以计算包围盒
-        this.game.pandaModel.position.set(0, 0, posZ);
+        // 应用缩放配置
+        this.game.pandaModel.scale.set(config.scale, config.scale, config.scale);
+        this.game.pandaModel.userData.maxScale = config.maxScale;
+        this.game.pandaModel.userData.minScale = config.minScale;
+        
+        // 先临时添加到场景以计算包围盒（使用原点位置以正确计算偏移）
+        this.game.pandaModel.position.set(0, 0, 0);
         this.game.scene.add(this.game.pandaModel);
         
-        // 对于有中心偏移的模型，计算并补偿偏移
-        if (modelPath.includes('sculpture_bust_of_roza_loewenfeld')) {
-            // 计算包围盒以获取模型的实际中心
+        // 对于需要中心偏移补偿的模型，计算并补偿偏移
+        if (config.centerOffset) {
+            // 计算包围盒以获取模型的实际中心（相对于原点的偏移）
             const tempBox = new THREE.Box3().setFromObject(this.game.pandaModel);
             const tempCenter = new THREE.Vector3();
             tempBox.getCenter(tempCenter);
             
-            // 调整位置：让模型的中心对准目标位置
-            // 目标是让模型中心在posY，所以位置应该是 posY - 中心偏移
-            this.game.pandaModel.position.y = posY - tempCenter.y;
-            console.log(`🔧 姆萨乌中心偏移补偿: 目标y=${posY}, 模型中心偏移=${tempCenter.y.toFixed(2)}, 最终位置y=${this.game.pandaModel.position.y.toFixed(2)}`);
+            // 调整位置：让模型的中心对准目标位置（补偿X/Y/Z三轴）
+            // position = 目标位置 - 中心偏移
+            this.game.pandaModel.position.x = 0 - tempCenter.x;
+            this.game.pandaModel.position.y = config.posY - tempCenter.y;
+            this.game.pandaModel.position.z = config.posZ - tempCenter.z;
+            console.log(`🔧 中心偏移补偿(XYZ): 目标=(0, ${config.posY}, ${config.posZ}), 中心偏移=(${tempCenter.x.toFixed(2)}, ${tempCenter.y.toFixed(2)}, ${tempCenter.z.toFixed(2)})`);
+            console.log(`   最终位置=(${this.game.pandaModel.position.x.toFixed(2)}, ${this.game.pandaModel.position.y.toFixed(2)}, ${this.game.pandaModel.position.z.toFixed(2)})`);
         } else {
             // 其他模型直接设置位置
-            this.game.pandaModel.position.y = posY;
+            this.game.pandaModel.position.set(0, config.posY, config.posZ);
         }
         
         // 调试信息：输出模型的详细信息
         console.log(`已添加新模型 "${modelPath}" 到场景`);
-        console.log(`模型缩放: ${scale}, 最大缩放: ${maxScale}`);
-        console.log(`模型位置: x=0, y=${posY.toFixed(2)}, z=${posZ}`);
+        console.log(`模型缩放: ${config.scale}, 最大缩放: ${config.maxScale}`);
+        console.log(`模型位置: x=${this.game.pandaModel.position.x.toFixed(2)}, y=${this.game.pandaModel.position.y.toFixed(2)}, z=${this.game.pandaModel.position.z.toFixed(2)}`);
         
         // 计算模型的包围盒
         const box = new THREE.Box3().setFromObject(this.game.pandaModel);

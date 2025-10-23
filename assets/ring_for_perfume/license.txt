@@ -1,0 +1,8 @@
+Model Information:
+* title:	Ring for perfume
+* source:	https://sketchfab.com/3d-models/ring-for-perfume-9115e1300bb94857b7ad05ad416b7d9e
+* author:	Virtual Museums of Małopolska (https://sketchfab.com/WirtualneMuzeaMalopolski)
+
+Model License:
+* license type:	CC0-1.0 (http://creativecommons.org/publicdomain/zero/1.0/)
+* requirements:	Credit is not mandatory. Commercial use is allowed.
