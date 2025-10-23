@@ -1,0 +1,8 @@
+Model Information:
+* title:	Cauldron
+* source:	https://sketchfab.com/3d-models/cauldron-521be39e2ea94bbaa1f06f3e89b0ad97
+* author:	Virtual Museums of Małopolska (https://sketchfab.com/WirtualneMuzeaMalopolski)
+
+Model License:
+* license type:	CC0-1.0 (http://creativecommons.org/publicdomain/zero/1.0/)
+* requirements:	Credit is not mandatory. Commercial use is allowed.

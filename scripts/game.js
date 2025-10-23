@@ -7,6 +7,7 @@ import { SpeechManager } from './SpeechManager.js';
 import { ModelSelector } from './modelSelector.js';
 import { ModelLoadingBubble } from './modelLoadingBubble.js';
 import { DescriptionManager } from './descriptionManager.js';
+import { getModelConfig } from './modelConfig.js';
 
 // ==================== 配置常量 ====================
 const CONFIG = {
@@ -363,18 +364,29 @@ export class Game {
                         this.animationMixer = new THREE.AnimationMixer(this.pandaModel);
                         this.animationClips = gltf.animations;
 
-                        // 设置模型
-                        const scale = CONFIG.model.defaultScale;
-                        this.pandaModel.scale.set(scale, scale, scale);
-                        this.pandaModel.userData.maxScale = CONFIG.model.defaultMaxScale;
-                        this.pandaModel.userData.minScale = CONFIG.model.defaultMinScale;
+                        // 从配置文件获取模型的缩放和位置配置
+                        const config = getModelConfig(modelPath, this.renderDiv.clientHeight);
 
-                        const sceneHeight = this.renderDiv.clientHeight;
-                        this.pandaModel.position.set(
-                            0,
-                            sceneHeight * CONFIG.model.positionYFactor,
-                            CONFIG.model.positionZ
-                        );
+                        // 设置模型缩放
+                        this.pandaModel.scale.set(config.scale, config.scale, config.scale);
+                        this.pandaModel.userData.maxScale = config.maxScale;
+                        this.pandaModel.userData.minScale = config.minScale;
+
+                        // 设置模型位置（先设置为原点以正确计算偏移）
+                        this.pandaModel.position.set(0, 0, 0);
+                        
+                        // 对于需要中心偏移补偿的模型，计算并补偿偏移
+                        if (config.centerOffset) {
+                            const tempBox = new THREE.Box3().setFromObject(this.pandaModel);
+                            const tempCenter = new THREE.Vector3();
+                            tempBox.getCenter(tempCenter);
+                            this.pandaModel.position.x = 0 - tempCenter.x;
+                            this.pandaModel.position.y = config.posY - tempCenter.y;
+                            this.pandaModel.position.z = config.posZ - tempCenter.z;
+                        } else {
+                            // 其他模型直接设置位置
+                            this.pandaModel.position.set(0, config.posY, config.posZ);
+                        }
 
                         this.scene.add(this.pandaModel);
 
@@ -666,75 +678,29 @@ export class Game {
         this.animationMixer = new THREE.AnimationMixer(this.pandaModel);
         this.animationClips = gltf.animations;
 
-        // 根据模型文件名设置缩放比例
-        let scale = CONFIG.model.defaultScale;
-        let maxScale = CONFIG.model.defaultMaxScale;
-        let posY = this.renderDiv.clientHeight * CONFIG.model.positionYFactor;
-        let posZ = CONFIG.model.positionZ;
-        const fileName = this.initialModelPath.split('/').pop();
+        // 从配置文件获取模型的缩放和位置配置
+        const config = getModelConfig(this.initialModelPath, this.renderDiv.clientHeight);
 
-        // 为不同模型设置特定的缩放值
-        if (fileName === 'modelNew.gltf') {
-            scale = 20;
-        }
-        if (fileName === 'copper-chew.gltf') {
-            scale = 5000;
-            maxScale = 9000;
-        }
-        if (fileName === 'teacup.gltf') {
-            scale = 2000;
-            maxScale = 5000;
-        }
-        if (fileName === 'egypt_djembe_drum.glb') {
-            posY = 450;
-            posZ = -500;
-            scale = 2000;
-            maxScale = 5000;
-        }
-        if (this.initialModelPath.includes('armillary_sphere_1771')) {
-            scale = 1000;
-            maxScale = 2000;
-            posY = -100;
-            posZ = -500;
-        }
-        if (this.initialModelPath.includes('ding_censer_with_an_openwork_cover')) {
-            scale = 1;
-            maxScale = 30;
-            posY = 0;
-            posZ = -1500;
-        }
-        if (this.initialModelPath.includes('mass_chalice')) {
-            // 原始尺寸5.7，但中心偏移严重，继续缩小
-            scale = 12;
-            maxScale = 40;
-            posY = 0;
-            posZ = -1500;
-        }
-        if (this.initialModelPath.includes('sculpture_bust_of_roza_loewenfeld')) {
-            // 原始尺寸350.7，非常大，需要极小缩放
-            scale = 1;
-            maxScale = 4;
-            posY = 0;
-            posZ = -2000;
-        }
+        // 设置模型缩放
+        this.pandaModel.scale.set(config.scale, config.scale, config.scale);
+        this.pandaModel.userData.maxScale = config.maxScale;
+        this.pandaModel.userData.minScale = config.minScale;
 
-        // 设置模型
-        this.pandaModel.scale.set(scale, scale, scale);
-        this.pandaModel.userData.maxScale = maxScale;
-        // minScale 设置为初始缩放的 10%，避免缩得太小
-        this.pandaModel.userData.minScale = Math.max(0.1, scale * 0.1);
-
-        this.pandaModel.position.set(0, posY, posZ);
+        // 设置模型位置（先设置为原点以正确计算偏移）
+        this.pandaModel.position.set(0, 0, 0);
         
-        // 对于有中心偏移的模型，计算并补偿偏移
-        if (this.initialModelPath.includes('sculpture_bust_of_roza_loewenfeld') || 
-            this.initialModelPath.includes('ding_censer_with_an_openwork_cover') ||
-            this.initialModelPath.includes('mass_chalice')) {
+        // 对于需要中心偏移补偿的模型，计算并补偿偏移
+        if (config.centerOffset) {
             const tempBox = new THREE.Box3().setFromObject(this.pandaModel);
             const tempCenter = new THREE.Vector3();
             tempBox.getCenter(tempCenter);
-            this.pandaModel.position.y = posY - tempCenter.y;
-            console.log(`初始加载补偿中心偏移: y调整为 ${this.pandaModel.position.y.toFixed(2)}`);
+            this.pandaModel.position.x = 0 - tempCenter.x;
+            this.pandaModel.position.y = config.posY - tempCenter.y;
+            this.pandaModel.position.z = config.posZ - tempCenter.z;
+            console.log(`初始加载补偿中心偏移(XYZ): 位置=(${this.pandaModel.position.x.toFixed(2)}, ${this.pandaModel.position.y.toFixed(2)}, ${this.pandaModel.position.z.toFixed(2)})`);
+        } else {
+            // 其他模型直接设置位置
+            this.pandaModel.position.set(0, config.posY, config.posZ);
         }
 
         this.scene.add(this.pandaModel);
