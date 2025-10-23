@@ -685,11 +685,9 @@
                 <div class="filter-group">
                     <label>朝代筛选：</label>
                     <button class="filter-btn active" data-filter-type="dynasty" data-filter-value="all">全部</button>
-                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="史前时期">史前时期</button>
-                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="青铜礼乐">青铜礼乐</button>
-                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="秦汉至南北朝">秦汉至南北朝</button>
-                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="隋唐至宋元">隋唐至宋元</button>
-                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="明清至近代">明清至近代</button>
+                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="清代">清代</button>
+                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="唐代">唐代</button>
+                    <button class="filter-btn" data-filter-type="dynasty" data-filter-value="夏商">夏商</button>
                     <button class="filter-btn" data-filter-type="dynasty" data-filter-value="未知">未知</button>
                 </div>
                 <div class="filter-group">
@@ -702,8 +700,6 @@
                     <button class="filter-btn" data-filter-type="category" data-filter-value="科学仪器">科学仪器</button>
                     <button class="filter-btn" data-filter-type="category" data-filter-value="金银器">金银器</button>
                     <button class="filter-btn" data-filter-type="category" data-filter-value="书画">书画</button>
-                    <button class="filter-btn" data-filter-type="category" data-filter-value="模型">模型</button>
-                    <button class="filter-btn" data-filter-type="category" data-filter-value="首饰">首饰</button>
                 </div>
             </div>
             <div class="model-list" id="modelList">
@@ -715,15 +711,6 @@
                 <div class="model-item" data-model="ding_censer_with_an_openwork_cover/scene.gltf" data-dynasty="清代" data-category="陶瓷器">鼎式镂空盖香炉</div>
                 <div class="model-item" data-model="mass_chalice/scene.gltf" data-dynasty="未知" data-category="金银器">弥撒圣杯</div>
                 <div class="model-item" data-model="sculpture_bust_of_roza_loewenfeld/scene.gltf" data-dynasty="未知" data-category="书画">姆萨乌·日姆斯基</div>
-                <div class="model-item" data-model="a_royal_crown/scene.gltf" data-dynasty="未知" data-category="模型">道具王冠</div>
-                <div class="model-item" data-model="ring_with_rubies_and_pearls/scene.gltf" data-dynasty="未知" data-category="首饰">宝石银戒</div>
-                <div class="model-item" data-model="two_small_vases/scene.gltf" data-dynasty="未知" data-category="陶瓷器">飞鹤花瓶</div>
-                <div class="model-item" data-model="cauldron/scene.gltf" data-dynasty="未知" data-category="陶瓷器">釜</div>
-                <div class="model-item" data-model="ritual_hare_mask/scene.gltf" data-dynasty="未知" data-category="模型">仪式用野兔面具</div>
-                <div class="model-item" data-model="mikiphone_pocket_phonograph/scene.gltf" data-dynasty="未知" data-category="模型">袖珍留声机</div>
-                <div class="model-item" data-model="ring_for_perfume/scene.gltf" data-dynasty="未知" data-category="金银器">香水戒指</div>
-                <div class="model-item" data-model="candlestick_for_five_candles/scene.gltf" data-dynasty="未知" data-category="金银器">犹太教堂烛台</div>
-
             </div>
             <button class="close-btn" id="closeModelCard">关闭</button>
         </div>
@@ -759,11 +746,9 @@
         // 更新模型信息
         function updateModelInfo(modelPath) {
             const modelKey = getModelKey(modelPath);
-            console.log(`📝 更新模型信息: 路径="${modelPath}" → 键名="${modelKey}"`);
             const modelData = descriptionsData[modelKey];
 
             if (modelData) {
-                console.log(`✅ 找到描述数据:`, modelData.title);
                 // 更新左侧介绍
                 const descriptionDiv = document.getElementById('modelDescription');
                 descriptionDiv.innerHTML = `
@@ -789,36 +774,20 @@
                 if (window.aiAssistant) {
                     window.aiAssistant.setModelData(modelData);
                 }
-            } else {
-                console.warn(`❌ 未找到键名"${modelKey}"的描述数据`);
-                const descriptionDiv = document.getElementById('modelDescription');
-                descriptionDiv.innerHTML = `
-                    <h4>未找到介绍</h4>
-                    <p style="margin-top: 15px; color: #999;">暂无该模型的描述信息</p>
-                `;
             }
         }
 
-        // 根据模型路径获取对应的key（智能提取）
+        // 根据模型路径获取对应的key
         function getModelKey(path) {
-            // 规范化路径
-            const normalizedPath = path.replace(/^\.\.\//, '').replace(/^\.\//, '').replace(/^assets\//, '');
-            const parts = normalizedPath.split('/');
-            
-            // 获取文件名
-            const fileName = parts[parts.length - 1];
-            const fileNameWithoutExt = fileName.split('.')[0];
-            
-            // 如果文件名是 scene，使用父文件夹名
-            if (fileNameWithoutExt === 'scene' && parts.length > 1) {
-                const key = parts[parts.length - 2];
-                console.log(`🔑 提取模型键名: "${path}" → scene文件 → 使用父文件夹 "${key}"`);
-                return key;
-            }
-            
-            // 否则返回文件名（不含扩展名）
-            console.log(`🔑 提取模型键名: "${path}" → 使用文件名 "${fileNameWithoutExt}"`);
-            return fileNameWithoutExt;
+            if (path.includes('teacup')) return 'teacup';
+            if (path.includes('modelNew')) return 'modelNew';
+            if (path.includes('egypt_djembe_drum')) return 'egypt_djembe_drum';
+            if (path.includes('copper-chew')) return 'copper-chew';
+            if (path.includes('armillary_sphere_1771')) return 'armillary_sphere_1771';
+            if (path.includes('ding_censer')) return 'ding_censer_with_an_openwork_cover';
+            if (path.includes('mass_chalice')) return 'mass_chalice';
+            if (path.includes('sculpture_bust')) return 'sculpture_bust_of_roza_loewenfeld';
+            return 'teacup';
         }
 
         // 模型选择功能
