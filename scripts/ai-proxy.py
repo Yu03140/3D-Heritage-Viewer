@@ -1,22 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-通义千问API代理服务器
-解决前端直接调用API的CORS跨域问题
-"""
+# 通义千问API代理服务器
+# 解决了前端直接调用API时遇到的CORS跨域和API密钥暴露问题。
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import urllib.request
 import urllib.error
 
-# 从aiAssistant.js读取API密钥（自动同步）
+# 警告：API密钥在此处硬编码。在生产环境中，应使用更安全的方法（如环境变量）来管理密钥。
 API_KEY = 'sk-a21472fce05548dbbc1e2e0c38ce407d'
 API_ENDPOINT = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation'
 
 class ProxyHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
-        """处理预检请求"""
+        """处理CORS预检请求"""
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
@@ -82,7 +80,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
             self.wfile.write(error_response.encode('utf-8'))
 
     def log_message(self, format, *args):
-        """自定义日志格式"""
+        """自定义日志输出格式"""
         print(f"[代理服务器] {format % args}")
 
 def run_server(port=8001):

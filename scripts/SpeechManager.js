@@ -1,4 +1,3 @@
-// SpeechManager.js - 语音识别管理器，负责处理语音命令识别和语音转文本功能
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
     try {
         var info = gen[key](arg);
@@ -148,8 +147,8 @@ export var SpeechManager = /*#__PURE__*/ function() {
         var _this = this;
         _class_call_check(this, SpeechManager);
         this.onTranscript = onTranscript;
-        this.onRecognitionActive = onRecognitionActive; // 识别状态的回调函数
-        this.onCommandRecognized = onCommandRecognized; // 命令识别的回调函数
+        this.onRecognitionActive = onRecognitionActive;
+        this.onCommandRecognized = onCommandRecognized;
         this.recognition = null;
         this.isRecognizing = false;
         this.finalTranscript = '';
@@ -157,9 +156,9 @@ export var SpeechManager = /*#__PURE__*/ function() {
         var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             this.recognition = new SpeechRecognition();
-            this.recognition.continuous = true; // 即使在暂停后也继续监听
-            this.recognition.interimResults = true; // 在说话过程中获取结果
-            this.recognition.lang = 'zh-CN'; // 设置语言为中文（普通话，中国大陆）
+            this.recognition.continuous = true;
+            this.recognition.interimResults = true;
+            this.recognition.lang = 'zh-CN';
             this.recognition.onstart = function() {
                 _this.isRecognizing = true;
                 console.log('语音识别已启动。');
@@ -169,37 +168,20 @@ export var SpeechManager = /*#__PURE__*/ function() {
                 _this.interimTranscript = '';
                 for(var i = event.resultIndex; i < event.results.length; ++i){
                     if (event.results[i].isFinal) {
-                        // 附加到finalTranscript，然后为下一个话语清除它
-                        // 这样，`finalTranscript`保存*当前完整的*话语。
                         var currentFinalTranscript = event.results[i][0].transcript.trim().toLowerCase();
-                        _this.finalTranscript += currentFinalTranscript; // 如果需要，附加到可能更长的会话记录中，尽管我们按话语处理
+                        _this.finalTranscript += currentFinalTranscript;
                         if (_this.onTranscript) {
-                            // 在处理为命令之前显示原始记录
-                            _this.onTranscript(event.results[i][0].transcript, ''); // 发送最终结果，清除临时结果
+                            _this.onTranscript(event.results[i][0].transcript, '');
                         }
-                        // 检查命令
+                        
+                        // 定义中英文命令及其映射
                         var commandMap = {
-                            // 英文命令
-                            'drag': 'drag',
-                            'rotate': 'rotate',
-                            'rotation': 'rotate',
-                            'scale': 'scale',
-                            'size': 'scale',
-                            'zoom': 'scale',
-                            'fixed': 'fixed',
-                            'lock': 'fixed',
-                            
-                            // 中文命令
-                            '拖拽': 'drag',
-                            '拖动': 'drag',
-                            '旋转': 'rotate',
-                            '转动': 'rotate',
-                            '缩放': 'scale',
-                            '大小': 'scale',
-                            '放大': 'scale',
-                            '缩小': 'scale',
-                            '固定': 'fixed',
-                            '锁定': 'fixed'
+                            'drag': 'drag', 'rotate': 'rotate', 'rotation': 'rotate',
+                            'scale': 'scale', 'size': 'scale', 'zoom': 'scale',
+                            'fixed': 'fixed', 'lock': 'fixed',
+                            '拖拽': 'drag', '拖动': 'drag', '旋转': 'rotate', '转动': 'rotate',
+                            '缩放': 'scale', '大小': 'scale', '放大': 'scale', '缩小': 'scale',
+                            '固定': 'fixed', '锁定': 'fixed'
                         };
                         var spokenCommands = Object.keys(commandMap);
                         var _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
@@ -211,7 +193,7 @@ export var SpeechManager = /*#__PURE__*/ function() {
                                     if (_this.onCommandRecognized) {
                                         _this.onCommandRecognized(actualCommand);
                                     }
-                                    break; // Process the first command found (and its alias)
+                                    break;
                                 }
                             }
                         } catch (err) {
@@ -228,9 +210,6 @@ export var SpeechManager = /*#__PURE__*/ function() {
                                 }
                             }
                         }
-                        // 如果您是按话语处理，则为下一个完整话语重置finalTranscript
-                        // 如果您想累积，那么不要在这里重置。
-                        // 对于命令处理，通常最好按话语重置。
                         _this.finalTranscript = '';
                     } else {
                         _this.interimTranscript += event.results[i][0].transcript;
@@ -239,7 +218,6 @@ export var SpeechManager = /*#__PURE__*/ function() {
                         }
                     }
                 }
-                // 如果在此事件批处理中只处理了临时结果，确保调用onTranscript
                 if (_this.interimTranscript && !event.results[event.results.length - 1].isFinal) {
                     if (_this.onTranscript) {
                         _this.onTranscript(null, _this.interimTranscript);
@@ -250,29 +228,25 @@ export var SpeechManager = /*#__PURE__*/ function() {
                 console.error('语音识别错误:', event.error);
                 var oldIsRecognizing = _this.isRecognizing;
                 _this.isRecognizing = false;
-                _this.finalTranscript = ''; // 出错时清除记录
+                _this.finalTranscript = '';
                 _this.interimTranscript = '';
-                if (_this.onTranscript) _this.onTranscript('', ''); // 清除显示
+                if (_this.onTranscript) _this.onTranscript('', '');
                 if (oldIsRecognizing && _this.onRecognitionActive) _this.onRecognitionActive(false);
-                // 如果是"中止"或"无语音"错误，自动重启
                 if (event.error === 'aborted' || event.error === 'no-speech') {
-                    console.log('由于不活动或中止而重新启动语音识别。');
-                // 不直接调用startRecognition，如果是连续模式，让onend处理它
+                    console.log('因无语音或中止，准备重启识别。');
                 }
             };
             this.recognition.onend = function() {
                 var oldIsRecognizing = _this.isRecognizing;
                 _this.isRecognizing = false;
                 console.log('语音识别已结束。');
-                _this.finalTranscript = ''; // 结束时清除记录
+                _this.finalTranscript = '';
                 _this.interimTranscript = '';
-                if (_this.onTranscript) _this.onTranscript('', ''); // 清除显示
+                if (_this.onTranscript) _this.onTranscript('', '');
                 if (oldIsRecognizing && _this.onRecognitionActive) _this.onRecognitionActive(false);
-                // 如果它结束且continuous为true，则重新启动它。
-                // 这处理浏览器可能停止它的情况。
                 if (_this.recognition.continuous) {
                     console.log('连续模式：重新启动语音识别。');
-                    _this.startRecognition(); // startRecognition已经重置了记录
+                    _this.startRecognition();
                 }
             };
         } else {
@@ -286,16 +260,13 @@ export var SpeechManager = /*#__PURE__*/ function() {
                 var _this = this;
                 if (this.recognition && !this.isRecognizing) {
                     try {
-                        this.finalTranscript = ''; // 重置记录
+                        this.finalTranscript = '';
                         this.interimTranscript = '';
                         this.recognition.start();
                     } catch (e) {
                         console.error("启动语音识别时出错:", e);
-                        // 这可能是因为它已经启动或由于权限问题
                         if (e.name === 'InvalidStateError' && this.isRecognizing) {
-                        // 已经启动，不做任何事情
                         } else {
-                            // 如果由于其他原因失败，尝试重启（例如，在错误之后）
                             setTimeout(function() {
                                 return _this.startRecognition();
                             }, 500);
@@ -314,14 +285,11 @@ export var SpeechManager = /*#__PURE__*/ function() {
         {
             key: "updateSpeechRecognitionState",
             value: function updateSpeechRecognitionState() {
-                // 检查语音识别设置
                 const speechEnabled = localStorage.getItem('speechRecognitionEnabled') !== 'false';
                 
                 if (speechEnabled && !this.isRecognizing) {
-                    // 如果设置为启用且当前未运行，则启动语音识别
                     this.requestPermissionAndStart();
                 } else if (!speechEnabled && this.isRecognizing) {
-                    // 如果设置为禁用且当前正在运行，则停止语音识别
                     this.stopRecognition();
                 }
                 
@@ -330,7 +298,7 @@ export var SpeechManager = /*#__PURE__*/ function() {
         },
         {
             key: "requestPermissionAndStart",
-            value: // 在用户交互时调用此函数以请求麦克风权限
+            value: 
             function requestPermissionAndStart() {
                 var _this = this;
                 return _async_to_generator(function() {
@@ -352,7 +320,6 @@ export var SpeechManager = /*#__PURE__*/ function() {
                                     ,
                                     4
                                 ]);
-                                // Attempt to get microphone access (this might prompt the user)
                                 return [
                                     4,
                                     navigator.mediaDevices.getUserMedia({
@@ -361,7 +328,7 @@ export var SpeechManager = /*#__PURE__*/ function() {
                                 ];
                             case 2:
                                 _state.sent();
-                                console.log("Microphone permission granted.");
+                                console.log("麦克风权限已授予。");
                                 _this.startRecognition();
                                 return [
                                     3,
@@ -369,7 +336,7 @@ export var SpeechManager = /*#__PURE__*/ function() {
                                 ];
                             case 3:
                                 err = _state.sent();
-                                console.error("Microphone permission denied or error:", err);
+                                console.error("麦克风权限被拒绝或出错:", err);
                                 if (_this.onTranscript) {
                                     _this.onTranscript("麦克风访问被拒绝。请在浏览器设置中允许麦克风访问。", "");
                                 }

@@ -16,7 +16,6 @@ export class DescriptionManager {
     
     async init() {
         try {
-            // 加载描述数据
             const response = await fetch('../data/descriptions.json');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -25,9 +24,7 @@ export class DescriptionManager {
             console.log("模型描述数据加载成功");
             
             // 移除这里的初始描述设置，完全依赖modelChanged事件
-            // this.setModelDescription("teacup");
             
-            // 设置事件监听器
             this.setupEventListeners();
         } catch (error) {
             console.error("加载模型描述数据失败:", error);
@@ -36,38 +33,32 @@ export class DescriptionManager {
     }
     
     extractModelName(modelPath) {
-        // 规范化路径（移除开头的../等）
+        // 规范化路径
         const normalizedPath = modelPath.replace(/^\.\.\//, '').replace(/^\.\//, '');
         const parts = normalizedPath.split('/');
         
-        // 获取文件名（最后一部分）
         const fileName = parts[parts.length - 1];
         const fileNameWithoutExt = fileName.split('.')[0];
         
         // 如果文件名是通用的 "scene"，则使用父文件夹名称
         if (fileNameWithoutExt === 'scene' && parts.length > 1) {
-            return parts[parts.length - 2];  // 返回父文件夹名
+            return parts[parts.length - 2];
         }
         
-        // 否则返回文件名（不含扩展名）
         return fileNameWithoutExt;
     }
     
     setupEventListeners() {
-        // 监听显示描述按钮点击事件
         this.showDescriptionBtn.addEventListener('click', () => {
             this.toggleDescriptionCard();
         });
         
-        // 监听关闭描述按钮点击事件
         this.closeDescriptionBtn.addEventListener('click', () => {
             this.hideDescriptionCard();
         });
         
-        // 监听模型切换事件
         window.addEventListener('modelChanged', (event) => {
             const modelPath = event.detail.modelPath;
-            // 从路径中提取模型名称
             const modelName = this.extractModelName(modelPath);
             console.log(`描述管理器：从路径 "${modelPath}" 提取模型名 "${modelName}"`);
             this.setModelDescription(modelName);
@@ -81,10 +72,8 @@ export class DescriptionManager {
             const modelData = this.descriptions[modelName];
             this.descriptionTitle.textContent = modelData.title;
             
-            // 构建包含标签的HTML内容
             let htmlContent = '';
             
-            // 添加标签区域
             if (modelData.dynasty || modelData.category) {
                 htmlContent += '<div class="model-tags">';
                 
@@ -99,7 +88,6 @@ export class DescriptionManager {
                 htmlContent += '</div>';
             }
             
-            // 添加描述内容
             htmlContent += `<div class="model-description-text">${modelData.description}</div>`;
             
             this.descriptionContent.innerHTML = htmlContent;

@@ -1,5 +1,3 @@
-// comments.js - 评论管理系统
-
 class CommentManager {
     constructor() {
         this.storageKey = 'heritageViewerComments';
@@ -22,7 +20,6 @@ class CommentManager {
                 this.submitComment();
             });
 
-            // 支持Ctrl+Enter快捷键提交
             commentInput.addEventListener('keydown', (e) => {
                 if (e.ctrlKey && e.key === 'Enter') {
                     this.submitComment();
@@ -30,26 +27,21 @@ class CommentManager {
             });
         }
 
-        // 监听模型切换事件
         window.addEventListener('modelChanged', (e) => {
             console.log('评论系统：检测到模型切换', e.detail);
             if (e.detail && e.detail.modelPath) {
-                // 从完整路径中提取模型文件名
                 this.currentModelPath = e.detail.modelPath.replace('assets/', '');
                 console.log('评论系统：更新当前模型路径为', this.currentModelPath);
-                // 重新渲染评论
                 this.renderComments();
             }
         });
     }
 
-    // 从URL获取初始模型路径
     getInitialModelPath() {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get('model') || 'teacup.gltf';
     }
 
-    // 从localStorage加载评论
     loadComments() {
         try {
             const stored = localStorage.getItem(this.storageKey);
@@ -60,7 +52,6 @@ class CommentManager {
         }
     }
 
-    // 保存评论到localStorage
     saveComments() {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(this.comments));
@@ -72,7 +63,6 @@ class CommentManager {
         }
     }
 
-    // 提交新评论
     submitComment() {
         const commentInput = document.getElementById('commentInput');
         const content = commentInput.value.trim();
@@ -87,7 +77,6 @@ class CommentManager {
             return;
         }
 
-        // 创建新评论对象
         const newComment = {
             id: Date.now(),
             author: this.generateUsername(),
@@ -96,20 +85,16 @@ class CommentManager {
             modelPath: this.getCurrentModelPath()
         };
 
-        // 添加到评论列表
-        this.comments.unshift(newComment); // 新评论放在最前面
+        this.comments.unshift(newComment);
 
-        // 保存并渲染
         if (this.saveComments()) {
             commentInput.value = '';
             this.renderComments();
             
-            // 显示成功提示
             this.showNotification('评论发布成功！');
         }
     }
 
-    // 生成随机用户名
     generateUsername() {
         const adjectives = ['热心', '好学', '专业', '资深', '新手', '认真', '细心', '友善'];
         const nouns = ['观众', '访客', '用户', '爱好者', '学习者', '探索者', '参观者'];
@@ -119,51 +104,41 @@ class CommentManager {
         return `${randomAdj}的${randomNoun}${randomNum}`;
     }
 
-    // 获取当前模型路径
     getCurrentModelPath() {
         return this.currentModelPath;
     }
 
-    // 设置当前模型路径（供外部调用）
     setCurrentModelPath(modelPath) {
         console.log('评论系统：外部设置模型路径为', modelPath);
         this.currentModelPath = modelPath.replace('assets/', '');
         this.renderComments();
     }
 
-    // 格式化时间
     formatTime(timestamp) {
         const date = new Date(timestamp);
         const now = new Date();
         const diff = now - date;
 
-        // 小于1分钟
         if (diff < 60000) {
             return '刚刚';
         }
-        // 小于1小时
         if (diff < 3600000) {
             return `${Math.floor(diff / 60000)}分钟前`;
         }
-        // 小于24小时
         if (diff < 86400000) {
             return `${Math.floor(diff / 3600000)}小时前`;
         }
-        // 小于7天
         if (diff < 604800000) {
             return `${Math.floor(diff / 86400000)}天前`;
         }
         
-        // 超过7天显示具体日期
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
 
-    // 渲染评论列表
     renderComments() {
         const commentsList = document.getElementById('commentsList');
         if (!commentsList) return;
 
-        // 过滤当前模型的评论
         const currentModelPath = this.getCurrentModelPath();
         console.log('评论系统：渲染评论，当前模型路径=', currentModelPath);
         const currentModelComments = this.comments.filter(c => c.modelPath === currentModelPath);
@@ -174,7 +149,6 @@ class CommentManager {
             return;
         }
 
-        // 渲染评论
         const commentsHTML = currentModelComments.map(comment => `
             <div class="comment-item" data-comment-id="${comment.id}">
                 <div class="comment-header">
@@ -187,20 +161,16 @@ class CommentManager {
 
         commentsList.innerHTML = commentsHTML;
 
-        // 滚动到顶部显示最新评论
         commentsList.scrollTop = 0;
     }
 
-    // HTML转义，防止XSS
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
-    // 显示通知
     showNotification(message) {
-        // 创建通知元素
         const notification = document.createElement('div');
         notification.style.cssText = `
             position: fixed;
@@ -217,7 +187,6 @@ class CommentManager {
         `;
         notification.textContent = message;
 
-        // 添加动画样式
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideInRight {
@@ -245,7 +214,6 @@ class CommentManager {
 
         document.body.appendChild(notification);
 
-        // 3秒后移除
         setTimeout(() => {
             notification.style.animation = 'slideOutRight 0.3s ease-in';
             setTimeout(() => {
@@ -254,7 +222,6 @@ class CommentManager {
         }, 3000);
     }
 
-    // 导出评论数据（供调试使用）
     exportComments() {
         const dataStr = JSON.stringify(this.comments, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -266,7 +233,6 @@ class CommentManager {
         URL.revokeObjectURL(url);
     }
 
-    // 清空所有评论（供管理使用）
     clearAllComments() {
         if (confirm('确定要清空所有评论吗？此操作不可恢复！')) {
             this.comments = [];
@@ -276,7 +242,6 @@ class CommentManager {
         }
     }
 
-    // 添加测试评论（用于演示）
     addTestComments() {
         const testComments = [
             { content: '这件文物太精美了！可以看出古代工匠的精湛技艺。', author: '文物爱好者1024' },
@@ -292,7 +257,7 @@ class CommentManager {
                 id: Date.now() + index,
                 author: comment.author,
                 content: comment.content,
-                timestamp: new Date(Date.now() - Math.random() * 86400000 * 7).toISOString(), // 过去7天内的随机时间
+                timestamp: new Date(Date.now() - Math.random() * 86400000 * 7).toISOString(),
                 modelPath: currentModelPath
             });
         });
@@ -303,11 +268,9 @@ class CommentManager {
     }
 }
 
-// 初始化评论管理器
 document.addEventListener('DOMContentLoaded', () => {
     window.commentManager = new CommentManager();
     
-    // 在控制台提供管理方法
     console.log('评论系统已初始化');
     console.log('可用命令:');
     console.log('  commentManager.addTestComments() - 添加测试评论');

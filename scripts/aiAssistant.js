@@ -4,9 +4,9 @@ export class AIAssistant {
         this.currentModelData = null;
         this.conversationHistory = [];
         
-        // 通义千问配置 - 使用本地代理避免CORS
+        // 通义千问配置
         this.apiKey = 'sk-a21472fce05548dbbc1e2e0c38ce407d';
-        this.apiEndpoint = 'http://localhost:8001/api/chat';  // 使用代理服务器
+        this.apiEndpoint = 'http://localhost:8001/api/chat';  // 通过本地代理调用，避免CORS问题
         this.modelName = 'qwen-turbo';
         
         console.log('AI助手已就绪');
@@ -24,7 +24,6 @@ export class AIAssistant {
     }
 
     setupEventListeners() {
-        // 发送按钮点击
         this.submitButton.addEventListener('click', () => this.handleSubmit());
         
         // 回车发送（Shift+Enter换行）
@@ -35,14 +34,14 @@ export class AIAssistant {
             }
         });
 
-        // 监听模型变更事件
+        // 监听模型变更，切换时重置对话历史
         window.addEventListener('modelChanged', (e) => {
             this.handleModelChange(e.detail.modelPath);
         });
     }
 
     handleModelChange(modelPath) {
-        // 当模型切换时，静默重置对话历史（不显示提示）
+        // 静默重置对话历史，不产生系统提示
         this.conversationHistory = [];
     }
 
@@ -54,17 +53,14 @@ export class AIAssistant {
         const question = this.inputElement.value.trim();
         if (!question) return;
 
-        // 检查API配置
-        if (!this.apiKey || this.apiKey === 'sk-your-qianwen-api-key-here') {
-            this.addErrorMessage('管理员尚未配置通义千问API Key，请联系管理员。');
+        if (!this.apiKey || this.apiKey.includes('your-key-here')) {
+            this.addErrorMessage('管理员尚未配置有效的API Key，请联系管理员。');
             return;
         }
 
-        // 显示用户消息
         this.addUserMessage(question);
         this.inputElement.value = '';
         
-        // 禁用输入和按钮
         this.setLoading(true);
 
         try {
@@ -79,17 +75,15 @@ export class AIAssistant {
     }
 
     async callAI(userQuestion) {
-        // 构建系统提示词
         const systemPrompt = this.buildSystemPrompt();
         
-        // 构建消息（通义千问格式）
         const messages = [
             { role: 'system', content: systemPrompt },
             ...this.conversationHistory,
             { role: 'user', content: userQuestion }
         ];
 
-        // 调用通义千问API - 通过本地代理
+        // 通过本地代理调用通义千问API
         const response = await fetch(this.apiEndpoint, {
             method: 'POST',
             headers: {
@@ -102,7 +96,7 @@ export class AIAssistant {
                 },
                 parameters: {
                     temperature: 0.7,
-                    max_tokens: 150  // 限制输出100字左右
+                    max_tokens: 150  // 限制回复长度
                 }
             })
         });
@@ -114,30 +108,27 @@ export class AIAssistant {
         }
 
         const data = await response.json();
-        console.log('API响应数据:', data); // 调试日志
+        console.log('API响应数据:', data);
         
-        // 通义千问返回格式：data.output.text 或 data.output.choices[0].message.content
+        // 解析通义千问API的不同返回格式
         let aiResponse = '';
         
         if (data.output && data.output.text) {
-            // 格式1: 直接文本格式
             aiResponse = data.output.text;
         } else if (data.output && data.output.choices && data.output.choices[0]) {
-            // 格式2: choices格式
             aiResponse = data.output.choices[0].message.content;
         } else {
             console.error('完整响应:', JSON.stringify(data, null, 2));
-            throw new Error('API返回格式错误，请查看控制台');
+            throw new Error('API返回格式无法解析，请查看控制台');
         }
 
-        // 保存对话历史
         this.conversationHistory.push(
             { role: 'user', content: userQuestion },
             { role: 'assistant', content: aiResponse }
         );
 
-        // 限制历史长度（保留最近10轮对话）
-        if (this.conversationHistory.length > 20) {
+        // 限制对话历史长度，防止上下文过长
+        if (this.conversationHistory.length > 20) { // 保留最近10轮对话
             this.conversationHistory = this.conversationHistory.slice(-20);
         }
 
@@ -201,7 +192,6 @@ export class AIAssistant {
         
         messageDiv.appendChild(contentDiv);
         
-        // 添加时间戳（除了系统消息）
         if (type !== 'system') {
             const timeDiv = document.createElement('div');
             timeDiv.className = 'message-time';
@@ -214,7 +204,7 @@ export class AIAssistant {
         
         this.messagesContainer.appendChild(messageDiv);
         
-        // 滚动到底部
+        // 自动滚动到最新消息
         this.messagesContainer.parentElement.scrollTop = this.messagesContainer.parentElement.scrollHeight;
     }
 
@@ -233,12 +223,14 @@ export class AIAssistant {
 
 }
 
-// 初始化AI助手
+// 全局AI助手实例
 let aiAssistant = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    aiAssistant = new AIAssistant();
-    window.aiAssistant = aiAssistant;
+    if (document.getElementById('aiMessages')) {
+        aiAssistant = new AIAssistant();
+        window.aiAssistant = aiAssistant; // 挂载到window供调试
+    }
 });
 
 export { aiAssistant };

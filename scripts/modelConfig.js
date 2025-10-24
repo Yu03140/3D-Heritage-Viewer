@@ -12,7 +12,6 @@
  *   - centerOffset: 是否需要中心偏移补偿（可选，默认false）
  */
 export const MODEL_CONFIGS = {
-    // 默认配置
     'default': {
         scale: 80,
         maxScale: 300,
@@ -21,7 +20,6 @@ export const MODEL_CONFIGS = {
         posZ: -1000
     },
     
-    // 茶杯
     'teacup.gltf': {
         scale: 2000,
         maxScale: 5000,
@@ -30,7 +28,6 @@ export const MODEL_CONFIGS = {
         posZ: -1000
     },
     
-    // 铜器
     'copper-chew.gltf': {
         scale: 5000,
         maxScale: 9000,
@@ -39,7 +36,6 @@ export const MODEL_CONFIGS = {
         posZ: -1000
     },
     
-    // 新模型
     'modelNew.gltf': {
         scale: 20,
         maxScale: 300,
@@ -48,8 +44,6 @@ export const MODEL_CONFIGS = {
         posZ: -1000
     },
     
-
-    // 浑天仪
     'armillary_sphere_1771': {
         scale: 1000,
         maxScale: 2000,
@@ -58,7 +52,6 @@ export const MODEL_CONFIGS = {
         posZ: -500
     },
     
-    // 鼎香炉
     'ding_censer_with_an_openwork_cover': {
         scale: 1,
         maxScale: 30,
@@ -68,7 +61,6 @@ export const MODEL_CONFIGS = {
         centerOffset: true
     },
     
-    // 圣杯
     'mass_chalice': {
         scale: 12,
         maxScale: 40,
@@ -78,7 +70,6 @@ export const MODEL_CONFIGS = {
         centerOffset: true
     },
     
-    // 书
     'sculpture_bust_of_roza_loewenfeld': {
         scale: 3000,
         maxScale: 6000,
@@ -88,9 +79,6 @@ export const MODEL_CONFIGS = {
         centerOffset: true
     },
     
-
-
-    // 两个小花瓶
     'two_small_vases': {
         scale: 2,
         maxScale: 10,
@@ -98,7 +86,6 @@ export const MODEL_CONFIGS = {
         posYFactor: 0,
         posZ: -1000
     },
-        // 釜
     'cauldron': {
         scale: 15,
         maxScale: 200,
@@ -106,7 +93,6 @@ export const MODEL_CONFIGS = {
         posYFactor: 0,
         posZ: -1000
     },
-      // 仪式用野兔面具
     'ritual_hare_mask': {
         scale: 15,
         maxScale:200,
@@ -114,7 +100,6 @@ export const MODEL_CONFIGS = {
         posYFactor: 0,
         posZ: -1000
     },
-  // 袖珍留声机
     'mikiphone_pocket_phonograph': {
         scale: 3,
         maxScale:200,
@@ -123,7 +108,6 @@ export const MODEL_CONFIGS = {
         posZ: -1000,
         centerOffset: true
     },
-     // 犹太教堂烛台 - 原始尺寸很小，需要大幅放大
      'candlestick_for_five_candles': {
          scale: 800,
          maxScale: 4000,
@@ -141,22 +125,18 @@ export const MODEL_CONFIGS = {
  * @returns {object} 模型配置对象
  */
 export function getModelConfig(modelPath, containerHeight = 0) {
-    // 提取文件名
     const fileName = modelPath.split('/').pop();
     
-    // 尝试精确匹配文件名
     if (MODEL_CONFIGS[fileName]) {
         return processConfig(MODEL_CONFIGS[fileName], containerHeight);
     }
     
-    // 尝试路径包含匹配（用于文件夹名称匹配）
     for (const key in MODEL_CONFIGS) {
         if (key !== 'default' && modelPath.includes(key)) {
             return processConfig(MODEL_CONFIGS[key], containerHeight);
         }
     }
     
-    // 返回默认配置
     return processConfig(MODEL_CONFIGS['default'], containerHeight);
 }
 
@@ -169,27 +149,22 @@ export function getModelConfig(modelPath, containerHeight = 0) {
 function processConfig(config, containerHeight) {
     const processed = { ...config };
     
-    // 计算minScale（如果未指定）
     if (!processed.minScale) {
         processed.minScale = Math.max(0.1, processed.scale * 0.1);
     }
     
-    // 计算posY（如果使用posYFactor）
     if (processed.posYFactor !== undefined && processed.posY === undefined) {
         processed.posY = containerHeight * processed.posYFactor;
     }
     
-    // 如果posY未指定，设置为0
     if (processed.posY === undefined) {
         processed.posY = 0;
     }
     
-    // 如果posZ未指定，使用默认值
     if (processed.posZ === undefined) {
         processed.posZ = -1000;
     }
     
-    // 如果centerOffset未指定，默认为false
     if (processed.centerOffset === undefined) {
         processed.centerOffset = false;
     }

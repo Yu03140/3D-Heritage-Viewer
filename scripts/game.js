@@ -12,31 +12,31 @@ import { getModelConfig } from './modelConfig.js';
 // ==================== 配置常量 ====================
 const CONFIG = {
     hand: {
-        smoothingFactor: 0.4,           // 手部平滑系数
-        pinchThreshold: 45,              // 捏合判定阈值（像素）
-        fingertipRadius: 8,              // 指尖圆圈半径
-        wristRadius: 12,                 // 手腕圆圈半径
-        circleSegments: 16,              // 圆圈分段数
-        defaultOpacity: 0.3,             // 默认透明度
-        grabOpacity: 1.0,                // 抓取时透明度
-        fingertipIndices: [0, 4, 8, 12, 16, 20]  // 手腕+五指尖的索引
+        smoothingFactor: 0.4,
+        pinchThreshold: 45,
+        fingertipRadius: 8,
+        wristRadius: 12,
+        circleSegments: 16,
+        defaultOpacity: 0.3,
+        grabOpacity: 1.0,
+        fingertipIndices: [0, 4, 8, 12, 16, 20]
     },
     interaction: {
         rotateSensitivityKey: 'rotateSensitivity',
         scaleSensitivityKey: 'scaleSensitivity',
         defaultRotateSensitivity: 0.02,
         defaultScaleSensitivity: 0.2,
-        animationScrollThreshold: 40,    // 动画切换的垂直移动阈值
-        pulseSpeed: 8,                   // 抓取脉冲动画速度
-        pulseAmplitude: 0.5,             // 脉冲幅度
-        pulseBaseScale: 1.0              // 基础缩放
+        animationScrollThreshold: 40,
+        pulseSpeed: 8,
+        pulseAmplitude: 0.5,
+        pulseBaseScale: 1.0
     },
     model: {
-        defaultScale: 2000,              // 茶壶初始缩放
+        defaultScale: 2000,
         defaultMaxScale: 5000,
         defaultMinScale: 10,
-        positionYFactor: -0.45,          // Y轴位置因子
-        positionZ: -1000,                // Z轴位置
+        positionYFactor: -0.45,
+        positionZ: -1000,
         minZ: -200,
         maxZ: 50
     },
@@ -50,12 +50,12 @@ const CONFIG = {
     }
 };
 
-// 交互模式配置
+// 交互模式及其UI配置
 const INTERACTION_MODES = {
     drag: {
-        base: '#00FFFF',
-        text: '#000000',
-        hand: new THREE.Color('#00FFFF'),
+        base: '#00FFFF', // 按钮背景色
+        text: '#000000', // 按钮文字颜色
+        hand: new THREE.Color('#00FFFF'), // 手部辉光颜色
         instruction: '捏合手指来抓取并移动模型'
     },
     rotate: {
@@ -78,7 +78,7 @@ const INTERACTION_MODES = {
     }
 };
 
-// 动画名称翻译映射
+// 动画名称到中文的映射
 const ANIMATION_TRANSLATIONS = {
     "idle": "待机",
     "walk": "行走",
@@ -93,14 +93,14 @@ const ANIMATION_TRANSLATIONS = {
     "animation 5": "动画 5"
 };
 
-// 手部连接定义（MediaPipe Hand Landmarks）
+// 定义手部骨骼连接，用于可视化
 const HAND_CONNECTIONS = [
     [0, 1], [1, 2], [2, 3], [3, 4],        // 拇指
     [0, 5], [5, 6], [6, 7], [7, 8],        // 食指
     [0, 9], [9, 10], [10, 11], [11, 12],   // 中指
     [0, 13], [13, 14], [14, 15], [15, 16], // 无名指
     [0, 17], [17, 18], [18, 19], [19, 20], // 小指
-    [5, 9], [9, 13], [13, 17]              // 手掌连接
+    [5, 9], [9, 13], [13, 17]              // 手掌
 ];
 
 // ==================== 工具函数 ====================
@@ -203,25 +203,25 @@ export class Game {
 
     // ========== 初始化 ==========
     _initProperties() {
-        // Three.js核心对象
+        // Three.js 核心对象
         this.scene = null;
         this.camera = null;
         this.renderer = null;
         this.clock = new THREE.Clock();
 
-        // 视频和手部追踪
+        // 视频与手势追踪
         this.videoElement = null;
         this.handLandmarker = null;
         this.lastVideoTime = -1;
         this.hands = [];
-        this.lastLandmarkPositions = [[], []];
+        this.lastLandmarkPositions = [[], []]; // 用于平滑处理
 
         // 材质
         this.handLineMaterial = null;
         this.fingertipMaterialHand1 = null;
         this.fingertipMaterialHand2 = null;
 
-        // 模型和动画
+        // 模型与动画
         this.pandaModel = null;
         this.animationMixer = null;
         this.animationClips = [];
@@ -236,9 +236,9 @@ export class Game {
         this.modelDragOffset = new THREE.Vector3();
         this.modelGrabStartDepth = 0;
 
-        // 旋转模式 - 支持360°全方向旋转
+        // 旋转模式
         this.rotateLastHandX = null;
-        this.rotateLastHandY = null; // 新增Y轴追踪
+        this.rotateLastHandY = null;
         this.rotateSensitivity = this._loadSensitivity('rotateSensitivity', CONFIG.interaction.defaultRotateSensitivity);
 
         // 缩放模式
@@ -257,7 +257,7 @@ export class Game {
         this.modelLoadingBubble = null;
         this.descriptionManager = null;
 
-        // UI元素
+        // UI 元素
         this.speechBubble = null;
         this.speechBubbleTimeout = null;
         this.isSpeechActive = false;
@@ -288,7 +288,6 @@ export class Game {
         
         this.audioManager.resumeContext();
         
-        // 启动语音识别
         const speechEnabled = localStorage.getItem('speechRecognitionEnabled') !== 'false';
         if (speechEnabled) {
             this.speechManager.requestPermissionAndStart();
@@ -302,16 +301,16 @@ export class Game {
         this.gameState = 'tracking';
         this._animate();
 
-        // 初始化额外组件
+        // 初始化其他模块
         this.modelLoadingBubble = new ModelLoadingBubble(this.renderDiv);
         this.modelSelector = new ModelSelector(this);
         this.descriptionManager = new DescriptionManager(this);
 
-        // 监听设置变化
         this._setupStorageListener();
     }
 
     _setupStorageListener() {
+        // 监听localStorage中的灵敏度设置变化
         window.addEventListener('storage', (e) => {
             if (e.key === 'scaleSensitivity') {
                 this.scaleSensitivity = parseFloat(e.newValue);
@@ -321,40 +320,27 @@ export class Game {
                 this.modelLoadingBubble?.showMessage("旋转灵敏度已更新", 2000);
             }
         });
-
-        // 监听模型切换事件
-        // 注释掉此处的监听器，因为 modelSelector.js 已经在处理模型加载
-        // window.addEventListener('loadNewModel', (e) => {
-        //     const modelPath = e.detail.modelPath;
-        //     console.log("接收到加载新模型事件:", modelPath);
-        //     this.loadNewModel(modelPath);
-        // });
     }
 
     async loadNewModel(modelPath) {
         try {
-            // 显示加载提示
             this.modelLoadingBubble?.showMessage("正在加载模型...", 0);
 
-            // 移除旧模型
             if (this.pandaModel) {
                 this.scene.remove(this.pandaModel);
                 this.pandaModel = null;
             }
 
-            // 清空动画
             this.animationMixer = null;
             this.animationClips = [];
             this.animationActions = {};
             this.currentAction = null;
 
-            // 清空动画按钮
             const buttonContainer = document.getElementById('animation-buttons');
             if (buttonContainer) {
                 buttonContainer.innerHTML = '';
             }
 
-            // 加载新模型
             const gltfLoader = new GLTFLoader();
             await new Promise((resolve, reject) => {
                 gltfLoader.load(
@@ -364,18 +350,15 @@ export class Game {
                         this.animationMixer = new THREE.AnimationMixer(this.pandaModel);
                         this.animationClips = gltf.animations;
 
-                        // 从配置文件获取模型的缩放和位置配置
                         const config = getModelConfig(modelPath, this.renderDiv.clientHeight);
 
-                        // 设置模型缩放
                         this.pandaModel.scale.set(config.scale, config.scale, config.scale);
                         this.pandaModel.userData.maxScale = config.maxScale;
                         this.pandaModel.userData.minScale = config.minScale;
 
-                        // 设置模型位置（先设置为原点以正确计算偏移）
                         this.pandaModel.position.set(0, 0, 0);
                         
-                        // 对于需要中心偏移补偿的模型，计算并补偿偏移
+                        // 对需要中心化的模型进行偏移补偿
                         if (config.centerOffset) {
                             const tempBox = new THREE.Box3().setFromObject(this.pandaModel);
                             const tempCenter = new THREE.Vector3();
@@ -384,18 +367,16 @@ export class Game {
                             this.pandaModel.position.y = config.posY - tempCenter.y;
                             this.pandaModel.position.z = config.posZ - tempCenter.z;
                         } else {
-                            // 其他模型直接设置位置
                             this.pandaModel.position.set(0, config.posY, config.posZ);
                         }
 
                         this.scene.add(this.pandaModel);
 
-                        // 处理动画
                         if (this.animationClips?.length) {
                             this._setupModelAnimations();
                         }
 
-                        // 触发modelChanged事件
+                        // 触发模型变更事件，通知其他模块
                         window.dispatchEvent(new CustomEvent('modelChanged', {
                             detail: { modelPath: modelPath }
                         }));
@@ -604,7 +585,6 @@ export class Game {
         `;
         this.renderDiv.appendChild(this.renderer.domElement);
 
-        // 灯光
         const ambientLight = new THREE.AmbientLight(0xffffff, CONFIG.light.ambientIntensity);
         this.scene.add(ambientLight);
         
@@ -612,7 +592,6 @@ export class Game {
         directionalLight.position.set(0, 0, 100);
         this.scene.add(directionalLight);
 
-        // 初始化手部可视化
         this._initHandVisualization();
     }
 
@@ -678,18 +657,14 @@ export class Game {
         this.animationMixer = new THREE.AnimationMixer(this.pandaModel);
         this.animationClips = gltf.animations;
 
-        // 从配置文件获取模型的缩放和位置配置
         const config = getModelConfig(this.initialModelPath, this.renderDiv.clientHeight);
 
-        // 设置模型缩放
         this.pandaModel.scale.set(config.scale, config.scale, config.scale);
         this.pandaModel.userData.maxScale = config.maxScale;
         this.pandaModel.userData.minScale = config.minScale;
 
-        // 设置模型位置（先设置为原点以正确计算偏移）
         this.pandaModel.position.set(0, 0, 0);
         
-        // 对于需要中心偏移补偿的模型，计算并补偿偏移
         if (config.centerOffset) {
             const tempBox = new THREE.Box3().setFromObject(this.pandaModel);
             const tempCenter = new THREE.Vector3();
@@ -699,18 +674,16 @@ export class Game {
             this.pandaModel.position.z = config.posZ - tempCenter.z;
             console.log(`初始加载补偿中心偏移(XYZ): 位置=(${this.pandaModel.position.x.toFixed(2)}, ${this.pandaModel.position.y.toFixed(2)}, ${this.pandaModel.position.z.toFixed(2)})`);
         } else {
-            // 其他模型直接设置位置
             this.pandaModel.position.set(0, config.posY, config.posZ);
         }
 
         this.scene.add(this.pandaModel);
 
-        // 处理动画
         if (this.animationClips?.length) {
             this._setupModelAnimations();
         }
 
-        // 触发modelChanged事件，让描述管理器知道初始模型已加载
+        // 触发模型变更事件，通知描述管理器等模块
         window.dispatchEvent(new CustomEvent('modelChanged', {
             detail: { modelPath: this.initialModelPath }
         }));
@@ -720,23 +693,21 @@ export class Game {
 
     _setupModelAnimations() {
         this.animationClips.forEach((clip, index) => {
-            const action = this.animationMixer.clipAction(clip);
-            const actionName = clip.name || `Animation ${index + 1}`;
-            this.animationActions[actionName] = action;
+        const action = this.animationMixer.clipAction(clip);
+        const actionName = clip.name || `Animation ${index + 1}`;
+        this.animationActions[actionName] = action;
 
-            this._createAnimationButton(actionName);
-        });
+        this._createAnimationButton(actionName);
+    });
 
-        // 播放默认动画
-        const defaultName = this._findDefaultAnimation();
-        if (defaultName) {
-            this.currentAction = this.animationActions[defaultName];
-            this.currentAction.play();
-            this._updateButtonStyles(defaultName);
-        }
+    // 自动播放默认动画（如 "idle"）
+    const defaultName = this._findDefaultAnimation();
+    if (defaultName) {
+        this.currentAction = this.animationActions[defaultName];
+        this.currentAction.play();
+        this._updateButtonStyles(defaultName);
     }
-
-    _findDefaultAnimation() {
+}    _findDefaultAnimation() {
         const actionNames = Object.keys(this.animationActions);
         const idleAction = actionNames.find(name => name.toLowerCase().includes('idle'));
         return idleAction || actionNames[0];
@@ -806,9 +777,6 @@ export class Game {
 
             return new Promise(resolve => {
                 this.videoElement.onloadedmetadata = () => {
-                    // 移除视频元素尺寸设置，让CSS控制
-                    // this.videoElement.style.width = this.renderDiv.clientWidth + 'px';
-                    // this.videoElement.style.height = this.renderDiv.clientHeight + 'px';
                     resolve();
                 };
             });
@@ -826,7 +794,7 @@ export class Game {
             return;
         }
 
-        // 固定模式下禁用手势识别
+        // 如果是固定模式，则不进行手势识别
         if (this.interactionMode === 'fixed') {
             this.hands.forEach(hand => {
                 if (hand.lineGroup) hand.lineGroup.visible = false;
@@ -862,10 +830,8 @@ export class Game {
                 const smoothedLandmarks = this._smoothLandmarks(results.landmarks[i], i);
                 hand.landmarks = smoothedLandmarks;
 
-                // 更新手部位置
                 this._updateHandPosition(hand, smoothedLandmarks, videoParams, canvasWidth, canvasHeight);
 
-                // 检测手势
                 const prevIsPinching = hand.isPinching;
                 const pinchResult = GestureDetector.detectPinch(smoothedLandmarks, videoParams, canvasWidth, canvasHeight);
                 
@@ -878,16 +844,12 @@ export class Game {
 
                 hand.isFist = GestureDetector.detectFist(smoothedLandmarks);
 
-                // 处理交互逻辑
                 this._handleInteraction(i, hand, prevIsPinching);
-
-                // 更新手部可视化
                 this._updateHandLines(i, smoothedLandmarks, videoParams, canvasWidth, canvasHeight);
             } else {
                 this._handleHandDisappeared(i, hand);
             }
 
-            // 播放交互音效
             this._playInteractionSound(i, hand);
         }
     }
@@ -949,12 +911,11 @@ export class Game {
                 pinchPoint3D.z = this.modelGrabStartDepth;
                 this.modelDragOffset.subVectors(this.pickedUpModel.position, pinchPoint3D);
             } else if (this.grabbingHandIndex === handIndex && this.pickedUpModel) {
-                // 更新位置
+                // 更新拖拽位置
                 const newPoint3D = this._screenToWorld(hand.pinchPointScreen);
                 newPoint3D.z = this.modelGrabStartDepth;
                 this.pickedUpModel.position.addVectors(newPoint3D, this.modelDragOffset);
                 
-                // 限制Z轴范围
                 this.pickedUpModel.position.z = Math.max(
                     CONFIG.model.minZ, 
                     Math.min(CONFIG.model.maxZ, this.pickedUpModel.position.z)
@@ -972,21 +933,18 @@ export class Game {
                 this.grabbingHandIndex = handIndex;
                 this.pickedUpModel = this.pandaModel;
                 this.rotateLastHandX = hand.pinchPointScreen.x;
-                this.rotateLastHandY = hand.pinchPointScreen.y; // 新增Y轴追踪
+                this.rotateLastHandY = hand.pinchPointScreen.y;
             } else if (this.grabbingHandIndex === handIndex && this.pickedUpModel && this.rotateLastHandX !== null) {
-                // 更新旋转 - 支持360°全方向旋转
+                // 更新旋转（支持X、Y轴）
                 const deltaX = hand.pinchPointScreen.x - this.rotateLastHandX;
                 const deltaY = hand.pinchPointScreen.y - this.rotateLastHandY;
                 
-                // X方向移动控制Y轴旋转（左右旋转）
                 if (Math.abs(deltaX) > 0.5) {
                     this.pickedUpModel.rotation.y -= deltaX * this.rotateSensitivity;
                 }
                 
-                // Y方向移动控制X轴旋转（上下旋转）
                 if (Math.abs(deltaY) > 0.5) {
                     this.pickedUpModel.rotation.x -= deltaY * this.rotateSensitivity;
-                    // 限制X轴旋转范围，避免翻转过头
                     this.pickedUpModel.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.pickedUpModel.rotation.x));
                 }
                 
@@ -996,7 +954,7 @@ export class Game {
         } else if (prevIsPinching && this.grabbingHandIndex === handIndex) {
             this._releaseModel(handIndex);
             this.rotateLastHandX = null;
-            this.rotateLastHandY = null; // 重置Y轴追踪
+            this.rotateLastHandY = null;
         }
     }
 
@@ -1095,14 +1053,12 @@ export class Game {
         const hand = this.hands[handIndex];
         const lineGroup = hand.lineGroup;
 
-        // 确定是否正在交互
         const isInteracting = this._isHandInteracting(handIndex);
         const material = handIndex === 0 ? this.fingertipMaterialHand1 : this.fingertipMaterialHand2;
         if (material) {
             material.opacity = isInteracting ? CONFIG.hand.grabOpacity : CONFIG.hand.defaultOpacity;
         }
 
-        // 清空旧的可视化
         while (lineGroup.children.length) {
             const child = lineGroup.children[0];
             lineGroup.remove(child);
@@ -1114,7 +1070,6 @@ export class Game {
             return;
         }
 
-        // 检查是否所有地标都在屏幕内
         const allOnScreen = landmarks.every(lm => 
             CoordinateTransformer.isLandmarkOnScreen(lm, videoParams)
         );
@@ -1124,13 +1079,11 @@ export class Game {
             return;
         }
 
-        // 转换为屏幕坐标
         const points3D = landmarks.map(lm => {
             const screen = CoordinateTransformer.landmarkToScreen(lm, videoParams, canvasWidth, canvasHeight);
             return new THREE.Vector3(screen.x, screen.y, 1.1);
         });
 
-        // 绘制连接线
         HAND_CONNECTIONS.forEach(([idx1, idx2]) => {
             const p1 = points3D[idx1]?.clone().setZ(1);
             const p2 = points3D[idx2]?.clone().setZ(1);
@@ -1141,7 +1094,6 @@ export class Game {
             }
         });
 
-        // 绘制指尖圆圈
         CONFIG.hand.fingertipIndices.forEach(idx => {
             const pos = points3D[idx];
             if (pos) {
@@ -1150,7 +1102,7 @@ export class Game {
                 const circle = new THREE.Mesh(geometry, material);
                 circle.position.copy(pos);
 
-                // 添加脉冲效果
+                // 交互时添加脉冲动画
                 if (isInteracting) {
                     const pulseProgress = (1 + Math.sin(this.clock.elapsedTime * CONFIG.interaction.pulseSpeed)) / 2;
                     const scale = CONFIG.interaction.pulseBaseScale + 
@@ -1573,9 +1525,6 @@ export class Game {
         this.camera.updateProjectionMatrix();
 
         this.renderer.setSize(width, height);
-        // 移除视频元素尺寸设置，让CSS控制
-        // this.videoElement.style.width = width + 'px';
-        // this.videoElement.style.height = height + 'px';
     }
 
     // ========== 动画循环 ==========
@@ -1648,7 +1597,7 @@ export class Game {
 
     // ========== 资源清理 ==========
     dispose() {
-        // 清理几何体和材质
+        // 清理场景中的几何体和材质
         this.scene.traverse((obj) => {
             if (obj.geometry) obj.geometry.dispose();
             if (obj.material) {
@@ -1660,16 +1609,16 @@ export class Game {
             }
         });
 
-        // 停止摄像头流
+        // 停止摄像头
         if (this.videoElement?.srcObject) {
             this.videoElement.srcObject.getTracks().forEach(track => track.stop());
         }
 
-        // 移除事件监听
+        // 移除事件监听器
         window.removeEventListener('resize', this._onResize);
         window.removeEventListener('storage', this._setupStorageListener);
 
-        // 清理管理器
+        // 清理子管理器
         if (this.speechManager) this.speechManager.dispose?.();
         if (this.audioManager) this.audioManager.dispose?.();
     }
