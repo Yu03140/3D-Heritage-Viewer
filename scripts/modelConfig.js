@@ -5,8 +5,7 @@
  * 键：模型文件名或路径关键词
  * 值：配置对象
  *   - scale: 初始缩放比例
- *   - maxScale: 最大缩放比例
- *   - minScale: 最小缩放比例（可选，默认为 scale * 0.1）
+ *   - maxScale: 最大缩 - minScale: 最小缩放比例（可选，默认为 scale * 0.1）
  *   - posY: Y轴位置（可选）
  *   - posYFactor: Y轴位置因子（相对于容器高度，可选）
  *   - posZ: Z轴位置（可选）
@@ -49,15 +48,7 @@ export const MODEL_CONFIGS = {
         posZ: -1000
     },
     
-    // 埃及鼓
-    'egypt_djembe_drum.glb': {
-        scale: 2000,
-        maxScale: 5000,
-        minScale: 200,
-        posY: 450,
-        posZ: -500
-    },
-    
+
     // 浑天仪
     'armillary_sphere_1771': {
         scale: 1000,
@@ -97,26 +88,8 @@ export const MODEL_CONFIGS = {
         centerOffset: true
     },
     
-    // 皇冠 
-    'a_royal_crown': {
-        scale: 2,
-        maxScale: 10,
-        minScale: 1,
-        posY: 0,
-        posZ: -1000,
-        centerOffset: true
-    },
-    
-    // 红宝石戒指 
-    'ring_with_rubies_and_pearls': {
-        scale: 10,
-        maxScale: 15000,
-        minScale: 1000,
-        posY: 0,
-        posZ: -800,
-        centerOffset: false
-    },
-    
+
+
     // 两个小花瓶
     'two_small_vases': {
         scale: 2,
@@ -150,16 +123,7 @@ export const MODEL_CONFIGS = {
         posZ: -1000,
         centerOffset: true
     },
-      // 香水戒指
-    'ring_for_perfume': {
-        scale: 10,
-        maxScale:200,
-        minScale: 1,
-        posYFactor: 0,
-        posZ: -1000,
-        centerOffset: true
-    },
-         // 犹太教堂烛台 - 原始尺寸很小，需要大幅放大
+     // 犹太教堂烛台 - 原始尺寸很小，需要大幅放大
      'candlestick_for_five_candles': {
          scale: 800,
          maxScale: 4000,
