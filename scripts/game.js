@@ -29,7 +29,9 @@ const CONFIG = {
         animationScrollThreshold: 40,
         pulseSpeed: 8,
         pulseAmplitude: 0.5,
-        pulseBaseScale: 1.0
+        pulseBaseScale: 1.0,
+        scaleMinDistance: 150,  // 双手最小距离阈值（像素），小于此距离不认为是缩放
+        scaleDistanceChangeThreshold: 20  // 距离变化阈值（像素），超过此值才触发缩放
     },
     model: {
         defaultScale: 2000,
@@ -52,6 +54,12 @@ const CONFIG = {
 
 // 交互模式及其UI配置
 const INTERACTION_MODES = {
+    auto: {
+        base: '#00FF00',
+        text: '#000000',
+        hand: new THREE.Color('#00FF00'),
+        instruction: '自动模式：单手五指=拖拽，单手二指=旋转，双手二指=缩放'
+    },
     drag: {
         base: '#00FFFF', // 按钮背景色
         text: '#000000', // 按钮文字颜色
@@ -230,7 +238,8 @@ export class Game {
 
         // 交互状态
         this.gameState = 'loading';
-        this.interactionMode = 'drag';
+        this.interactionMode = 'auto'; // 默认使用自动模式
+        this.autoModeEnabled = true; // 自动手势识别模式
         this.grabbingHandIndex = -1;
         this.pickedUpModel = null;
         this.modelDragOffset = new THREE.Vector3();
@@ -531,8 +540,8 @@ export class Game {
             gap: 4px;
         `;
 
-        ['拖拽', '旋转', '缩放', '固定'].forEach(modeName => {
-            const modeMap = { '拖拽': 'drag', '旋转': 'rotate', '缩放': 'scale', '固定': 'fixed' };
+        ['自动', '拖拽', '旋转', '缩放', '固定'].forEach(modeName => {
+            const modeMap = { '自动': 'auto', '拖拽': 'drag', '旋转': 'rotate', '缩放': 'scale', '固定': 'fixed' };
             const modeId = modeMap[modeName];
             
             const button = document.createElement('button');
@@ -598,7 +607,7 @@ export class Game {
     }
 
     _initHandVisualization() {
-        const initialColor = INTERACTION_MODES[this.interactionMode].hand;
+        const initialColor = INTERACTION_MODES[this.interactionMode]?.hand || INTERACTION_MODES.auto.hand;
 
         this.handLineMaterial = new THREE.LineBasicMaterial({
             color: 0x00ccff,
@@ -818,7 +827,12 @@ export class Game {
             const canvasHeight = this.renderDiv.clientHeight;
 
             this._processHands(results, videoParams, canvasWidth, canvasHeight);
-            this._handleScaleMode();
+            // 处理缩放模式（手动模式）或自动模式的缩放
+            if (this.interactionMode === 'scale') {
+                this._handleScaleMode();
+            } else if (this.interactionMode === 'auto') {
+                this._handleAutoScaleModeInProcess();
+            }
         } catch (error) {
             console.error("手势检测错误:", error);
         }
@@ -888,6 +902,12 @@ export class Game {
             return;
         }
 
+        // 自动模式：根据手势自动选择操作
+        if (this.interactionMode === 'auto') {
+            this._handleAutoModeInteraction(handIndex, hand, prevIsPinching);
+            return;
+        }
+
         switch (this.interactionMode) {
             case 'drag':
                 this._handleDragInteraction(handIndex, hand, prevIsPinching);
@@ -898,6 +918,213 @@ export class Game {
             case 'scale':
                 // 缩放模式在_handleScaleMode中处理
                 break;
+        }
+    }
+
+    /**
+     * 自动模式交互处理：根据手势自动识别操作类型
+     */
+    _handleAutoModeInteraction(handIndex, hand, prevIsPinching) {
+        const hand0 = this.hands[0];
+        const hand1 = this.hands[1];
+        
+        // 检测双手二指捏合（缩放）- 优先级最高
+        const bothHandsPinching = hand0?.landmarks && hand1?.landmarks && 
+                                  hand0.isPinching && hand1.isPinching;
+        
+        if (bothHandsPinching) {
+            // 检查双手距离，只有距离足够远才认为是缩放操作
+            // 使用捏合点而不是手掌中心点
+            const pinch0Point = hand0.pinchPointScreen;
+            const pinch1Point = hand1.pinchPointScreen;
+            
+            // 确保捏合点已设置
+            if (pinch0Point && pinch1Point) {
+                const dist = pinch0Point.distanceTo(pinch1Point);
+                
+                // 只有当双手距离大于最小阈值时，才认为是缩放操作
+                if (dist >= CONFIG.interaction.scaleMinDistance) {
+                    // 双手二指捏合且距离足够 = 缩放，释放单手的操作
+                    if (this.grabbingHandIndex === handIndex && this.scaleInitialPinchDistance === null) {
+                        // 如果当前手正在执行其他操作，先释放
+                        this._releaseModel(handIndex);
+                    }
+                    // 缩放操作在_processHands循环外统一处理
+                    return;
+                }
+                // 如果双手距离太近，不认为是缩放，继续处理单手操作
+            }
+        }
+
+        // 如果正在缩放，不处理单手操作
+        if (this.scaleInitialPinchDistance !== null) {
+            return;
+        }
+
+        // 检测单手操作
+        if (hand.landmarks) {
+            if (hand.isFist && !hand.isPinching) {
+                // 单手五指聚拢（握拳）= 拖拽
+                this._handleAutoDragInteraction(handIndex, hand);
+            } else if (hand.isPinching && !hand.isFist) {
+                // 单手二指捏合 = 旋转（只在单手时触发）
+                // 检查另一只手是否也在捏合，如果是则不触发旋转
+                const otherHand = handIndex === 0 ? hand1 : hand0;
+                if (!otherHand?.isPinching) {
+                    // 另一只手不在捏合，可以触发旋转
+                    this._handleAutoRotateInteraction(handIndex, hand, prevIsPinching);
+                } else {
+                    // 另一只手也在捏合，释放当前手的操作（应该由缩放处理）
+                    if (this.grabbingHandIndex === handIndex) {
+                        this._releaseModel(handIndex);
+                    }
+                }
+            } else {
+                // 手势不明确，释放模型
+                if (this.grabbingHandIndex === handIndex) {
+                    this._releaseModel(handIndex);
+                }
+            }
+        }
+    }
+
+    /**
+     * 自动模式拖拽：使用握拳手势
+     */
+    _handleAutoDragInteraction(handIndex, hand) {
+        if (hand.isFist && this.pandaModel) {
+            // 使用手掌中心点作为拖拽点
+            const palm = hand.landmarks[9]; // 中指MCP关节
+            const videoParams = this._getVisibleVideoParameters();
+            if (!videoParams) return;
+            
+            const canvasWidth = this.renderDiv.clientWidth;
+            const canvasHeight = this.renderDiv.clientHeight;
+            const palmScreen = CoordinateTransformer.landmarkToScreen(palm, videoParams, canvasWidth, canvasHeight);
+            const palmPointScreen = new THREE.Vector2(palmScreen.x, palmScreen.y);
+
+            if (this.grabbingHandIndex === -1) {
+                // 开始拖拽
+                this.grabbingHandIndex = handIndex;
+                this.pickedUpModel = this.pandaModel;
+                this.modelGrabStartDepth = this.pickedUpModel.position.z;
+
+                const palmPoint3D = this._screenToWorld(palmPointScreen);
+                palmPoint3D.z = this.modelGrabStartDepth;
+                this.modelDragOffset.subVectors(this.pickedUpModel.position, palmPoint3D);
+            } else if (this.grabbingHandIndex === handIndex && this.pickedUpModel) {
+                // 更新拖拽位置
+                const newPoint3D = this._screenToWorld(palmPointScreen);
+                newPoint3D.z = this.modelGrabStartDepth;
+                this.pickedUpModel.position.addVectors(newPoint3D, this.modelDragOffset);
+                
+                this.pickedUpModel.position.z = Math.max(
+                    CONFIG.model.minZ, 
+                    Math.min(CONFIG.model.maxZ, this.pickedUpModel.position.z)
+                );
+            }
+        } else if (this.grabbingHandIndex === handIndex) {
+            this._releaseModel(handIndex);
+        }
+    }
+
+    /**
+     * 自动模式旋转：使用二指捏合手势
+     */
+    _handleAutoRotateInteraction(handIndex, hand, prevIsPinching) {
+        if (hand.isPinching) {
+            if (!prevIsPinching && this.grabbingHandIndex === -1 && this.pandaModel) {
+                // 开始旋转
+                this.grabbingHandIndex = handIndex;
+                this.pickedUpModel = this.pandaModel;
+                this.rotateLastHandX = hand.pinchPointScreen.x;
+                this.rotateLastHandY = hand.pinchPointScreen.y;
+            } else if (this.grabbingHandIndex === handIndex && this.pickedUpModel && this.rotateLastHandX !== null) {
+                // 更新旋转（支持X、Y轴）
+                const deltaX = hand.pinchPointScreen.x - this.rotateLastHandX;
+                const deltaY = hand.pinchPointScreen.y - this.rotateLastHandY;
+                
+                if (Math.abs(deltaX) > 0.5) {
+                    this.pickedUpModel.rotation.y -= deltaX * this.rotateSensitivity;
+                }
+                
+                if (Math.abs(deltaY) > 0.5) {
+                    this.pickedUpModel.rotation.x -= deltaY * this.rotateSensitivity;
+                    this.pickedUpModel.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.pickedUpModel.rotation.x));
+                }
+                
+                this.rotateLastHandX = hand.pinchPointScreen.x;
+                this.rotateLastHandY = hand.pinchPointScreen.y;
+            }
+        } else if (prevIsPinching && this.grabbingHandIndex === handIndex) {
+            this._releaseModel(handIndex);
+            this.rotateLastHandX = null;
+            this.rotateLastHandY = null;
+        }
+    }
+
+    /**
+     * 自动模式缩放：使用双手二指捏合
+     */
+    _handleAutoScaleMode() {
+        const hand0 = this.hands[0];
+        const hand1 = this.hands[1];
+
+        if (hand0?.landmarks && hand1?.landmarks && hand0.isPinching && hand1.isPinching) {
+            // 使用两个捏合点之间的距离
+            const pinch0Point = hand0.pinchPointScreen;
+            const pinch1Point = hand1.pinchPointScreen;
+            
+            // 确保捏合点已设置
+            if (!pinch0Point || !pinch1Point) {
+                // 捏合点未设置，结束缩放
+                if (this.scaleInitialPinchDistance !== null) {
+                    this.scaleInitialPinchDistance = null;
+                    this.scaleInitialModelScale = null;
+                    this.grabbingHandIndex = -1;
+                    this.pickedUpModel = null;
+                }
+                return;
+            }
+            
+            const dist = pinch0Point.distanceTo(pinch1Point);
+
+            // 检查双手距离是否足够远
+            if (dist < CONFIG.interaction.scaleMinDistance) {
+                // 双手距离太近，不认为是缩放操作，结束缩放
+                if (this.scaleInitialPinchDistance !== null) {
+                    this.scaleInitialPinchDistance = null;
+                    this.scaleInitialModelScale = null;
+                    this.grabbingHandIndex = -1;
+                    this.pickedUpModel = null;
+                }
+                return;
+            }
+
+            if (this.scaleInitialPinchDistance === null) {
+                // 记录初始距离，准备开始缩放
+                this.scaleInitialPinchDistance = dist;
+                this.scaleInitialModelScale = this.pandaModel.scale.clone();
+                this.grabbingHandIndex = 0;
+                this.pickedUpModel = this.pandaModel;
+            } else {
+                // 继续缩放：计算距离变化
+                const deltaDistance = dist - this.scaleInitialPinchDistance;
+                const scaleChange = deltaDistance * this.scaleSensitivity;
+                let newScale = this.scaleInitialModelScale.x + scaleChange;
+
+                const minScale = this.pandaModel.userData?.minScale || CONFIG.model.defaultMinScale;
+                const maxScale = this.pandaModel.userData?.maxScale || CONFIG.model.defaultMaxScale;
+                newScale = Math.max(minScale, Math.min(maxScale, newScale));
+
+                this.pandaModel.scale.set(newScale, newScale, newScale);
+            }
+        } else if (this.scaleInitialPinchDistance !== null) {
+            // 结束缩放
+            this.scaleInitialPinchDistance = null;
+            this.scaleInitialModelScale = null;
+            this.grabbingHandIndex = -1;
+            this.pickedUpModel = null;
         }
     }
 
@@ -999,8 +1226,32 @@ export class Game {
         }
     }
 
+    /**
+     * 在自动模式下处理缩放（在_processHands中调用）
+     */
+    _handleAutoScaleModeInProcess() {
+        if (this.interactionMode !== 'auto') return;
+        this._handleAutoScaleMode();
+    }
+
     _handleHandDisappeared(handIndex, hand) {
-        if (this.interactionMode === 'drag' || this.interactionMode === 'rotate') {
+        if (this.interactionMode === 'auto') {
+            // 自动模式：释放当前操作
+            if (this.grabbingHandIndex === handIndex) {
+                this._releaseModel(handIndex);
+            }
+            // 如果是缩放模式，检查是否还有双手
+            if (this.scaleInitialPinchDistance !== null) {
+                const hand0Exists = this.hands[0]?.landmarks;
+                const hand1Exists = this.hands[1]?.landmarks;
+                if (!hand0Exists || !hand1Exists) {
+                    this.scaleInitialPinchDistance = null;
+                    this.scaleInitialModelScale = null;
+                    this.grabbingHandIndex = -1;
+                    this.pickedUpModel = null;
+                }
+            }
+        } else if (this.interactionMode === 'drag' || this.interactionMode === 'rotate') {
             if (this.grabbingHandIndex === handIndex) {
                 this._releaseModel(handIndex);
             }
@@ -1029,7 +1280,11 @@ export class Game {
     _playInteractionSound(handIndex, hand) {
         let isActive = false;
 
-        if (this.interactionMode === 'drag' || this.interactionMode === 'rotate') {
+        if (this.interactionMode === 'auto') {
+            // 自动模式：检查是否正在交互
+            isActive = (this.grabbingHandIndex === handIndex && this.pickedUpModel === this.pandaModel) ||
+                      (this.scaleInitialPinchDistance !== null && (handIndex === 0 || handIndex === 1));
+        } else if (this.interactionMode === 'drag' || this.interactionMode === 'rotate') {
             isActive = this.grabbingHandIndex === handIndex && 
                       this.pickedUpModel === this.pandaModel;
         } else if (this.interactionMode === 'scale') {
@@ -1037,7 +1292,7 @@ export class Game {
                       (handIndex === 0 || handIndex === 1);
         }
 
-        if (hand.isPinching && isActive) {
+        if ((hand.isPinching || hand.isFist) && isActive) {
             this.audioManager.playInteractionClickSound();
         }
     }
@@ -1122,7 +1377,11 @@ export class Game {
     }
 
     _isHandInteracting(handIndex) {
-        if (this.interactionMode === 'drag' || this.interactionMode === 'rotate') {
+        if (this.interactionMode === 'auto') {
+            // 自动模式：检查是否正在交互
+            return (this.grabbingHandIndex === handIndex && this.pickedUpModel === this.pandaModel) ||
+                   (this.scaleInitialPinchDistance !== null && (handIndex === 0 || handIndex === 1));
+        } else if (this.interactionMode === 'drag' || this.interactionMode === 'rotate') {
             return this.grabbingHandIndex === handIndex && this.pickedUpModel === this.pandaModel;
         } else if (this.interactionMode === 'scale') {
             return this.scaleInitialPinchDistance !== null && (handIndex === 0 || handIndex === 1);
@@ -1327,8 +1586,9 @@ export class Game {
         if (this.interactionMode === mode) return;
 
         this.interactionMode = mode;
+        this.autoModeEnabled = (mode === 'auto');
 
-        const modeNames = { 'drag': '拖拽', 'rotate': '旋转', 'scale': '缩放', 'fixed': '固定' };
+        const modeNames = { 'auto': '自动', 'drag': '拖拽', 'rotate': '旋转', 'scale': '缩放', 'fixed': '固定' };
         this.modelLoadingBubble?.showMessage(`已切换至${modeNames[mode]}操作`, 3000);
 
         // 释放当前抓取
