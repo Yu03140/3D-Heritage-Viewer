@@ -143,12 +143,11 @@ function _ts_generator(thisArg, body) {
 }
 export var SpeechManager = /*#__PURE__*/ function() {
     "use strict";
-    function SpeechManager(onTranscript, onRecognitionActive, onCommandRecognized) {
+    function SpeechManager(onTranscript, onRecognitionActive) {
         var _this = this;
         _class_call_check(this, SpeechManager);
         this.onTranscript = onTranscript;
         this.onRecognitionActive = onRecognitionActive;
-        this.onCommandRecognized = onCommandRecognized;
         this.recognition = null;
         this.isRecognizing = false;
         this.finalTranscript = '';
@@ -168,47 +167,8 @@ export var SpeechManager = /*#__PURE__*/ function() {
                 _this.interimTranscript = '';
                 for(var i = event.resultIndex; i < event.results.length; ++i){
                     if (event.results[i].isFinal) {
-                        var currentFinalTranscript = event.results[i][0].transcript.trim().toLowerCase();
-                        _this.finalTranscript += currentFinalTranscript;
                         if (_this.onTranscript) {
                             _this.onTranscript(event.results[i][0].transcript, '');
-                        }
-                        
-                        // 定义中英文命令及其映射
-                        var commandMap = {
-                            'drag': 'drag', 'rotate': 'rotate', 'rotation': 'rotate',
-                            'scale': 'scale', 'size': 'scale', 'zoom': 'scale',
-                            'fixed': 'fixed', 'lock': 'fixed',
-                            '拖拽': 'drag', '拖动': 'drag', '旋转': 'rotate', '转动': 'rotate',
-                            '缩放': 'scale', '大小': 'scale', '放大': 'scale', '缩小': 'scale',
-                            '固定': 'fixed', '锁定': 'fixed'
-                        };
-                        var spokenCommands = Object.keys(commandMap);
-                        var _iteratorNormalCompletion = true, _didIteratorError = false, _iteratorError = undefined;
-                        try {
-                            for(var _iterator = spokenCommands[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true){
-                                var spokenCmd = _step.value;
-                                if (currentFinalTranscript.includes(spokenCmd)) {
-                                    var actualCommand = commandMap[spokenCmd];
-                                    if (_this.onCommandRecognized) {
-                                        _this.onCommandRecognized(actualCommand);
-                                    }
-                                    break;
-                                }
-                            }
-                        } catch (err) {
-                            _didIteratorError = true;
-                            _iteratorError = err;
-                        } finally{
-                            try {
-                                if (!_iteratorNormalCompletion && _iterator.return != null) {
-                                    _iterator.return();
-                                }
-                            } finally{
-                                if (_didIteratorError) {
-                                    throw _iteratorError;
-                                }
-                            }
                         }
                         _this.finalTranscript = '';
                     } else {

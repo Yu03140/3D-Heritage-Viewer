@@ -8,6 +8,12 @@ export class AIAssistant {
         this.apiKey = 'sk-a21472fce05548dbbc1e2e0c38ce407d';
         this.apiEndpoint = 'http://localhost:8001/api/chat';  // 通过本地代理调用，避免CORS问题
         this.modelName = 'qwen-turbo';
+        this.isProcessing = false;
+        this.pendingQuestions = [];
+    this.ttsSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+    this.aiSpeechEnabled = localStorage.getItem('aiSpeechEnabled') !== 'false';
+    this.currentSpeechUtterance = null;
+    this.speechVoice = null;
         
         console.log('AI助手已就绪');
         
@@ -21,6 +27,9 @@ export class AIAssistant {
         this.submitButton = document.getElementById('aiSubmitBtn');
         this.btnText = this.submitButton.querySelector('.btn-text');
         this.btnLoading = this.submitButton.querySelector('.btn-loading');
+        this.speechToggleButton = document.getElementById('aiSpeechToggle');
+
+        this._updateSpeechToggleButton();
     }
 
     setupEventListeners() {
@@ -38,11 +47,33 @@ export class AIAssistant {
         window.addEventListener('modelChanged', (e) => {
             this.handleModelChange(e.detail.modelPath);
         });
+
+        if (this.speechToggleButton) {
+            this.speechToggleButton.addEventListener('click', () => {
+                if (!this.ttsSupported) return;
+                this.setAssistantSpeechEnabled(!this.aiSpeechEnabled);
+            });
+        }
+
+        if (this.ttsSupported && window.speechSynthesis) {
+            window.speechSynthesis.addEventListener('voiceschanged', () => {
+                this._selectSpeechVoice();
+            });
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.stopAssistantSpeech();
+            }
+        });
+
+        window.addEventListener('beforeunload', () => this.stopAssistantSpeech());
     }
 
     handleModelChange(modelPath) {
         // 静默重置对话历史，不产生系统提示
         this.conversationHistory = [];
+        this.stopAssistantSpeech();
     }
 
     setModelData(modelData) {
@@ -50,17 +81,35 @@ export class AIAssistant {
     }
 
     async handleSubmit() {
-        const question = this.inputElement.value.trim();
+        await this.submitQuestion(this.inputElement.value, { source: 'text', clearInput: true });
+    }
+
+    async submitQuestion(rawQuestion, { source = 'text', clearInput = false } = {}) {
+        const question = (rawQuestion || '').trim();
         if (!question) return;
 
-        if (!this.apiKey || this.apiKey.includes('your-key-here')) {
-            this.addErrorMessage('管理员尚未配置有效的API Key，请联系管理员。');
+        if (!this.isApiConfigured()) {
+            this.addErrorMessage('管理员尚未配置通义千问API Key，请联系管理员。');
             return;
         }
 
-        this.addUserMessage(question);
-        this.inputElement.value = '';
-        
+        if (clearInput && this.inputElement) {
+            this.inputElement.value = '';
+        }
+
+        this.addUserMessage(question, { source });
+
+        const payload = { question };
+        if (this.isProcessing) {
+            this.pendingQuestions.push(payload);
+            return;
+        }
+
+        await this._processQuestionPayload(payload);
+    }
+
+    async _processQuestionPayload({ question }) {
+        this.isProcessing = true;
         this.setLoading(true);
 
         try {
@@ -71,7 +120,17 @@ export class AIAssistant {
             this.addErrorMessage(`AI调用失败: ${error.message}`);
         } finally {
             this.setLoading(false);
+            this.isProcessing = false;
+
+            if (this.pendingQuestions.length > 0) {
+                const nextPayload = this.pendingQuestions.shift();
+                this._processQuestionPayload(nextPayload);
+            }
         }
+    }
+
+    isApiConfigured() {
+        return this.apiKey && this.apiKey !== 'sk-your-qianwen-api-key-here';
     }
 
     async callAI(userQuestion) {
@@ -166,12 +225,13 @@ export class AIAssistant {
         return prompt;
     }
 
-    addUserMessage(content) {
-        this.addMessage('user', content);
+    addUserMessage(content, options = {}) {
+        this.addMessage('user', content, options);
     }
 
     addAssistantMessage(content) {
         this.addMessage('assistant', content);
+        this.speakAssistantMessage(content);
     }
 
     addSystemMessage(content) {
@@ -182,9 +242,16 @@ export class AIAssistant {
         this.addMessage('error', content);
     }
 
-    addMessage(type, content) {
+    addMessage(type, content, options = {}) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `ai-message ${type}`;
+        if (type === 'user' && options.source === 'speech') {
+            messageDiv.classList.add('speech-origin');
+            const badge = document.createElement('span');
+            badge.className = 'speech-origin-badge';
+            badge.textContent = '语音输入';
+            messageDiv.appendChild(badge);
+        }
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
@@ -219,6 +286,90 @@ export class AIAssistant {
             this.btnText.style.display = 'inline';
             this.btnLoading.style.display = 'none';
         }
+    }
+
+    setAssistantSpeechEnabled(enabled) {
+        if (!this.ttsSupported) return;
+        this.aiSpeechEnabled = enabled;
+        localStorage.setItem('aiSpeechEnabled', enabled ? 'true' : 'false');
+        if (!enabled) {
+            this.stopAssistantSpeech();
+        }
+        this._updateSpeechToggleButton();
+    }
+
+    _updateSpeechToggleButton() {
+        if (!this.speechToggleButton) return;
+
+        if (!this.ttsSupported) {
+            this.speechToggleButton.disabled = true;
+            this.speechToggleButton.textContent = '🔇 浏览器不支持语音播报';
+            this.speechToggleButton.classList.remove('active');
+            return;
+        }
+
+        if (this.aiSpeechEnabled) {
+            this.speechToggleButton.textContent = '🔊 语音播报开启';
+            this.speechToggleButton.classList.add('active');
+        } else {
+            this.speechToggleButton.textContent = '🔈 语音播报关闭';
+            this.speechToggleButton.classList.remove('active');
+        }
+    }
+
+    _selectSpeechVoice() {
+        if (!this.ttsSupported || !window.speechSynthesis) return;
+        const voices = window.speechSynthesis.getVoices?.() || [];
+        if (!voices.length) return;
+
+        const preferred = voices.find(v => v.lang?.toLowerCase().startsWith('zh'))
+            || voices.find(v => v.lang?.toLowerCase().includes('zh'))
+            || voices[0];
+        this.speechVoice = preferred || null;
+    }
+
+    speakAssistantMessage(text) {
+        if (!this.ttsSupported || !this.aiSpeechEnabled) return;
+        const content = (text || '').trim();
+        if (!content) return;
+
+        this.stopAssistantSpeech();
+        if (!this.speechVoice) {
+            this._selectSpeechVoice();
+        }
+
+        const utterance = new SpeechSynthesisUtterance(content);
+        utterance.lang = this.speechVoice?.lang || 'zh-CN';
+        if (this.speechVoice) {
+            utterance.voice = this.speechVoice;
+        }
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+
+        utterance.onend = () => {
+            if (this.currentSpeechUtterance === utterance) {
+                this.currentSpeechUtterance = null;
+            }
+        };
+        utterance.onerror = (event) => {
+            console.error('AI语音播报出错:', event.error);
+            if (this.currentSpeechUtterance === utterance) {
+                this.currentSpeechUtterance = null;
+            }
+            this._updateSpeechToggleButton();
+        };
+
+        this.currentSpeechUtterance = utterance;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    stopAssistantSpeech() {
+        if (!this.ttsSupported) return;
+        if (window.speechSynthesis?.speaking || window.speechSynthesis?.pending) {
+            window.speechSynthesis.cancel();
+        }
+        this.currentSpeechUtterance = null;
     }
 
 }

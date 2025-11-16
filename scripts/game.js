@@ -270,6 +270,8 @@ export class Game {
         this.instructionTextElement = null;
         this.speechStatusElement = null;
         this.speechStatusTextElement = null;
+        this.lastSpeechAIText = '';
+        this.lastSpeechAITimestamp = 0;
     }
 
     _loadSensitivity(key, defaultValue) {
@@ -1218,8 +1220,7 @@ export class Game {
         // 初始化SpeechManager
         this.speechManager = new SpeechManager(
             (finalTranscript, interimTranscript) => this._onSpeechResult(finalTranscript, interimTranscript),
-            (isActive) => this._onSpeechActiveChange(isActive),
-            (command) => this._onSpeechCommand(command)
+            (isActive) => this._onSpeechActiveChange(isActive)
         );
 
         if (this.speechBubble) {
@@ -1242,6 +1243,7 @@ export class Game {
                 this.speechBubble.style.opacity = '0.7';
                 this._updateSpeechBubbleAppearance();
             }, 2000);
+            this._forwardSpeechToAI(finalTranscript);
         } else if (interimTranscript) {
             this.speechBubble.innerHTML = `<i style="color: #888;">${interimTranscript}</i>`;
             this.speechBubble.style.opacity = '1';
@@ -1263,10 +1265,24 @@ export class Game {
         this._updateSpeechBubbleAppearance();
     }
 
-    _onSpeechCommand(command) {
-        const validCommands = ['drag', 'rotate', 'scale', 'fixed'];
-        if (validCommands.includes(command.toLowerCase())) {
-            this._setInteractionMode(command.toLowerCase());
+    _forwardSpeechToAI(transcript) {
+        if (!this.isSpeechActive) return;
+        const text = transcript?.trim();
+        if (!text) return;
+        const now = Date.now();
+        if (text === this.lastSpeechAIText && now - this.lastSpeechAITimestamp < 1500) {
+            return;
+        }
+        this.lastSpeechAIText = text;
+        this.lastSpeechAITimestamp = now;
+
+        if (window.aiAssistant?.submitQuestion) {
+            const maybePromise = window.aiAssistant.submitQuestion(text, { source: 'speech' });
+            if (maybePromise && typeof maybePromise.catch === 'function') {
+                maybePromise.catch((err) => {
+                    console.error('通过语音发送到AI失败:', err);
+                });
+            }
         }
     }
 
