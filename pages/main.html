@@ -50,6 +50,39 @@
             overflow-y: auto;
         }
 
+        .description-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .speak-description-btn {
+            border: 2px solid #4a90e2;
+            background: #4a90e2;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 6px rgba(74, 144, 226, 0.3);
+        }
+
+        .speak-description-btn:hover:not(:disabled) {
+            background: #357abd;
+            border-color: #357abd;
+            box-shadow: 0 3px 10px rgba(53, 122, 189, 0.35);
+        }
+
+        .speak-description-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
         .sidebar-title {
             color: #e74c3c;
             font-size: 18px;
@@ -615,6 +648,11 @@
         <!-- 左侧边栏 - 相关介绍 -->
         <aside class="left-sidebar">
             <h3 class="sidebar-title">相关介绍</h3>
+            <div class="description-toolbar">
+                <button id="speakDescriptionBtn" class="speak-description-btn" disabled title="朗读当前文物介绍" aria-pressed="false">
+                    🔊 语音讲解
+                </button>
+            </div>
             <div class="model-description" id="modelDescription">
                 <p>加载中...</p>
             </div>
@@ -726,6 +764,7 @@
     <script type="module" src="../scripts/main.js"></script>
     <script type="module" src="../scripts/comments.js"></script>
     <script type="module" src="../scripts/aiAssistant.js"></script>
+    <script type="module" src="../scripts/descriptionNarrator.js"></script>
     <script type="module">
         // 确保渲染器在布局完成后正确调整大小
         window.addEventListener('load', () => {
@@ -783,6 +822,8 @@
                 if (window.aiAssistant) {
                     window.aiAssistant.setModelData(modelData);
                 }
+
+                window.descriptionNarrator?.onDescriptionUpdated();
             } else {
                 console.warn(`❌ 未找到键名"${modelKey}"的描述数据`);
                 const descriptionDiv = document.getElementById('modelDescription');
@@ -790,6 +831,7 @@
                     <h4>未找到介绍</h4>
                     <p style="margin-top: 15px; color: #999;">暂无该模型的描述信息</p>
                 `;
+                window.descriptionNarrator?.onDescriptionUpdated();
             }
         }
 
