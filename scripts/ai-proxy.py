@@ -7,10 +7,95 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import urllib.request
 import urllib.error
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from rag import load_default_kb, RAGKnowledgeBase
 
 # 警告：API密钥在此处硬编码。在生产环境中，应使用更安全的方法（如环境变量）来管理密钥。
 API_KEY = 'sk-a21472fce05548dbbc1e2e0c38ce407d'
 API_ENDPOINT = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation'
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+KB_PATH = SCRIPT_DIR.parent / 'data' / 'descriptions.json'
+
+try:
+    KNOWLEDGE_BASE: Optional[RAGKnowledgeBase] = load_default_kb(str(KB_PATH))
+    kb_stats = KNOWLEDGE_BASE.stats()
+    print(f"📚 知识库已加载: {kb_stats['chunks']} 个片段, 来源 {kb_stats['source']}")
+except Exception as kb_error:
+    KNOWLEDGE_BASE = None
+    print(f"⚠️ 知识库未启用: {kb_error}")
+
+
+def inject_context(request_payload: Dict[str, Any]) -> None:
+    if KNOWLEDGE_BASE is None:
+        return
+
+    input_block = request_payload.get('input')
+    if not isinstance(input_block, dict):
+        return
+
+    messages = input_block.get('messages')
+    if not isinstance(messages, list):
+        return
+
+    last_user_message = None
+    for message in reversed(messages):
+        if isinstance(message, dict) and message.get('role') == 'user' and message.get('content'):
+            last_user_message = message['content']
+            break
+
+    if not last_user_message:
+        return
+
+    try:
+        results = KNOWLEDGE_BASE.retrieve(last_user_message, top_k=3)
+    except Exception as retrieval_error:
+        print(f"⚠️ 检索失败: {retrieval_error}")
+        return
+
+    if not results:
+        return
+
+    context_lines: List[str] = [
+        '以下是从知识库检索到的相关资料：'
+    ]
+
+    for idx, item in enumerate(results, 1):
+        metadata = item.get('metadata', {})
+        title = metadata.get('title', '未知')
+        dynasty = metadata.get('dynasty', '未知')
+        category = metadata.get('category', '未知')
+        year = metadata.get('year')
+        header = f"[{idx}] 名称: {title} | 朝代: {dynasty} | 类别: {category}"
+        if year and year != '未知':
+            header += f" | 年代: {year}"
+        context_lines.append(header)
+        context_lines.append(f"来源: {metadata.get('source', 'data/descriptions.json')}")
+
+        snippet = (item.get('text') or '').strip()
+        if len(snippet) > 400:
+            snippet = snippet[:400].rstrip() + '...'
+        context_lines.append(f"内容: {snippet}")
+
+    context_lines.append('如果资料不足，请说明。')
+
+    context_message = {
+        'role': 'system',
+        'content': '\n'.join(context_lines)
+    }
+
+    augmented: List[Dict[str, Any]] = list(messages)
+    insert_at = 0
+    for idx, message in enumerate(augmented):
+        if isinstance(message, dict) and message.get('role') == 'system':
+            insert_at = idx + 1
+            break
+
+    augmented.insert(insert_at, context_message)
+    input_block['messages'] = augmented
+    print('📖 已注入知识库上下文')
 
 class ProxyHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -32,6 +117,12 @@ class ProxyHandler(BaseHTTPRequestHandler):
             content_length = int(self.headers.get('Content-Length', 0))
             body = self.rfile.read(content_length)
             request_data = json.loads(body.decode('utf-8'))
+
+            # RAG上下文增强
+            try:
+                inject_context(request_data)
+            except Exception as context_error:
+                print(f"⚠️ 注入上下文时出错: {context_error}")
 
             # 构建请求到通义千问
             headers = {
