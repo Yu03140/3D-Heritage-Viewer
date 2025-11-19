@@ -273,6 +273,144 @@
             box-shadow: none;
         }
 
+        /* 语音选择弹窗 */
+        .voice-selection-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s;
+        }
+
+        .voice-selection-dialog {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .voice-selection-dialog h3 {
+            margin: 0 0 16px 0;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+
+        .voice-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .voice-item {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .voice-item:hover {
+            background: #f0f7ff;
+            border-color: #4a90e2;
+        }
+
+        .voice-item.selected {
+            background: #e3f2fd;
+            border-color: #4a90e2;
+        }
+
+        .voice-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .voice-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .voice-lang {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .quality-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .quality-badge.high {
+            background: #4caf50;
+            color: white;
+        }
+
+        .quality-badge.medium {
+            background: #2196f3;
+            color: white;
+        }
+
+        .quality-badge.low {
+            background: #ff9800;
+            color: white;
+        }
+
+        .voice-dialog-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .voice-test-btn, .voice-close-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .voice-test-btn {
+            background: #4a90e2;
+            color: white;
+        }
+
+        .voice-test-btn:hover {
+            background: #357abd;
+        }
+
+        .voice-close-btn {
+            background: #e0e0e0;
+            color: #555;
+        }
+
+        .voice-close-btn:hover {
+            background: #d0d0d0;
+        }
+
         .ai-chat-container {
             flex: 1;
             overflow-y: auto;
@@ -726,7 +864,10 @@
             <div class="ai-panel">
                 <div class="ai-panel-header">
                     <h3 class="panel-title" style="margin-bottom:0; border-bottom:none; padding-bottom:0;">🤖 AI文物助手</h3>
-                    <button id="aiSpeechToggle" class="ai-speech-toggle" type="button">🔈 语音播报开启</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="aiVoiceSelect" class="ai-speech-toggle" type="button" title="选择语音引擎">🎤 选择语音</button>
+                        <button id="aiSpeechToggle" class="ai-speech-toggle" type="button">🔈 语音播报开启</button>
+                    </div>
                 </div>
                 
                 <div class="ai-chat-container" id="aiChatContainer">

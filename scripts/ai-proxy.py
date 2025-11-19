@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# 通义千问API代理服务器
+# AI API代理服务器 (支持 DeepSeek/通义千问)
 # 解决了前端直接调用API时遇到的CORS跨域和API密钥暴露问题。
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -13,8 +13,9 @@ from typing import Any, Dict, List, Optional
 from rag import load_default_kb, RAGKnowledgeBase
 
 # 警告：API密钥在此处硬编码。在生产环境中，应使用更安全的方法（如环境变量）来管理密钥。
-API_KEY = 'sk-a21472fce05548dbbc1e2e0c38ce407d'
-API_ENDPOINT = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation'
+API_KEY = 'sk-0e4fac7233614d8d8b1432f7b6c3ae5a'  # DeepSeek API Key
+API_ENDPOINT = 'https://api.deepseek.com/chat/completions'  # DeepSeek API 端点
+API_PROVIDER = 'deepseek'  # 'deepseek' 或 'qianwen'
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 KB_PATH = SCRIPT_DIR.parent / 'data' / 'descriptions.json'
@@ -107,7 +108,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
-        """代理POST请求到通义千问API"""
+        """代理POST请求到AI API"""
         if self.path != '/api/chat':
             self.send_error(404)
             return
@@ -124,7 +125,20 @@ class ProxyHandler(BaseHTTPRequestHandler):
             except Exception as context_error:
                 print(f"⚠️ 注入上下文时出错: {context_error}")
 
-            # 构建请求到通义千问
+            # 转换请求格式
+            if API_PROVIDER == 'deepseek':
+                # DeepSeek 使用 OpenAI 兼容格式
+                api_request = {
+                    'model': 'deepseek-chat',
+                    'messages': request_data.get('input', {}).get('messages', []),
+                    'temperature': request_data.get('parameters', {}).get('temperature', 0.7),
+                    'max_tokens': request_data.get('parameters', {}).get('max_tokens', 150)
+                }
+            else:
+                # 通义千问格式
+                api_request = request_data
+
+            # 构建请求
             headers = {
                 'Content-Type': 'application/json',
                 'Authorization': f'Bearer {API_KEY}'
@@ -132,7 +146,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
             req = urllib.request.Request(
                 API_ENDPOINT,
-                data=json.dumps(request_data).encode('utf-8'),
+                data=json.dumps(api_request).encode('utf-8'),
                 headers=headers,
                 method='POST'
             )
@@ -140,15 +154,36 @@ class ProxyHandler(BaseHTTPRequestHandler):
             # 发送请求
             with urllib.request.urlopen(req) as response:
                 response_data = response.read()
+                api_response = json.loads(response_data.decode('utf-8'))
+
+            # 转换响应格式
+            if API_PROVIDER == 'deepseek':
+                # 将 DeepSeek (OpenAI格式) 转为通义千问格式
+                if 'choices' in api_response and len(api_response['choices']) > 0:
+                    content = api_response['choices'][0]['message']['content']
+                    unified_response = {
+                        'output': {
+                            'text': content,
+                            'choices': [{
+                                'message': {
+                                    'content': content
+                                }
+                            }]
+                        }
+                    }
+                else:
+                    unified_response = api_response
+            else:
+                unified_response = api_response
 
             # 返回响应
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(response_data)
+            self.wfile.write(json.dumps(unified_response).encode('utf-8'))
 
-            print(f"✅ API调用成功")
+            print(f"✅ API调用成功 ({API_PROVIDER})")
 
         except urllib.error.HTTPError as e:
             error_body = e.read().decode('utf-8')
@@ -177,19 +212,20 @@ class ProxyHandler(BaseHTTPRequestHandler):
 def run_server(port=8001):
     server_address = ('', port)
     httpd = HTTPServer(server_address, ProxyHandler)
+    provider_name = 'DeepSeek' if API_PROVIDER == 'deepseek' else '通义千问'
     print(f"""
 ╔══════════════════════════════════════════════════════════╗
 ║           🤖 AI代理服务器已启动                           ║
 ╠══════════════════════════════════════════════════════════╣
 ║  地址: http://localhost:{port}/api/chat                    ║
-║  API: 通义千问 (qwen-turbo)                              ║
+║  API: {provider_name}                                     ║
 ║  状态: 运行中...                                          ║
 ╚══════════════════════════════════════════════════════════╝
 
 💡 提示：
 1. 保持此窗口运行
 2. 在浏览器访问 http://localhost:8000 (主页面)
-3. AI助手将通过本代理服务器调用通义千问API
+3. AI助手将通过本代理服务器调用{provider_name} API
 
 按 Ctrl+C 停止服务器
 """)
