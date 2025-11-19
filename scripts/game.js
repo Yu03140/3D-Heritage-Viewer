@@ -961,14 +961,16 @@ export class Game {
             return;
         }
 
-        // 检测单手操作
+        // 检测单手操作（优先握拳拖拽，避免与捏合冲突）
         if (hand.landmarks) {
-            if (hand.isFist && !hand.isPinching) {
-                // 单手五指聚拢（握拳）= 拖拽
+            if (hand.isFist) {
+                // 优先握拳触发拖拽，即使同时检测到捏合
                 this._handleAutoDragInteraction(handIndex, hand);
-            } else if (hand.isPinching && !hand.isFist) {
+                return;
+            }
+
+            if (hand.isPinching) {
                 // 单手二指捏合 = 旋转（只在单手时触发）
-                // 检查另一只手是否也在捏合，如果是则不触发旋转
                 const otherHand = handIndex === 0 ? hand1 : hand0;
                 if (!otherHand?.isPinching) {
                     // 另一只手不在捏合，可以触发旋转
@@ -979,11 +981,12 @@ export class Game {
                         this._releaseModel(handIndex);
                     }
                 }
-            } else {
-                // 手势不明确，释放模型
-                if (this.grabbingHandIndex === handIndex) {
-                    this._releaseModel(handIndex);
-                }
+                return;
+            }
+
+            // 手势不明确，释放模型
+            if (this.grabbingHandIndex === handIndex) {
+                this._releaseModel(handIndex);
             }
         }
     }
