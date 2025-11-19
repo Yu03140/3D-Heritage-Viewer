@@ -4,18 +4,18 @@ export class AIAssistant {
         this.currentModelData = null;
         this.conversationHistory = [];
         
-        // 通义千问配置
-        this.apiKey = 'sk-a21472fce05548dbbc1e2e0c38ce407d';
+        // DeepSeek配置 (通过本地代理)
+        this.apiKey = 'sk-0e4fac7233614d8d8b1432f7b6c3ae5a';
         this.apiEndpoint = 'http://localhost:8001/api/chat';  // 通过本地代理调用，避免CORS问题
-        this.modelName = 'qwen-turbo';
+        this.modelName = 'deepseek-chat';
         this.isProcessing = false;
         this.pendingQuestions = [];
-    this.ttsSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
-    this.aiSpeechEnabled = localStorage.getItem('aiSpeechEnabled') !== 'false';
-    this.currentSpeechUtterance = null;
-    this.speechVoice = null;
-        
-        console.log('AI助手已就绪');
+        this.ttsSupported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+        this.aiSpeechEnabled = localStorage.getItem('aiSpeechEnabled') !== 'false';
+        this.currentSpeechUtterance = null;
+        this.speechVoice = null;
+        this.availableVoices = [];
+        this.selectedVoiceIndex = parseInt(localStorage.getItem('aiSelectedVoiceIndex') || '0');        console.log('AI助手已就绪');
         
         this.initUI();
         this.setupEventListeners();
@@ -28,8 +28,10 @@ export class AIAssistant {
         this.btnText = this.submitButton.querySelector('.btn-text');
         this.btnLoading = this.submitButton.querySelector('.btn-loading');
         this.speechToggleButton = document.getElementById('aiSpeechToggle');
+        this.voiceSelectButton = document.getElementById('aiVoiceSelect');
 
         this._updateSpeechToggleButton();
+        this._initVoiceSelector();
     }
 
     setupEventListeners() {
@@ -57,8 +59,11 @@ export class AIAssistant {
 
         if (this.ttsSupported && window.speechSynthesis) {
             window.speechSynthesis.addEventListener('voiceschanged', () => {
+                this._loadAvailableVoices();
                 this._selectSpeechVoice();
             });
+            // 立即加载语音列表
+            this._loadAvailableVoices();
         }
 
         document.addEventListener('visibilitychange', () => {
@@ -89,7 +94,7 @@ export class AIAssistant {
         if (!question) return;
 
         if (!this.isApiConfigured()) {
-            this.addErrorMessage('管理员尚未配置通义千问API Key，请联系管理员。');
+            this.addErrorMessage('管理员尚未配置AI API Key，请联系管理员。');
             return;
         }
 
@@ -142,7 +147,7 @@ export class AIAssistant {
             { role: 'user', content: userQuestion }
         ];
 
-        // 通过本地代理调用通义千问API
+        // 通过本地代理调用AI API (DeepSeek)
         const response = await fetch(this.apiEndpoint, {
             method: 'POST',
             headers: {
@@ -169,13 +174,16 @@ export class AIAssistant {
         const data = await response.json();
         console.log('API响应数据:', data);
         
-        // 解析通义千问API的不同返回格式
+        // 解析API返回（代理已统一格式）
         let aiResponse = '';
         
         if (data.output && data.output.text) {
             aiResponse = data.output.text;
         } else if (data.output && data.output.choices && data.output.choices[0]) {
             aiResponse = data.output.choices[0].message.content;
+        } else if (data.choices && data.choices[0]) {
+            // 直接OpenAI格式（备用）
+            aiResponse = data.choices[0].message.content;
         } else {
             console.error('完整响应:', JSON.stringify(data, null, 2));
             throw new Error('API返回格式无法解析，请查看控制台');
@@ -317,15 +325,155 @@ export class AIAssistant {
         }
     }
 
-    _selectSpeechVoice() {
+    _loadAvailableVoices() {
         if (!this.ttsSupported || !window.speechSynthesis) return;
         const voices = window.speechSynthesis.getVoices?.() || [];
         if (!voices.length) return;
 
-        const preferred = voices.find(v => v.lang?.toLowerCase().startsWith('zh'))
-            || voices.find(v => v.lang?.toLowerCase().includes('zh'))
-            || voices[0];
-        this.speechVoice = preferred || null;
+        // 优先选择中文语音，并按质量排序
+        const chineseVoices = voices.filter(v => {
+            const lang = v.lang?.toLowerCase() || '';
+            return lang.includes('zh') || lang.includes('cn');
+        });
+
+        // 优先级：Google > Microsoft > 其他在线 > 本地
+        const sortedVoices = chineseVoices.sort((a, b) => {
+            const aScore = this._getVoiceQualityScore(a);
+            const bScore = this._getVoiceQualityScore(b);
+            return bScore - aScore;
+        });
+
+        this.availableVoices = sortedVoices.length > 0 ? sortedVoices : voices;
+        this._updateVoiceSelector();
+    }
+
+    _getVoiceQualityScore(voice) {
+        let score = 0;
+        const name = voice.name?.toLowerCase() || '';
+        const lang = voice.lang?.toLowerCase() || '';
+
+        // Google 语音通常质量最好
+        if (name.includes('google')) score += 100;
+        
+        // Microsoft 语音也不错
+        if (name.includes('microsoft')) score += 80;
+        
+        // 在线语音优于本地
+        if (!voice.localService) score += 50;
+        
+        // 女声通常更自然
+        if (name.includes('female') || name.includes('女')) score += 30;
+        
+        // 普通话优先
+        if (lang.includes('zh-cn') || lang.includes('cmn')) score += 20;
+        
+        return score;
+    }
+
+    _selectSpeechVoice() {
+        if (!this.availableVoices.length) return;
+        
+        // 使用用户选择的语音，如果索引无效则使用第一个
+        const index = Math.min(this.selectedVoiceIndex, this.availableVoices.length - 1);
+        this.speechVoice = this.availableVoices[index] || this.availableVoices[0];
+        
+        console.log(`🔊 已选择语音: ${this.speechVoice?.name} (${this.speechVoice?.lang})`);
+    }
+
+    _initVoiceSelector() {
+        if (!this.voiceSelectButton) return;
+        
+        this.voiceSelectButton.addEventListener('click', () => {
+            if (!this.ttsSupported || !this.availableVoices.length) return;
+            this._showVoiceSelectionDialog();
+        });
+    }
+
+    _updateVoiceSelector() {
+        if (!this.voiceSelectButton) return;
+        
+        if (!this.ttsSupported || !this.availableVoices.length) {
+            this.voiceSelectButton.disabled = true;
+            this.voiceSelectButton.textContent = '🎤 无可用语音';
+            return;
+        }
+
+        this.voiceSelectButton.disabled = false;
+        const currentVoice = this.availableVoices[this.selectedVoiceIndex];
+        if (currentVoice) {
+            const shortName = currentVoice.name.split(' ')[0].substring(0, 8);
+            this.voiceSelectButton.textContent = `🎤 ${shortName}`;
+            this.voiceSelectButton.title = `当前语音: ${currentVoice.name}`;
+        }
+    }
+
+    _showVoiceSelectionDialog() {
+        const dialog = document.createElement('div');
+        dialog.className = 'voice-selection-overlay';
+        dialog.innerHTML = `
+            <div class="voice-selection-dialog">
+                <h3>选择语音引擎</h3>
+                <div class="voice-list" id="voiceList"></div>
+                <div class="voice-dialog-actions">
+                    <button class="voice-test-btn" id="voiceTestBtn">🔊 试听</button>
+                    <button class="voice-close-btn" id="voiceCloseBtn">关闭</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(dialog);
+
+        const voiceList = dialog.querySelector('#voiceList');
+        this.availableVoices.forEach((voice, index) => {
+            const item = document.createElement('div');
+            item.className = 'voice-item';
+            if (index === this.selectedVoiceIndex) {
+                item.classList.add('selected');
+            }
+            
+            const qualityBadge = this._getVoiceQualityBadge(voice);
+            item.innerHTML = `
+                <div class="voice-info">
+                    <div class="voice-name">${voice.name} ${qualityBadge}</div>
+                    <div class="voice-lang">${voice.lang} ${voice.localService ? '(本地)' : '(在线)'}</div>
+                </div>
+            `;
+            
+            item.addEventListener('click', () => {
+                dialog.querySelectorAll('.voice-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                this.selectedVoiceIndex = index;
+                localStorage.setItem('aiSelectedVoiceIndex', index.toString());
+                this._selectSpeechVoice();
+                this._updateVoiceSelector();
+            });
+            
+            voiceList.appendChild(item);
+        });
+
+        dialog.querySelector('#voiceTestBtn').addEventListener('click', () => {
+            this.stopAssistantSpeech();
+            const testText = '你好，我是AI文物助手，很高兴为您讲解文物知识。';
+            this.speakAssistantMessage(testText);
+        });
+
+        dialog.querySelector('#voiceCloseBtn').addEventListener('click', () => {
+            document.body.removeChild(dialog);
+        });
+
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                document.body.removeChild(dialog);
+            }
+        });
+    }
+
+    _getVoiceQualityBadge(voice) {
+        const name = voice.name?.toLowerCase() || '';
+        if (name.includes('google')) return '<span class="quality-badge high">推荐</span>';
+        if (name.includes('microsoft')) return '<span class="quality-badge medium">优质</span>';
+        if (!voice.localService) return '<span class="quality-badge low">在线</span>';
+        return '';
     }
 
     speakAssistantMessage(text) {
@@ -343,7 +491,8 @@ export class AIAssistant {
         if (this.speechVoice) {
             utterance.voice = this.speechVoice;
         }
-        utterance.rate = 1.0;
+        // 稍微加快语速，使其更自然
+        utterance.rate = 1.1;
         utterance.pitch = 1.0;
         utterance.volume = 1.0;
 
