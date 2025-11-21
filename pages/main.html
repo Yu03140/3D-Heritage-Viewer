@@ -50,39 +50,6 @@
             overflow-y: auto;
         }
 
-        .description-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .speak-description-btn {
-            border: 2px solid #4a90e2;
-            background: #4a90e2;
-            color: #fff;
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            box-shadow: 0 2px 6px rgba(74, 144, 226, 0.3);
-        }
-
-        .speak-description-btn:hover:not(:disabled) {
-            background: #357abd;
-            border-color: #357abd;
-            box-shadow: 0 3px 10px rgba(53, 122, 189, 0.35);
-        }
-
-        .speak-description-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
         .sidebar-title {
             color: #e74c3c;
             font-size: 18px;
@@ -90,6 +57,37 @@
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 2px solid #e74c3c;
+        }
+
+        .narrate-btn {
+            border: 2px solid #4a90e2;
+            background: #4a90e2;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .narrate-btn:hover {
+            background: #357abd;
+            border-color: #357abd;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(74, 144, 226, 0.4);
+        }
+
+        .narrate-btn.speaking {
+            background: #e74c3c;
+            border-color: #e74c3c;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         .model-description {
@@ -839,9 +837,9 @@
     <div class="viewer-layout">
         <!-- 左侧边栏 - 相关介绍 -->
         <aside class="left-sidebar">
-            <h3 class="sidebar-title">相关介绍</h3>
-            <div class="description-toolbar">
-                <button id="speakDescriptionBtn" class="speak-description-btn" disabled title="朗读当前文物介绍" aria-pressed="false">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <h3 class="sidebar-title" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">相关介绍</h3>
+                <button id="narrateDescriptionBtn" class="narrate-btn" title="朗读文物介绍">
                     🔊 语音讲解
                 </button>
             </div>
@@ -962,7 +960,113 @@
     <script type="module" src="../scripts/main.js"></script>
     <script type="module" src="../scripts/comments.js"></script>
     <script type="module" src="../scripts/aiAssistant.js"></script>
-    <script type="module" src="../scripts/descriptionNarrator.js"></script>
+    
+    <script type="module">
+        // 简单的文物介绍朗读功能
+        class DescriptionNarrator {
+            constructor() {
+                this.button = document.getElementById('narrateDescriptionBtn');
+                this.descriptionElement = document.getElementById('modelDescription');
+                this.isSpeaking = false;
+                this.utterance = null;
+                
+                if (!('speechSynthesis' in window)) {
+                    this.button.disabled = true;
+                    this.button.textContent = '🔇 不支持';
+                    this.button.title = '浏览器不支持语音合成';
+                    return;
+                }
+                
+                this.button.addEventListener('click', () => this.toggle());
+                
+                // 模型切换时停止朗读
+                window.addEventListener('modelChanged', () => this.stop());
+                window.addEventListener('beforeunload', () => this.stop());
+            }
+            
+            toggle() {
+                if (this.isSpeaking) {
+                    this.stop();
+                } else {
+                    this.start();
+                }
+            }
+            
+            start() {
+                const text = this.getText();
+                if (!text) {
+                    alert('暂无可朗读的内容');
+                    return;
+                }
+                
+                this.stop(); // 确保停止之前的朗读
+                
+                this.utterance = new SpeechSynthesisUtterance(text);
+                this.utterance.lang = 'zh-CN';
+                this.utterance.rate = 1.0;
+                this.utterance.pitch = 1.0;
+                
+                // 选择中文语音
+                const voices = speechSynthesis.getVoices();
+                const chineseVoice = voices.find(v => v.lang.includes('zh'));
+                if (chineseVoice) {
+                    this.utterance.voice = chineseVoice;
+                }
+                
+                this.utterance.onstart = () => {
+                    this.isSpeaking = true;
+                    this.button.textContent = '⏹ 停止讲解';
+                    this.button.classList.add('speaking');
+                };
+                
+                this.utterance.onend = () => {
+                    this.isSpeaking = false;
+                    this.button.textContent = '🔊 语音讲解';
+                    this.button.classList.remove('speaking');
+                };
+                
+                this.utterance.onerror = () => {
+                    this.isSpeaking = false;
+                    this.button.textContent = '🔊 语音讲解';
+                    this.button.classList.remove('speaking');
+                };
+                
+                speechSynthesis.speak(this.utterance);
+            }
+            
+            stop() {
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                }
+                this.isSpeaking = false;
+                this.button.textContent = '🔊 语音讲解';
+                this.button.classList.remove('speaking');
+            }
+            
+            getText() {
+                if (!this.descriptionElement) return '';
+                const text = this.descriptionElement.innerText || this.descriptionElement.textContent || '';
+                const trimmed = text.trim();
+                
+                // 过滤占位文本
+                if (trimmed === '加载中...' || trimmed === '未找到介绍' || trimmed.length < 10) {
+                    return '';
+                }
+                
+                return trimmed;
+            }
+        }
+        
+        // 页面加载完成后初始化
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                window.descriptionNarrator = new DescriptionNarrator();
+            });
+        } else {
+            window.descriptionNarrator = new DescriptionNarrator();
+        }
+    </script>
+    
     <script type="module">
         // 确保渲染器在布局完成后正确调整大小
         window.addEventListener('load', () => {
@@ -1020,8 +1124,6 @@
                 if (window.aiAssistant) {
                     window.aiAssistant.setModelData(modelData);
                 }
-
-                window.descriptionNarrator?.onDescriptionUpdated();
             } else {
                 console.warn(`❌ 未找到键名"${modelKey}"的描述数据`);
                 const descriptionDiv = document.getElementById('modelDescription');
@@ -1029,7 +1131,6 @@
                     <h4>未找到介绍</h4>
                     <p style="margin-top: 15px; color: #999;">暂无该模型的描述信息</p>
                 `;
-                window.descriptionNarrator?.onDescriptionUpdated();
             }
         }
 
